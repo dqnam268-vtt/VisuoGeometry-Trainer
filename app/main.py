@@ -11,18 +11,20 @@ from .core.adaptation import AdaptationEngine
 from .core.student_bkt_manager import StudentBKTManager
 
 app = FastAPI(
-    title="Hệ Thống Luyện Tập Phân Số Thích Ứng",
-    description="Ứng dụng giúp học sinh luyện tập phân số với khả năng thích ứng dựa trên trình độ.",
+    # CẬP NHẬT: Tên và mô tả dự án mới
+    title="VisuoGeometry-Trainer",
+    description="Ứng dụng giúp học sinh lớp 7 luyện tập hình học trực quan.",
     version="1.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
+    # Cấu hình CORS để cho phép các nguồn gốc đã xác định
     allow_origins=[
-        "http://localhost:8000",                                    # Cho phát triển cục bộ
-        "null",                                                     # Cho việc mở index.html trực tiếp từ ổ đĩa (chỉ cho test, không dùng prod)
-        "https://dqnam268-vtt.github.io",                           # URL gốc của GitHub Pages
-        "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",   # URL cụ thể của repo trên GitHub Pages
+        "http://localhost:8000",
+        "null",
+        "https://dqnam268-vtt.github.io",
+        "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -33,6 +35,7 @@ app.add_middleware(
 async def startup_event():
     print("Ứng dụng đang khởi động...")
 
+    # Đường dẫn đến question_bank.json
     question_bank_path = 'app/data/question_bank.json'
 
     try:
