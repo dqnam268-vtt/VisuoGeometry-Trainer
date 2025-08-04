@@ -1,5 +1,4 @@
-git clone https://github.com/dqnam268-vtt/adaptive-fractions-its1
-cd adaptive-fractions-its1
+cd VisuoGeometry-Trainer
 py -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
@@ -33,6 +32,7 @@ Hãy mở trình duyệt web (Chrome, Firefox, v.v.) và truy cập vào địa 
 
 http://127.0.0.1:8000/docs
 
+https://jsonlint.com/	//sửa lỗi json
 
 cd ..	//Di chuyển ra khỏi thư mục hiện tại 
 
