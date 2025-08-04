@@ -1,4 +1,4 @@
-# adaptive-fractions-its1/app/core/student_bkt_manager.py
+# VisuoGeometry-Trainer/app/core/student_bkt_manager.py
 
 import pandas as pd
 import datetime
@@ -53,7 +53,7 @@ class StudentBKTManager:
                     return loaded_mastery
             except json.JSONDecodeError:
                 print(f"Lỗi đọc file JSON {self.mastery_file}. Tạo mới.")
-                return {} # Trả về rỗng nếu file JSON bị lỗi
+                return {}
         return {}
 
     def _save_mastery_to_file(self):
@@ -68,7 +68,6 @@ class StudentBKTManager:
                 return pd.read_csv(self.interactions_file)
             except pd.errors.EmptyDataError:
                 print(f"File CSV {self.interactions_file} rỗng. Tạo DataFrame mới.")
-                # Trả về DataFrame rỗng với các cột cần thiết
                 return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
             except Exception as e:
                 print(f"Lỗi đọc file CSV {self.interactions_file}: {e}. Tạo DataFrame mới.")
@@ -80,13 +79,8 @@ class StudentBKTManager:
         self.interactions_df.to_csv(self.interactions_file, index=False)
 
     def update_mastery(self, kc: str, is_correct: bool):
-        """
-        Cập nhật xác suất thành thạo của một Knowledge Component (KC)
-        dựa trên câu trả lời của học sinh (đúng/sai) và ghi vào file.
-        """
         p_L_prev = self.mastery_vector.get(kc, self.p_L0)
         
-        # Tính toán BKT Bayes
         p_correct_given_known = (1 - self.p_S)
         p_incorrect_given_known = self.p_S
         p_correct_given_unknown = self.p_G
@@ -104,10 +98,8 @@ class StudentBKTManager:
         
         self.mastery_vector[kc] = max(0.0, min(1.0, p_L_next))
 
-        # Ghi mastery_vector đã cập nhật vào file JSON
         self._save_mastery_to_file()
 
-        # Thêm tương tác mới vào DataFrame và lưu vào file CSV
         new_interaction = pd.DataFrame([{
             'timestamp': datetime.datetime.now().isoformat(),
             'kc': kc,
@@ -119,11 +111,9 @@ class StudentBKTManager:
         self._save_interactions_to_file()
 
     def get_mastery_vector(self) -> dict:
-        """Trả về vector trình độ thành thạo hiện tại của học sinh (từ bộ nhớ, đã được sync với file)."""
         return self.mastery_vector
 
     def get_interactions_df(self) -> pd.DataFrame:
-        """Trả về lịch sử tương tác dưới dạng DataFrame (từ bộ nhớ, đã được sync với file)."""
         return self.interactions_df
 
     def get_topic_stars(self) -> dict:

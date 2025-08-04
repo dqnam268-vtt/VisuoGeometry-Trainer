@@ -1731,14 +1731,14 @@
   {
     "question_id": "hinh_lang_tru_dung_03_34",
     "content": {
-      "text": "Một hình lăng trụ đứng có mặt đáy là hình ngũ giác. Số mặt của nó là bao nhiêu?",
+      "text": "Hình hộp chữ nhật có mấy đường chéo không gian?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["5", "6", "7"],
-    "correct_answer": "7",
-    "knowledge_component": "hinh_lang_tru_dung",
+    "options": ["2", "3", "4", "6"],
+    "correct_answer": "4",
+    "knowledge_component": "hinh_hop_lap_phuong",
     "difficulty_level": 3
   },
   {
@@ -1757,26 +1757,26 @@
   {
     "question_id": "hinh_lang_tru_dung_03_36",
     "content": {
-      "text": "Một hình lăng trụ đứng có mặt đáy là hình lục giác. Số đỉnh của nó là bao nhiêu?",
+      "text": "Hình lăng trụ đứng tam giác có 3 cạnh bên. Nếu 3 cạnh đáy của nó có độ dài lần lượt là 3 cm, 4 cm, và 5 cm, thì tổng độ dài tất cả các cạnh là bao nhiêu?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["6", "8", "12"],
-    "correct_answer": "12",
+    "options": ["24 cm", "27 cm", "30 cm"],
+    "correct_answer": "30 cm",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 3
   },
   {
     "question_id": "hinh_lang_tru_dung_03_37",
     "content": {
-      "text": "Hình lăng trụ đứng có 12 cạnh. Đáy của nó là hình gì?",
+      "text": "Hình lăng trụ đứng tứ giác có 12 cạnh. Đúng hay Sai?",
       "formula_latex": null,
       "image": null
     },
-    "question_type": "multiple_choice",
-    "options": ["Hình tam giác", "Hình tứ giác", "Hình ngũ giác"],
-    "correct_answer": "Hình tứ giác",
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 3
   },
@@ -1789,7 +1789,7 @@
     },
     "question_type": "multiple_choice",
     "options": ["27", "30", "42"],
-    "correct_answer": "30",
+    "correct_answer": "42",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 3
   },
@@ -1809,13 +1809,13 @@
   {
     "question_id": "hinh_lang_tru_dung_03_40",
     "content": {
-      "text": "Một hình lăng trụ đứng có 12 đỉnh. Đáy của nó là hình gì?",
+      "text": "Một lăng trụ đứng có 9 cạnh, đáy của nó là hình gì?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["Hình ngũ giác", "Hình lục giác", "Hình bát giác"],
-    "correct_answer": "Hình lục giác",
+    "options": ["Hình vuông", "Hình tam giác", "Hình ngũ giác"],
+    "correct_answer": "Hình tam giác",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 3
   },
@@ -1835,117 +1835,117 @@
   {
     "question_id": "hinh_lang_tru_dung_03_42",
     "content": {
-      "text": "Một hình lăng trụ đứng có 15 cạnh. Đáy của nó là hình gì?",
+      "text": "Một hình lăng trụ đứng tam giác có các cạnh bên dài 8 cm. Tổng chiều dài các cạnh bên là bao nhiêu?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["Ngũ giác", "Lục giác", "Bát giác"],
-    "correct_answer": "Ngũ giác",
+    "options": ["16 cm", "24 cm", "32 cm"],
+    "correct_answer": "24 cm",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_43",
     "content": {
-      "text": "Một hình lăng trụ đứng có 20 đỉnh. Đáy của nó là hình gì?",
+      "text": "Một lăng trụ đứng có 8 đỉnh. Đáy của nó là hình gì?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["Thập giác", "Bát giác", "Thập nhị giác"],
-    "correct_answer": "Thập giác",
+    "options": ["Hình tam giác", "Hình tứ giác", "Hình ngũ giác"],
+    "correct_answer": "Hình tứ giác",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_44",
     "content": {
-      "text": "Nếu một lăng trụ đứng có 10 mặt, thì đáy của nó là hình gì?",
+      "text": "Một lăng trụ đứng có 5 mặt. Đáy của nó là hình gì?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["Ngũ giác", "Lục giác", "Bát giác"],
-    "correct_answer": "Bát giác",
+    "options": ["Hình tam giác", "Hình tứ giác", "Hình ngũ giác"],
+    "correct_answer": "Hình tam giác",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_45",
     "content": {
-      "text": "Một hình lăng trụ đứng có 18 cạnh. Số đỉnh của nó là bao nhiêu?",
+      "text": "Một hình lăng trụ đứng tứ giác có 12 cạnh. Độ dài của 8 cạnh đáy là 3, 5, 3, 5 cm và chiều cao là 6 cm. Tổng độ dài tất cả các cạnh là bao nhiêu?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["10", "12", "14"],
-    "correct_answer": "12",
+    "options": ["32 cm", "44 cm", "56 cm"],
+    "correct_answer": "44 cm",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_46",
     "content": {
-      "text": "Một hình lăng trụ đứng có 14 mặt. Đáy của nó có bao nhiêu cạnh?",
+      "text": "Nếu một lăng trụ đứng có 9 cạnh, thì số đỉnh của nó là bao nhiêu?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["10", "12", "14"],
-    "correct_answer": "12",
+    "options": ["6", "8", "9"],
+    "correct_answer": "6",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_47",
     "content": {
-      "text": "Nếu các mặt bên của một hình lăng trụ đứng là hình vuông, thì đáy của nó phải là hình gì?",
+      "text": "Một lăng trụ đứng tứ giác có đáy là hình vuông. Các mặt bên của nó có phải là hình chữ nhật không?",
       "formula_latex": null,
       "image": null
     },
-    "question_type": "multiple_choice",
-    "options": ["Hình chữ nhật", "Hình lập phương", "Một đa giác đều"],
-    "correct_answer": "Một đa giác đều",
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_48",
     "content": {
-      "text": "Một hình lăng trụ đứng tam giác có chu vi đáy 15 cm. Tổng độ dài tất cả các cạnh đáy của nó là bao nhiêu?",
+      "text": "Hình lăng trụ đứng tam giác có 5 mặt. Đúng hay Sai?",
       "formula_latex": null,
       "image": null
     },
-    "question_type": "multiple_choice",
-    "options": ["15 cm", "30 cm", "45 cm"],
-    "correct_answer": "30 cm",
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_49",
     "content": {
-      "text": "Tổng số mặt và đỉnh của một hình lăng trụ đứng lục giác là bao nhiêu?",
+      "text": "Một hình lăng trụ đứng có 12 cạnh. Đáy của nó là hình gì?",
       "formula_latex": null,
       "image": null
     },
     "question_type": "multiple_choice",
-    "options": ["16", "18", "20", "22"],
-    "correct_answer": "20",
+    "options": ["Hình tam giác", "Hình tứ giác", "Hình ngũ giác"],
+    "correct_answer": "Hình tứ giác",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
   {
     "question_id": "hinh_lang_tru_dung_03_50",
     "content": {
-      "text": "Một hình lăng trụ đứng có n-cạnh đáy. Số mặt của nó là bao nhiêu?",
+      "text": "Một hình lăng trụ đứng có n-cạnh đáy. Số mặt của nó là n+2. Đúng hay Sai?",
       "formula_latex": null,
       "image": null
     },
-    "question_type": "multiple_choice",
-    "options": ["n+1", "n+2", "2n"],
-    "correct_answer": "n+2",
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
     "knowledge_component": "hinh_lang_tru_dung",
     "difficulty_level": 4
   },
@@ -2600,3 +2600,5 @@
     "difficulty_level": 5
   }
 ]
+}
+tôi đã tạo một file gitignore trong thư mục gốc. nhưng vẫn bị lỗi. sao chép file đó vào thư mục dự án và đẩy lại lên github desktop xem có được không

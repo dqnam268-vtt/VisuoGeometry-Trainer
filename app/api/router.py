@@ -1,4 +1,4 @@
-# adaptive-fractions-its1/app/api/router.py
+# VisuoGeometry-Trainer/app/api/router.py
 
 from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.responses import StreamingResponse
@@ -12,10 +12,7 @@ from ..schemas.question import QuestionPublic, Submission, SubmissionResult, Opt
 
 # Import các lớp logic từ gói con 'core'
 from ..core.adaptation import AdaptationEngine #
-from ..core.student_bkt_manager import StudentBKTManager # ĐÂY LÀ DÒNG ĐÚNG, ĐÃ SỬA CHÍNH XÁC
-
-# ĐẢM BẢO KHÔNG CÓ DÒNG NÀO SAU ĐÂY NẾU BẠN KHÔNG DÙNG student_model.py:
-# from ..core.student_model import StudentModelClass # Dòng này gây lỗi ModuleNotFoundError
+from ..core.student_bkt_manager import StudentBKTManager #
 
 router = APIRouter()
 

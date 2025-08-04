@@ -1,4 +1,4 @@
-# adaptive-fractions-its1/app/core/adaptation.py
+# VisuoGeometry-Trainer/app/core/adaptation.py
 
 import random
 from typing import Tuple, Dict

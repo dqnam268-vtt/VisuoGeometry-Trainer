@@ -1,4 +1,4 @@
-# adaptive-fractions-its1/app/schemas/question.py
+# VisuoGeometry-Trainer/app/schemas/question.py
 
 from pydantic import BaseModel
 from typing import List, Optional, Dict
