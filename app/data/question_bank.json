@@ -1,0 +1,2602 @@
+[
+  {
+    "question_id": "hinh_hop_lap_phuong_01_01",
+    "content": {
+      "text": "Một hình hộp chữ nhật có bao nhiêu mặt, bao nhiêu đỉnh, bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 mặt, 8 đỉnh, 12 cạnh", "4 mặt, 6 đỉnh, 8 cạnh", "8 mặt, 12 đỉnh, 6 cạnh"],
+    "correct_answer": "6 mặt, 8 đỉnh, 12 cạnh",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_02",
+    "content": {
+      "text": "Hình lập phương có tất cả các mặt đều là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình chữ nhật", "Hình vuông", "Hình tam giác", "Hình thoi"],
+    "correct_answer": "Hình vuông",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_03",
+    "content": {
+      "text": "Phát biểu nào sau đây là sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình hộp chữ nhật có 6 mặt", "Hình hộp chữ nhật có 12 cạnh", "Hình lập phương có 6 mặt là hình chữ nhật"],
+    "correct_answer": "Hình lập phương có 6 mặt là hình chữ nhật",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_04",
+    "content": {
+      "text": "Hình hộp chữ nhật có ba kích thước khác nhau: chiều dài, chiều rộng, chiều cao. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_05",
+    "content": {
+      "text": "Một viên gạch hình hộp chữ nhật có 6 mặt. Các mặt đối diện nhau có bằng nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Có", "Không", "Chỉ một số mặt"],
+    "correct_answer": "Có",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_06",
+    "content": {
+      "text": "Hình lập phương là hình hộp chữ nhật có các cạnh như thế nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Chiều dài, chiều rộng, chiều cao bằng nhau", "Chỉ có chiều dài và chiều rộng bằng nhau", "Chỉ có chiều dài và chiều cao bằng nhau"],
+    "correct_answer": "Chiều dài, chiều rộng, chiều cao bằng nhau",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_07",
+    "content": {
+      "text": "Các mặt của hình hộp chữ nhật là các hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình chữ nhật", "Hình vuông", "Hình tròn"],
+    "correct_answer": "Hình chữ nhật",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_08",
+    "content": {
+      "text": "Hình lập phương có 12 cạnh. Các cạnh này có độ dài như thế nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Bằng nhau", "Không bằng nhau", "Chỉ có 4 cạnh bằng nhau"],
+    "correct_answer": "Bằng nhau",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_09",
+    "content": {
+      "text": "Hình hộp chữ nhật và hình lập phương có điểm gì chung?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Số mặt", "Độ dài các cạnh", "Hình dạng các mặt"],
+    "correct_answer": "Số mặt",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_10",
+    "content": {
+      "text": "Đường chéo của hình lập phương có đặc điểm gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Tất cả đều bằng nhau", "Tất cả đều không bằng nhau", "Chỉ có 2 đường chéo bằng nhau"],
+    "correct_answer": "Tất cả đều bằng nhau",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_11",
+    "content": {
+      "text": "Hình hộp chữ nhật có 6 mặt, các mặt đối diện có diện tích như thế nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Bằng nhau", "Không bằng nhau"],
+    "correct_answer": "Bằng nhau",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_12",
+    "content": {
+      "text": "Hình lập phương có tất cả các mặt là hình vuông. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_13",
+    "content": {
+      "text": "Tất cả các cạnh của hình hộp chữ nhật có bằng nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Không nhất thiết", "Luôn luôn bằng nhau", "Chỉ có các cạnh đối diện bằng nhau"],
+    "correct_answer": "Không nhất thiết",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_14",
+    "content": {
+      "text": "Hình hộp chữ nhật có 3 cặp mặt đối diện. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_15",
+    "content": {
+      "text": "Hình lập phương có bao nhiêu đường chéo?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4", "6", "8", "12"],
+    "correct_answer": "4",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_16",
+    "content": {
+      "text": "Các mặt của hình hộp chữ nhật có các góc vuông không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Có", "Không"],
+    "correct_answer": "Có",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_17",
+    "content": {
+      "text": "Hình lập phương có thể được xem là trường hợp đặc biệt của hình hộp chữ nhật. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_18",
+    "content": {
+      "text": "Một hình hộp chữ nhật có bao nhiêu cặp cạnh song song?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3", "4", "6"],
+    "correct_answer": "3",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_19",
+    "content": {
+      "text": "Cạnh bên của hình hộp chữ nhật vuông góc với mặt đáy. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_20",
+    "content": {
+      "text": "Số lượng mặt, đỉnh, cạnh của hình hộp chữ nhật và hình lập phương có giống nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Có", "Không"],
+    "correct_answer": "Có",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_21",
+    "content": {
+      "text": "Mặt đáy của hình hộp chữ nhật có hình dạng như thế nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình vuông", "Hình chữ nhật", "Hình tam giác"],
+    "correct_answer": "Hình chữ nhật",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_22",
+    "content": {
+      "text": "Hình lập phương có 12 cạnh. Chiều dài của một cạnh là 5 cm. Tổng chiều dài của tất cả các cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["30 cm", "60 cm", "45 cm"],
+    "correct_answer": "60 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_23",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước: 6 cm, 8 cm, 10 cm. Tổng chiều dài tất cả các cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["24 cm", "48 cm", "96 cm"],
+    "correct_answer": "96 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_24",
+    "content": {
+      "text": "Một hộp quà hình lập phương có cạnh dài 10 cm. Tổng chiều dài tất cả các cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["40 cm", "80 cm", "120 cm"],
+    "correct_answer": "120 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_25",
+    "content": {
+      "text": "Mặt đáy của một hình lập phương có cạnh 7 cm là một hình vuông có diện tích là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["14 cm²", "28 cm²", "49 cm²", "35 cm²"],
+    "correct_answer": "49 cm²",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_26",
+    "content": {
+      "text": "Hình hộp chữ nhật có ba kích thước a, b, c. Cạnh nào có độ dài c?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Chiều dài", "Chiều rộng", "Chiều cao", "Đường chéo"],
+    "correct_answer": "Chiều cao",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_27",
+    "content": {
+      "text": "Mặt đáy và mặt bên của hình hộp chữ nhật có vuông góc với nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_28",
+    "content": {
+      "text": "Nếu các cạnh của hình lập phương tăng gấp đôi, số mặt của nó có thay đổi không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Không", "Có"],
+    "correct_answer": "Không",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_29",
+    "content": {
+      "text": "Một hình lập phương có cạnh 5 cm. Diện tích của một mặt là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 cm²", "25 cm²", "50 cm²"],
+    "correct_answer": "25 cm²",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_30",
+    "content": {
+      "text": "Một hình lập phương có 12 cạnh. Nếu tổng chiều dài các cạnh là 36 cm, độ dài mỗi cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3 cm", "4 cm", "6 cm", "9 cm"],
+    "correct_answer": "3 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_31",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài gấp đôi chiều rộng và chiều cao bằng chiều rộng. Đây có phải là hình lập phương không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Sai",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_32",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước 2 cm, 3 cm, 4 cm. Có bao nhiêu cặp mặt có diện tích bằng nhau?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["1", "2", "3", "Không có"],
+    "correct_answer": "3",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_33",
+    "content": {
+      "text": "Một hình hộp chữ nhật có các mặt bên là hình vuông. Hình hộp đó có phải là hình lập phương không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Không nhất thiết", "Luôn luôn là hình lập phương"],
+    "correct_answer": "Luôn luôn là hình lập phương",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_34",
+    "content": {
+      "text": "Một hình lập phương có tổng diện tích các mặt là 600 cm². Độ dài mỗi cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 cm", "20 cm", "50 cm", "100 cm"],
+    "correct_answer": "10 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_35",
+    "content": {
+      "text": "Nếu chiều dài, chiều rộng, chiều cao của hình hộp chữ nhật là 4, 5, 6, các cạnh đối diện của mặt đáy có độ dài bằng nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_36",
+    "content": {
+      "text": "Một hình hộp chữ nhật có 6 mặt, 8 đỉnh. Cần bao nhiêu que diêm để tạo thành khung của nó?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 que", "8 que", "12 que", "16 que"],
+    "correct_answer": "12 que",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_37",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài, chiều rộng, chiều cao lần lượt là 12cm, 5cm, 8cm. Nếu cắt một đường thẳng từ một đỉnh đến đỉnh đối diện không nằm trên cùng một mặt, đường thẳng này có độ dài như thế nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Bằng chiều dài", "Bằng đường chéo của mặt đáy", "Là đường chéo không gian"],
+    "correct_answer": "Là đường chéo không gian",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_38",
+    "content": {
+      "text": "Trong một hình lập phương, các đường chéo của các mặt có bằng nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_39",
+    "content": {
+      "text": "Hình hộp chữ nhật có 12 cạnh. Nếu 3 cạnh không bằng nhau, số cặp cạnh có độ dài bằng nhau là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3", "4", "6", "12"],
+    "correct_answer": "6",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_40",
+    "content": {
+      "text": "Nếu một hình lập phương có cạnh dài 5 cm, thì tổng độ dài của 3 đường chéo không gian của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$5\sqrt{3}$ cm", "$15\sqrt{3}$ cm", "$20\sqrt{3}$ cm"],
+    "correct_answer": "$20\sqrt{3}$ cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_41",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước a, b, c. Nếu $a=b=c$, thì nó trở thành hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình hộp chữ nhật", "Hình lập phương", "Hình lăng trụ đứng"],
+    "correct_answer": "Hình lập phương",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_42",
+    "content": {
+      "text": "Một hình lập phương có tổng chiều dài tất cả các cạnh là 48 cm. Cạnh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4 cm", "6 cm", "8 cm", "12 cm"],
+    "correct_answer": "4 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_43",
+    "content": {
+      "text": "Một hình lập phương có tổng diện tích các mặt là 150 cm². Độ dài của một cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "15 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_44",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước 3 cm, 4 cm, 5 cm. Có bao nhiêu mặt có chu vi bằng 14 cm?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["0", "2", "4", "6"],
+    "correct_answer": "2",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_45",
+    "content": {
+      "text": "Một hình hộp chữ nhật có các cạnh a, b, c. Diện tích các mặt là 12, 18, 24 cm². Tìm tổng độ dài các cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["24 cm", "48 cm", "60 cm", "72 cm"],
+    "correct_answer": "72 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_46",
+    "content": {
+      "text": "Nếu bạn vẽ một đường chéo trên một mặt của hình lập phương có cạnh 6 cm. Độ dài đường chéo đó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 cm", "$6\sqrt{2}$ cm", "$6\sqrt{3}$ cm"],
+    "correct_answer": "$6\sqrt{2}$ cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_47",
+    "content": {
+      "text": "Một hình lập phương có cạnh dài 5 dm. Tổng chiều dài tất cả các cạnh là bao nhiêu cm?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["60 cm", "600 cm", "6000 cm"],
+    "correct_answer": "600 cm",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_48",
+    "content": {
+      "text": "Một hình lập phương có tổng chiều dài 12 cạnh là 96 cm. Diện tích của một mặt là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["64 cm²", "96 cm²", "128 cm²"],
+    "correct_answer": "64 cm²",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_49",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước a, b, c. Nếu $a=2, b=3, c=4$, diện tích các mặt là 6, 8, 12. Nếu các cạnh tăng gấp đôi, diện tích các mặt sẽ tăng gấp mấy lần?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2 lần", "4 lần", "6 lần", "8 lần"],
+    "correct_answer": "4 lần",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_hop_lap_phuong_01_50",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chu vi mặt đáy là 24 cm, chiều cao 10 cm. Diện tích xung quanh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["120 cm²", "240 cm²", "480 cm²"],
+    "correct_answer": "240 cm²",
+    "knowledge_component": "hinh_hop_lap_phuong",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_01",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 5 m, chiều rộng 3 m, chiều cao 2 m. Tính thể tích của hình hộp đó.",
+      "formula_latex": "V=a.b.h",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 m³", "25 m³", "30 m³", "30 m"],
+    "correct_answer": "30 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_02",
+    "content": {
+      "text": "Công thức tính thể tích hình lập phương có cạnh a là gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$V = a^2$", "$V = a^3$", "$V = 6a^2$"],
+    "correct_answer": "$V = a^3$",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_03",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chu vi mặt đáy là 20 cm và chiều cao là 5 cm. Tính diện tích xung quanh của nó.",
+      "formula_latex": "$S_{xq}=C_{day}.h$",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["25 cm²", "50 cm²", "100 cm²", "200 cm²"],
+    "correct_answer": "100 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_04",
+    "content": {
+      "text": "Một hình lập phương có cạnh 3 cm. Tính thể tích của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["9 cm³", "18 cm³", "27 cm³", "36 cm³"],
+    "correct_answer": "27 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_05",
+    "content": {
+      "text": "Diện tích toàn phần của hình lập phương có cạnh a được tính bằng công thức nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$S_{tp} = 4a^2$", "$S_{tp} = 6a^2$", "$S_{tp} = a^3$"],
+    "correct_answer": "$S_{tp} = 6a^2$",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_06",
+    "content": {
+      "text": "Một hình lập phương có cạnh 5 cm. Diện tích xung quanh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["100 cm²", "125 cm²", "150 cm²"],
+    "correct_answer": "100 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_07",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 8 cm, chiều rộng 5 cm và chiều cao 3 cm. Tính diện tích toàn phần của nó.",
+      "formula_latex": "$S_{tp} = S_{xq} + 2S_{day}$",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["94 cm²", "128 cm²", "158 cm²"],
+    "correct_answer": "158 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_08",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích đáy là 24 cm² và chiều cao 5 cm. Thể tích của nó là bao nhiêu?",
+      "formula_latex": "$V = S_{day}.h$",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["29 cm³", "120 cm³", "144 cm³"],
+    "correct_answer": "120 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_09",
+    "content": {
+      "text": "Một hình lập phương có thể tích là 64 cm³. Cạnh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4 cm", "8 cm", "16 cm"],
+    "correct_answer": "4 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_10",
+    "content": {
+      "text": "Một bể cá hình hộp chữ nhật có chiều dài 1.2 m, chiều rộng 0.5 m, chiều cao 0.8 m. Thể tích của bể là bao nhiêu mét khối?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["0.48 m³", "4.8 m³", "48 m³"],
+    "correct_answer": "0.48 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_11",
+    "content": {
+      "text": "Tính diện tích xung quanh của một hình hộp chữ nhật có chu vi đáy 15 dm và chiều cao 10 dm.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["150 dm²", "300 dm²", "75 dm²"],
+    "correct_answer": "150 dm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_12",
+    "content": {
+      "text": "Một hình lập phương có cạnh 6 cm. Diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["144 cm²", "216 cm²", "36 cm²"],
+    "correct_answer": "216 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_13",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích xung quanh là 120 m² và chu vi đáy là 24 m. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 m", "10 m", "12 m"],
+    "correct_answer": "5 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_14",
+    "content": {
+      "text": "Một thùng gỗ hình lập phương có cạnh 8 dm. Thể tích của nó là bao nhiêu dm³?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["64 dm³", "256 dm³", "512 dm³"],
+    "correct_answer": "512 dm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_15",
+    "content": {
+      "text": "Tính diện tích toàn phần của một hình lập phương có cạnh 7 cm.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["49 cm²", "294 cm²", "343 cm²"],
+    "correct_answer": "294 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_16",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 10 cm, chiều rộng 8 cm, và chiều cao 6 cm. Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["480 cm³", "480 cm²", "240 cm³"],
+    "correct_answer": "480 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_17",
+    "content": {
+      "text": "Một cái thùng hình lập phương có cạnh 50 cm. Người ta đổ nước vào thùng sao cho mực nước cao 40 cm. Thể tích nước là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["100000 cm³", "125000 cm³", "200000 cm³"],
+    "correct_answer": "100000 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_18",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích đáy 30 m² và thể tích 150 m³. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3 m", "5 m", "10 m"],
+    "correct_answer": "5 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_19",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 8 cm, chiều rộng 6 cm. Diện tích xung quanh là 280 cm². Chiều cao của hình hộp là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["8 cm", "10 cm", "12 cm"],
+    "correct_answer": "10 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_20",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước tỉ lệ với 1, 2, 3. Thể tích là 48 m³. Tổng ba kích thước là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 m", "12 m", "18 m"],
+    "correct_answer": "12 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_21",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích toàn phần là 120 cm², diện tích xung quanh là 80 cm². Tính diện tích một mặt đáy.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["20 cm²", "40 cm²", "50 cm²"],
+    "correct_answer": "20 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_22",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 20 cm, chiều rộng 15 cm. Nếu diện tích xung quanh là 1400 cm², chiều cao là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 cm", "20 cm", "40 cm"],
+    "correct_answer": "20 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_23",
+    "content": {
+      "text": "Một hình lập phương có diện tích toàn phần 294 cm². Tính thể tích của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["49 cm³", "294 cm³", "343 cm³"],
+    "correct_answer": "343 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_24",
+    "content": {
+      "text": "Một hình hộp chữ nhật có thể tích 480 cm³, chiều dài 12 cm, chiều rộng 8 cm. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "8 cm", "10 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_25",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước a, b, c. Nếu diện tích đáy là 12, diện tích mặt bên là 18, diện tích mặt trước là 24. Tính thể tích.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["72", "864", "10368"],
+    "correct_answer": "72",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_26",
+    "content": {
+      "text": "Một bể bơi hình hộp chữ nhật có chiều dài 20 m, chiều rộng 10 m, chiều cao 2 m. Thể tích bể là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["400 m³", "200 m³", "400 m²"],
+    "correct_answer": "400 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_27",
+    "content": {
+      "text": "Một khối rubik hình lập phương có cạnh 6 cm. Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["36 cm³", "216 cm³", "120 cm³"],
+    "correct_answer": "216 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_28",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 12 cm, chiều rộng 5 cm, chiều cao 8 cm. Tính diện tích toàn phần của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["160 cm²", "280 cm²", "392 cm²", "400 cm²"],
+    "correct_answer": "392 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_29",
+    "content": {
+      "text": "Một hình lập phương có thể tích 125 m³. Diện tích xung quanh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["100 m²", "150 m²", "25 m²"],
+    "correct_answer": "100 m²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_30",
+    "content": {
+      "text": "Một hình hộp chữ nhật có thể tích 60 cm³. Nếu chiều dài là 5 cm, chiều rộng là 4 cm, chiều cao là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3 cm", "6 cm", "12 cm"],
+    "correct_answer": "3 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_31",
+    "content": {
+      "text": "Một bể cá hình hộp chữ nhật có chiều dài 1.2 m, chiều rộng 0.5 m, chiều cao 0.8 m. Thể tích bể là bao nhiêu lít?",
+      "formula_latex": "1 m^3 = 1000 lit",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["48 lít", "480 lít", "4800 lít"],
+    "correct_answer": "480 lít",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_32",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích xung quanh 300 cm², chiều dài 20 cm, chiều rộng 5 cm. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "6 cm", "10 cm"],
+    "correct_answer": "6 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_33",
+    "content": {
+      "text": "Một hình lập phương có tổng diện tích các mặt là 216 cm². Tính thể tích của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["36 cm³", "216 cm³", "1296 cm³"],
+    "correct_answer": "216 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_34",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 12 cm, chiều rộng 8 cm. Thể tích là 480 cm³. Tính diện tích xung quanh của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["120 cm²", "200 cm²", "360 cm²"],
+    "correct_answer": "200 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_35",
+    "content": {
+      "text": "Một khối bê tông hình hộp chữ nhật có chiều dài 2 m, chiều rộng 1 m, chiều cao 0.5 m. Thể tích là bao nhiêu mét khối?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["1 m³", "2 m³", "3 m³"],
+    "correct_answer": "1 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_36",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 15 cm, chiều rộng 10 cm, và chiều cao 8 cm. Tính diện tích toàn phần của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["200 cm²", "400 cm²", "700 cm²"],
+    "correct_answer": "700 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_37",
+    "content": {
+      "text": "Một bể nước hình lập phương có thể tích 8 m³. Cạnh của bể là bao nhiêu mét?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2 m", "4 m", "8 m"],
+    "correct_answer": "2 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_38",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích xung quanh 240 m², chiều dài 10 m, chiều rộng 5 m. Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2400 m³", "400 m³", "600 m³"],
+    "correct_answer": "600 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_39",
+    "content": {
+      "text": "Một hình lập phương có diện tích toàn phần 294 cm². Tính diện tích xung quanh của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["49 cm²", "196 cm²", "294 cm²"],
+    "correct_answer": "196 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_40",
+    "content": {
+      "text": "Một hình lập phương có thể tích 27 m³. Diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["9 m²", "54 m²", "81 m²"],
+    "correct_answer": "54 m²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_41",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích toàn phần 112 cm², chiều dài 6 cm, chiều rộng 4 cm. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2 cm", "3 cm", "4 cm"],
+    "correct_answer": "2 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_42",
+    "content": {
+      "text": "Một hình lập phương có thể tích 64 cm³. Tính tổng chiều dài tất cả các cạnh của nó.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["48 cm", "64 cm", "96 cm"],
+    "correct_answer": "48 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_43",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chu vi đáy 30 cm, diện tích xung quanh 300 cm². Thể tích của nó là bao nhiêu nếu chiều dài gấp đôi chiều rộng?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["750 cm³", "1000 cm³", "1250 cm³"],
+    "correct_answer": "1000 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_44",
+    "content": {
+      "text": "Một hình hộp chữ nhật có ba kích thước a, b, c. Tỉ lệ a:b:c = 2:3:4 và thể tích là 192 cm³. Tính diện tích toàn phần.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["208 cm²", "416 cm²", "400 cm²"],
+    "correct_answer": "208 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_45",
+    "content": {
+      "text": "Một hình lập phương có diện tích xung quanh 144 m². Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["144 m³", "216 m³", "432 m³"],
+    "correct_answer": "216 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_46",
+    "content": {
+      "text": "Một bể nước hình hộp chữ nhật có diện tích xung quanh 320 m² và chu vi mặt đáy 40 m. Thể tích bể là bao nhiêu nếu chiều dài gấp 3 lần chiều rộng?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["1280 m³", "1920 m³", "1440 m³"],
+    "correct_answer": "1920 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_47",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài 20 cm, chiều rộng 15 cm, và chiều cao 10 cm. Thể tích của nó là bao nhiêu lít?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3000 lít", "30 lít", "3 lít"],
+    "correct_answer": "3 lít",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_48",
+    "content": {
+      "text": "Một hình lập phương có thể tích 512 cm³. Diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["64 cm²", "256 cm²", "384 cm²"],
+    "correct_answer": "384 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_49",
+    "content": {
+      "text": "Một hình hộp chữ nhật có chiều dài gấp đôi chiều rộng, chiều cao bằng chiều rộng. Diện tích xung quanh là 144 m². Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["128 m³", "256 m³", "144 m³"],
+    "correct_answer": "256 m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_hop_02_50",
+    "content": {
+      "text": "Một hình hộp chữ nhật có diện tích xung quanh 180 cm², chiều cao 9 cm. Nếu chiều dài hơn chiều rộng 2 cm, thể tích là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["360 cm³", "450 cm³", "540 cm³"],
+    "correct_answer": "360 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_hop",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_01",
+    "content": {
+      "text": "Hình lăng trụ đứng tam giác có các mặt bên là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình chữ nhật", "Hình tam giác", "Hình vuông"],
+    "correct_answer": "Hình chữ nhật",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_02",
+    "content": {
+      "text": "Hình lăng trụ đứng tứ giác có hai mặt đáy là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình vuông", "Hình chữ nhật", "Hình tứ giác"],
+    "correct_answer": "Hình tứ giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_03",
+    "content": {
+      "text": "Các cạnh bên của hình lăng trụ đứng có vuông góc với mặt đáy không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_04",
+    "content": {
+      "text": "Hình hộp chữ nhật có thể là một hình lăng trụ đứng tứ giác không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Có", "Không"],
+    "correct_answer": "Có",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_05",
+    "content": {
+      "text": "Một hình lăng trụ đứng có hai mặt đáy song song và bằng nhau. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_06",
+    "content": {
+      "text": "Mặt đáy của hình lăng trụ đứng tam giác có bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3", "4", "5", "6"],
+    "correct_answer": "3",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_07",
+    "content": {
+      "text": "Hình lăng trụ đứng tứ giác có mấy mặt?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4", "5", "6"],
+    "correct_answer": "6",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_08",
+    "content": {
+      "text": "Hình lăng trụ đứng tam giác có bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6", "9", "12"],
+    "correct_answer": "9",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_09",
+    "content": {
+      "text": "Chiều cao của hình lăng trụ đứng chính là độ dài của cạnh nào?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Cạnh đáy", "Cạnh bên", "Đường chéo"],
+    "correct_answer": "Cạnh bên",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_10",
+    "content": {
+      "text": "Mặt bên của hình lăng trụ đứng tam giác có thể là hình vuông không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Có", "Không"],
+    "correct_answer": "Có",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_11",
+    "content": {
+      "text": "Các mặt đáy của hình lăng trụ đứng tam giác có vuông góc với các mặt bên không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_12",
+    "content": {
+      "text": "Hình lăng trụ đứng tứ giác có bao nhiêu mặt, bao nhiêu đỉnh, bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4 mặt, 6 đỉnh, 8 cạnh", "6 mặt, 8 đỉnh, 12 cạnh", "5 mặt, 6 đỉnh, 9 cạnh"],
+    "correct_answer": "6 mặt, 8 đỉnh, 12 cạnh",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_13",
+    "content": {
+      "text": "Hình hộp chữ nhật là một trường hợp đặc biệt của hình lăng trụ đứng tứ giác. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_14",
+    "content": {
+      "text": "Các mặt bên của hình lăng trụ đứng có bằng nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Có", "Không nhất thiết"],
+    "correct_answer": "Không nhất thiết",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_15",
+    "content": {
+      "text": "Hình lăng trụ đứng tam giác có mấy mặt bên?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2", "3", "4"],
+    "correct_answer": "3",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_16",
+    "content": {
+      "text": "Hình lăng trụ đứng tứ giác có mấy mặt bên?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["2", "3", "4"],
+    "correct_answer": "4",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_17",
+    "content": {
+      "text": "Hình lăng trụ đứng tam giác có tổng cộng bao nhiêu mặt?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3", "4", "5"],
+    "correct_answer": "5",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_18",
+    "content": {
+      "text": "Các cạnh bên của hình lăng trụ đứng có song song với nhau không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_19",
+    "content": {
+      "text": "Hình lăng trụ đứng có 2 mặt đáy và các mặt bên. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_20",
+    "content": {
+      "text": "Hình lăng trụ đứng tam giác có các cạnh bên dài 5 cm. Chiều cao của lăng trụ là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "15 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_21",
+    "content": {
+      "text": "Mặt đáy của hình lăng trụ đứng tứ giác có bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["3", "4", "5"],
+    "correct_answer": "4",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_22",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có các cạnh đáy 3 cm, 4 cm, 5 cm. Chu vi của mặt đáy là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["12 cm", "15 cm", "18 cm"],
+    "correct_answer": "12 cm",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_23",
+    "content": {
+      "text": "Nếu một hình lăng trụ đứng tam giác có tất cả các cạnh bên bằng nhau, thì nó có phải là hình lập phương không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Sai",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_24",
+    "content": {
+      "text": "Một hình lăng trụ đứng có mặt bên là hình vuông. Hình lăng trụ đó có phải là lăng trụ đứng tam giác không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Có thể", "Không thể"],
+    "correct_answer": "Có thể",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_25",
+    "content": {
+      "text": "Hình lăng trụ đứng có 9 cạnh, trong đó có 3 cạnh bên. Hình lăng trụ đó có hai mặt đáy là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình vuông", "Hình tam giác", "Hình tứ giác"],
+    "correct_answer": "Hình tam giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_26",
+    "content": {
+      "text": "Một hình lăng trụ đứng tứ giác có đáy là hình vuông. Các mặt bên của nó có phải là hình chữ nhật không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_27",
+    "content": {
+      "text": "Số mặt của hình lăng trụ đứng tứ giác là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4", "5", "6"],
+    "correct_answer": "6",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_28",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có các mặt bên là hình chữ nhật. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_29",
+    "content": {
+      "text": "Hình lăng trụ đứng tứ giác có bao nhiêu đỉnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6", "8", "10"],
+    "correct_answer": "8",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_30",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có 6 đỉnh. Đúng hay Sai?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_31",
+    "content": {
+      "text": "Nếu hình lăng trụ đứng tam giác có hai đáy là tam giác đều, thì các mặt bên là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình chữ nhật", "Hình vuông", "Hình thoi"],
+    "correct_answer": "Hình chữ nhật",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_32",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có 9 cạnh. Tổng chiều dài 3 cạnh đáy là 12 cm, tổng chiều dài 3 cạnh bên là 15 cm. Chu vi của mặt đáy là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["12 cm", "15 cm", "18 cm"],
+    "correct_answer": "12 cm",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_33",
+    "content": {
+      "text": "Các mặt bên của hình lăng trụ đứng có phải là hình chữ nhật không?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "true_false",
+    "options": ["Đúng", "Sai"],
+    "correct_answer": "Đúng",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_34",
+    "content": {
+      "text": "Một hình lăng trụ đứng có mặt đáy là hình ngũ giác. Số mặt của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5", "6", "7"],
+    "correct_answer": "7",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_35",
+    "content": {
+      "text": "Đâu là tên gọi khác của hình hộp chữ nhật?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Lăng trụ đứng tam giác", "Lăng trụ đứng tứ giác", "Hình lập phương"],
+    "correct_answer": "Lăng trụ đứng tứ giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_36",
+    "content": {
+      "text": "Một hình lăng trụ đứng có mặt đáy là hình lục giác. Số đỉnh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6", "8", "12"],
+    "correct_answer": "12",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_37",
+    "content": {
+      "text": "Hình lăng trụ đứng có 12 cạnh. Đáy của nó là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình tam giác", "Hình tứ giác", "Hình ngũ giác"],
+    "correct_answer": "Hình tứ giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_38",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có các cạnh đáy 3, 4, 5. Các cạnh bên dài 6. Tổng chiều dài tất cả các cạnh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["27", "30", "42"],
+    "correct_answer": "30",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_39",
+    "content": {
+      "text": "Nếu tất cả các mặt bên của hình lăng trụ đứng đều là hình vuông, thì đáy của nó phải là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình vuông", "Hình tam giác đều", "Một đa giác đều"],
+    "correct_answer": "Một đa giác đều",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_40",
+    "content": {
+      "text": "Một hình lăng trụ đứng có 12 đỉnh. Đáy của nó là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình ngũ giác", "Hình lục giác", "Hình bát giác"],
+    "correct_answer": "Hình lục giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_41",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình tam giác vuông có hai cạnh góc vuông là 3 cm và 4 cm. Chiều cao của lăng trụ là 6 cm. Chu vi của mặt đáy là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["12 cm", "14 cm", "16 cm"],
+    "correct_answer": "12 cm",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_42",
+    "content": {
+      "text": "Một hình lăng trụ đứng có 15 cạnh. Đáy của nó là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Ngũ giác", "Lục giác", "Bát giác"],
+    "correct_answer": "Ngũ giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_43",
+    "content": {
+      "text": "Một hình lăng trụ đứng có 20 đỉnh. Đáy của nó là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Thập giác", "Bát giác", "Thập nhị giác"],
+    "correct_answer": "Thập giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_44",
+    "content": {
+      "text": "Nếu một lăng trụ đứng có 10 mặt, thì đáy của nó là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Ngũ giác", "Lục giác", "Bát giác"],
+    "correct_answer": "Bát giác",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_45",
+    "content": {
+      "text": "Một hình lăng trụ đứng có 18 cạnh. Số đỉnh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10", "12", "14"],
+    "correct_answer": "12",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_46",
+    "content": {
+      "text": "Một hình lăng trụ đứng có 14 mặt. Đáy của nó có bao nhiêu cạnh?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10", "12", "14"],
+    "correct_answer": "12",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_47",
+    "content": {
+      "text": "Nếu các mặt bên của một hình lăng trụ đứng là hình vuông, thì đáy của nó phải là hình gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["Hình chữ nhật", "Hình lập phương", "Một đa giác đều"],
+    "correct_answer": "Một đa giác đều",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_48",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có chu vi đáy 15 cm. Tổng độ dài tất cả các cạnh đáy của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["15 cm", "30 cm", "45 cm"],
+    "correct_answer": "30 cm",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_49",
+    "content": {
+      "text": "Tổng số mặt và đỉnh của một hình lăng trụ đứng lục giác là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["16", "18", "20", "22"],
+    "correct_answer": "20",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "hinh_lang_tru_dung_03_50",
+    "content": {
+      "text": "Một hình lăng trụ đứng có n-cạnh đáy. Số mặt của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["n+1", "n+2", "2n"],
+    "correct_answer": "n+2",
+    "knowledge_component": "hinh_lang_tru_dung",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_01",
+    "content": {
+      "text": "Công thức tính diện tích xung quanh của hình lăng trụ đứng là gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$S_{xq}=S_{day}.h$", "$S_{xq}=C_{day}.h$", "$S_{xq}=S_{tp}-2S_{day}$"],
+    "correct_answer": "$S_{xq}=C_{day}.h$",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_02",
+    "content": {
+      "text": "Công thức tính thể tích của hình lăng trụ đứng là gì?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$V=S_{day}.h$", "$V=C_{day}.h$", "$V=S_{xq}+2S_{day}$"],
+    "correct_answer": "$V=S_{day}.h$",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_03",
+    "content": {
+      "text": "Một hình lăng trụ đứng có chu vi đáy 15 cm và chiều cao 10 cm. Tính diện tích xung quanh.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["150 cm²", "75 cm²", "25 cm²"],
+    "correct_answer": "150 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_04",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích đáy 25 cm² và chiều cao 8 cm. Tính thể tích.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["33 cm³", "100 cm³", "200 cm³", "250 cm³"],
+    "correct_answer": "200 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_05",
+    "content": {
+      "text": "Diện tích toàn phần của hình lăng trụ đứng là tổng của diện tích xung quanh và diện tích của bao nhiêu mặt đáy?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["1", "2", "3"],
+    "correct_answer": "2",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 1
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_06",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có chu vi đáy 10 cm và chiều cao 6 cm. Diện tích xung quanh là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["30 cm²", "60 cm²", "100 cm²"],
+    "correct_answer": "60 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_07",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích đáy 15 cm² và chiều cao 4 cm. Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["19 cm³", "30 cm³", "60 cm³"],
+    "correct_answer": "60 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_08",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 80 cm³ và diện tích đáy 16 cm². Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4 cm", "5 cm", "6 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_09",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 120 cm² và chiều cao 10 cm. Chu vi của mặt đáy là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 cm", "12 cm", "20 cm"],
+    "correct_answer": "12 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_10",
+    "content": {
+      "text": "Một hình lăng trụ đứng tứ giác có chu vi đáy 20 cm, chiều cao 8 cm. Diện tích xung quanh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["160 cm²", "100 cm²", "80 cm²"],
+    "correct_answer": "160 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_11",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích đáy 10 cm², diện tích xung quanh 50 cm². Diện tích toàn phần là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["60 cm²", "70 cm²", "80 cm²"],
+    "correct_answer": "70 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_12",
+    "content": {
+      "text": "Một hình lăng trụ đứng có chu vi đáy 30 m, chiều cao 6 m. Tính diện tích xung quanh.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["180 m²", "90 m²", "360 m²"],
+    "correct_answer": "180 m²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_13",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 90 cm³, chiều cao 6 cm. Diện tích đáy là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["15 cm²", "30 cm²", "45 cm²"],
+    "correct_answer": "15 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_14",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có diện tích đáy 12 cm², chiều cao 5 cm. Thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["30 cm³", "60 cm³", "90 cm³"],
+    "correct_answer": "60 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_15",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 160 cm², chu vi đáy 40 cm. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["4 cm", "8 cm", "16 cm"],
+    "correct_answer": "4 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 2
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_16",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có chu vi đáy 18 cm. Chiều cao của lăng trụ bằng 1/3 chu vi đáy. Tính diện tích xung quanh.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["54 cm²", "108 cm²", "18 cm²"],
+    "correct_answer": "108 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_17",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình vuông cạnh 5 cm và chiều cao 10 cm. Tính thể tích.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["50 cm³", "250 cm³", "500 cm³"],
+    "correct_answer": "250 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_18",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 180 cm³, chiều cao 6 cm. Diện tích xung quanh là 120 cm². Tính diện tích toàn phần.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["180 cm²", "150 cm²", "200 cm²"],
+    "correct_answer": "180 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_19",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là tam giác vuông cân có cạnh góc vuông 4 cm. Chiều cao lăng trụ là 5 cm. Tính thể tích.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["20 cm³", "40 cm³", "80 cm³"],
+    "correct_answer": "40 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_20",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 100 cm². Nếu chiều cao giảm một nửa, chu vi đáy tăng gấp đôi, diện tích xung quanh mới là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["50 cm²", "100 cm²", "200 cm²"],
+    "correct_answer": "100 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_21",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 150 cm³. Nếu diện tích đáy là 30 cm², chiều cao là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "15 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_22",
+    "content": {
+      "text": "Một hình lăng trụ đứng có chu vi đáy 24 cm. Diện tích xung quanh là 144 cm². Chiều cao là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 cm", "12 cm", "10 cm"],
+    "correct_answer": "6 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_23",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích toàn phần 200 cm², diện tích xung quanh 150 cm². Thể tích của nó là bao nhiêu nếu chiều cao là 5 cm?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["125 cm³", "187.5 cm³", "375 cm³"],
+    "correct_answer": "125 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_24",
+    "content": {
+      "text": "Một hình lăng trụ đứng tam giác có diện tích đáy 24 cm², chiều cao 8 cm. Thể tích là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["192 cm³", "128 cm³", "96 cm³"],
+    "correct_answer": "192 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_25",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình vuông cạnh 4 cm và chiều cao 6 cm. Tính diện tích toàn phần.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["96 cm²", "128 cm²", "160 cm²"],
+    "correct_answer": "128 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 3
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_26",
+    "content": {
+      "text": "Một lăng trụ đứng có đáy là tam giác đều cạnh 6 cm và chiều cao 10 cm. Tính diện tích xung quanh.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["60 cm²", "180 cm²", "120 cm²"],
+    "correct_answer": "180 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_27",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 240 m³, diện tích đáy 30 m². Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["8 m", "10 m", "12 m"],
+    "correct_answer": "8 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_28",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 240 cm², chu vi đáy 16 cm. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 cm", "15 cm", "20 cm"],
+    "correct_answer": "15 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_29",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là tam giác đều có cạnh 4 cm và chiều cao 5 cm. Tính diện tích toàn phần.",
+      "formula_latex": "S_{day} = a^2.\\frac{\\sqrt{3}}{4}",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$60+8\sqrt{3}$ cm²", "$60+16\sqrt{3}$ cm²", "$60+4\sqrt{3}$ cm²"],
+    "correct_answer": "$60+8\sqrt{3}$ cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_30",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình vuông cạnh 8 cm, diện tích toàn phần 512 cm². Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["12 cm", "16 cm", "20 cm"],
+    "correct_answer": "16 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_31",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 300 cm³, chu vi đáy 30 cm. Nếu chiều dài gấp đôi chiều rộng, chiều cao là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "15 cm"],
+    "correct_answer": "10 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_32",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích đáy 25 cm² và chiều cao 10 cm. Thể tích của nó là bao nhiêu lít?",
+      "formula_latex": "1000 cm^3 = 1 lit",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["0.25 lít", "2.5 lít", "25 lít"],
+    "correct_answer": "0.25 lít",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_33",
+    "content": {
+      "text": "Một hình lăng trụ đứng có chu vi đáy 10 cm, chiều cao 10 cm. Nếu diện tích đáy là 50 cm², diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["100 cm²", "150 cm²", "200 cm²"],
+    "correct_answer": "200 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_34",
+    "content": {
+      "text": "Một hình lăng trụ đứng có thể tích 600 m³, diện tích đáy 50 m². Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["10 m", "12 m", "15 m"],
+    "correct_answer": "12 m",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_35",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình vuông cạnh 5 dm, chiều cao 10 dm. Thể tích của nó là bao nhiêu lít?",
+      "formula_latex": "1 dm^3 = 1 lit",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["250 lít", "500 lít", "1000 lít"],
+    "correct_answer": "250 lít",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 4
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_36",
+    "content": {
+      "text": "Một lăng trụ đứng có đáy là tam giác vuông cân có cạnh góc vuông 6 cm và thể tích 108 cm³. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["6 cm", "9 cm", "12 cm"],
+    "correct_answer": "6 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_37",
+    "content": {
+      "text": "Một lăng trụ đứng có thể tích 200 cm³, chiều cao 8 cm. Chu vi đáy là 25 cm. Diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["200 cm²", "250 cm²", "300 cm²"],
+    "correct_answer": "200 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_38",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình vuông và thể tích 160 cm³, chiều cao 10 cm. Tính diện tích xung quanh.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["64 cm²", "160 cm²", "256 cm²"],
+    "correct_answer": "160 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_39",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là tam giác đều, diện tích xung quanh 180 cm², chiều cao 10 cm. Tính chu vi đáy.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["18 cm", "36 cm", "54 cm"],
+    "correct_answer": "18 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_40",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình thang, diện tích đáy 20 cm², thể tích 100 cm³. Tính chiều cao.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "20 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_41",
+    "content": {
+      "text": "Một lăng trụ đứng có đáy là hình tam giác vuông có hai cạnh góc vuông là 6 cm và 8 cm. Thể tích là 240 cm³. Chiều cao của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["8 cm", "10 cm", "12 cm"],
+    "correct_answer": "10 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_42",
+    "content": {
+      "text": "Một lăng trụ đứng có đáy là hình vuông cạnh 4 cm và thể tích 64 cm³. Diện tích xung quanh của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["64 cm²", "96 cm²", "128 cm²"],
+    "correct_answer": "64 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_43",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 300 cm², chiều cao 10 cm. Nếu đáy là hình chữ nhật có chiều dài gấp đôi chiều rộng, thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["500 cm³", "1000 cm³", "1500 cm³"],
+    "correct_answer": "1000 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_44",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là tam giác vuông có cạnh góc vuông 3 cm và 4 cm. Diện tích xung quanh 60 cm². Diện tích toàn phần là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["72 cm²", "84 cm²", "96 cm²"],
+    "correct_answer": "84 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_45",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là tam giác đều cạnh 8 cm, chiều cao 10 cm. Tính thể tích.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$80\sqrt{3}$ cm³", "$160\sqrt{3}$ cm³", "$320\sqrt{3}$ cm³"],
+    "correct_answer": "$160\sqrt{3}$ cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_46",
+    "content": {
+      "text": "Một lăng trụ đứng có đáy là hình vuông. Thể tích là 100 cm³, chiều cao 4 cm. Diện tích toàn phần của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["100 cm²", "125 cm²", "150 cm²"],
+    "correct_answer": "150 cm²",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_47",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 240 m² và chiều cao 10 m. Nếu đáy là hình tam giác có các cạnh 8, 10, 12, thể tích của nó là bao nhiêu?",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["$120\sqrt{2}$ m³", "$240\sqrt{2}$ m³", "$360\sqrt{2}$ m³"],
+    "correct_answer": "$240\sqrt{2}$ m³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_48",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích toàn phần 252 cm², diện tích đáy 30 cm². Tính thể tích của nó nếu chu vi đáy là 24 cm.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["120 cm³", "240 cm³", "360 cm³"],
+    "correct_answer": "360 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_49",
+    "content": {
+      "text": "Một hình lăng trụ đứng có đáy là hình thang vuông với hai đáy 5 cm và 9 cm, chiều cao 4 cm. Chiều cao của lăng trụ là 10 cm. Tính thể tích.",
+      "formula_latex": "S_{day} = \\frac{1}{2}(a+b).h",
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["140 cm³", "280 cm³", "560 cm³"],
+    "correct_answer": "280 cm³",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  },
+  {
+    "question_id": "dien_tich_the_tich_hinh_lang_tru_04_50",
+    "content": {
+      "text": "Một hình lăng trụ đứng có diện tích xung quanh 300 cm² và thể tích 750 cm³. Tính chiều cao.",
+      "formula_latex": null,
+      "image": null
+    },
+    "question_type": "multiple_choice",
+    "options": ["5 cm", "10 cm", "15 cm"],
+    "correct_answer": "5 cm",
+    "knowledge_component": "dien_tich_the_tich_hinh_lang_tru",
+    "difficulty_level": 5
+  }
+]

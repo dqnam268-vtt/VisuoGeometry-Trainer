@@ -1,0 +1,16 @@
+order_id,user_id,skill_name,correct,opportunity
+1,default_student,tim_so_biet_gia_tri_phan_so,1,1.0
+2,default_student,tim_so_biet_gia_tri_phan_so,1,2.0
+3,default_student,tim_so_biet_gia_tri_phan_so,1,
+4,default_student,tim_so_biet_gia_tri_phan_so,1,
+5,default_student,tim_so_biet_gia_tri_phan_so,1,
+6,default_student,tim_so_biet_gia_tri_phan_so,1,
+7,default_student,tim_so_biet_gia_tri_phan_so,1,
+8,default_student,cong_cung_mau_so,0,
+9,default_student,cong_cung_mau_so,1,
+10,default_student,tru_cung_mau_so,0,
+11,default_student,tru_cung_mau_so,1,
+12,default_student,bai_toan_thuc_te,0,
+13,default_student,bai_toan_thuc_te,1,
+14,default_student,tru_khac_mau_so,1,
+15,default_student,tim_gia_tri_phan_so_cua_mot_so,1,

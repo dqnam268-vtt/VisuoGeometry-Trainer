@@ -1,0 +1,19 @@
+{
+    "mastery_vector": {
+        "bai_toan_thuc_te": 0.475,
+        "cong_cung_mau_so": 0.475,
+        "cong_khac_mau_so": 0.475,
+        "hon_so": 0.4125625,
+        "khai_niem_phan_so": 0.3,
+        "phep_chia_phan_so": 0.36745140625,
+        "phep_nhan_phan_so": 0.3,
+        "quy_dong_mau_so": 0.475,
+        "rut_gon_phan_so": 0.475,
+        "so_sanh_cung_mau": 0.44125000000000003,
+        "so_sanh_khac_mau": 0.475,
+        "tim_gia_tri_phan_so_cua_mot_so": 0.36745140625,
+        "tim_so_biet_gia_tri_phan_so": 0.475,
+        "tru_cung_mau_so": 0.3,
+        "tru_khac_mau_so": 0.475
+    }
+}
