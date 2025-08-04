@@ -22,7 +22,7 @@ app.add_middleware(
         "http://localhost:8000",                                    # Cho phát triển cục bộ
         "null",                                                     # Cho việc mở index.html trực tiếp từ ổ đĩa (chỉ cho test, không dùng prod)
         "https://dqnam268-vtt.github.io",                           # URL gốc của GitHub Pages
-        "https://dqnam268-vtt.github.io/adaptive-fractions-its1",   # URL cụ thể của repo trên GitHub Pages
+        "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",   # URL cụ thể của repo trên GitHub Pages
     ],
     allow_credentials=True,
     allow_methods=["*"],
