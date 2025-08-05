@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện Tập Hình Khối Trong Thực Tiễn Lớp 7</title>
+    <title>Luyện Tập Hình Học Trực Quan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Cấu hình MathJax
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
     <style>
         body { font-family: 'Be Vietnam Pro', sans-serif; }
         .selected-correct { background-color: #22c55e !important; color: white !important; }
@@ -22,6 +33,11 @@
         canvas {
             width: 100% !important;
             height: auto !important;
+        }
+        /* Style cho công thức toán học */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.25rem;
         }
     </style>
 </head>
@@ -112,7 +128,6 @@
             let currentQuestion = null;
             let studentId = null;
 
-            // CẬP NHẬT: Bản đồ chi tiết cho tên KC hình học
             const knowledgeComponentMap = {
                 "hinh_hop_lap_phuong": { full: "Hình hộp chữ nhật và Hình lập phương" },
                 "dien_tich_the_tich_hinh_hop": { full: "Diện tích và Thể tích hình hộp" },
@@ -120,17 +135,31 @@
                 "dien_tich_the_tich_hinh_lang_tru": { full: "Diện tích và Thể tích hình lăng trụ" }
             };
 
-
+            // CẬP NHẬT: Logic hiển thị câu hỏi và đáp án
             function renderQuestion(data) {
-                questionTextEl.textContent = data.content.text;
+                // Hiển thị công thức toán học nếu có
+                if (data.content.formula_latex) {
+                    questionTextEl.innerHTML = `
+                        <p>${data.content.text}</p>
+                        <p class="math">${data.content.formula_latex}</p>
+                    `;
+                } else {
+                    questionTextEl.textContent = data.content.text;
+                }
+                
                 optionsContainerEl.innerHTML = '';
                 (data.options || []).forEach(optionObject => {
                     const button = document.createElement('button');
                     button.className = "option-btn bg-white border-2 border-gray-300 text-gray-700 font-semibold py-4 px-4 rounded-lg hover:bg-gray-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 w-full text-lg transition-all duration-200";
-                    button.textContent = optionObject.text;
+                    button.innerHTML = `<span class="math">${optionObject.text}</span>`; // Bọc đáp án bằng span.math
                     button.onclick = () => handleAnswerSelection(button, optionObject.is_correct);
                     optionsContainerEl.appendChild(button);
                 });
+                
+                // CẬP NHẬT: Gọi MathJax sau khi nội dung được thêm
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise([optionsContainerEl, questionTextEl]);
+                }
             }
 
             async function handleAnswerSelection(selectedButton, isCorrect) {
@@ -150,7 +179,7 @@
                     const correctOption = currentQuestion.options.find(opt => opt.is_correct);
                     if (correctOption) {
                         allButtons.forEach(btn => {
-                            if (btn.textContent === correctOption.text) {
+                            if (btn.querySelector('.math').textContent === correctOption.text) {
                                 btn.classList.add('reveal-correct');
                             }
                         });

@@ -3,10 +3,10 @@ py -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 py -m uvicorn app.main:app --reload
-https://dqnam268-vtt.github.io/adaptive-fractions-its1/
+https://dqnam268-vtt.github.io/VisuoGeometry-Trainer/
 
 
-
+https://dqnam268-vtt.github.io/VisuoGeometry-Trainer/
 git add .
 git commit -m "Successfully recreated venv and confirmed local functionality"
 git push origin main
