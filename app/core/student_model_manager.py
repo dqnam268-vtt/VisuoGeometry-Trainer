@@ -7,9 +7,6 @@ STUDENT_MODELS_DIR = "app/data/student_models/"
 os.makedirs(STUDENT_MODELS_DIR, exist_ok=True)
 
 class StudentModelManager:
-    """
-    Quản lý trạng thái của học sinh bằng một mô hình đơn giản, tất định như mô tả trong bài báo nghiên cứu.
-    """
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
@@ -23,17 +20,18 @@ class StudentModelManager:
     def _load_state(self) -> Dict[str, Any]:
         """Tải trạng thái của học sinh, bao gồm vector trình độ."""
         if os.path.exists(self.state_path):
-            with open(self.state_path, 'r') as f:
+            # Thêm encoding='utf-8'
+            with open(self.state_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            # Trạng thái ban đầu: mỗi kỹ năng bắt đầu với trình độ là 0.3
             initial_mastery = {kc: 0.3 for kc in self.all_kcs}
             return {"mastery_vector": initial_mastery}
 
     def _save_state(self):
         """Lưu trạng thái của học sinh."""
-        with open(self.state_path, 'w') as f:
-            json.dump(self.state, f, indent=4)
+        # Thêm encoding='utf-8'
+        with open(self.state_path, 'w', encoding='utf-8') as f:
+            json.dump(self.state, f, indent=4, ensure_ascii=False)
 
     def _load_interactions(self) -> pd.DataFrame:
         """Tải lịch sử tương tác của học sinh."""
@@ -46,20 +44,17 @@ class StudentModelManager:
         self.interactions_df.to_csv(self.interactions_path, index=False)
 
     def update_with_answer(self, kc: str, is_correct: bool):
-        """Cập nhật trình độ của học sinh dựa trên câu trả lời bằng một công thức đơn giản."""
+        """Cập nhật trình độ của học sinh."""
         learning_rate = 0.25
         penalty_rate = 0.15
         
         current_mastery = self.state['mastery_vector'].get(kc, 0.3)
         
         if is_correct:
-            # Học một phần của những gì chưa biết
             new_mastery = current_mastery + (1 - current_mastery) * learning_rate
         else:
-            # Quên một phần của những gì đã biết
             new_mastery = current_mastery - current_mastery * penalty_rate
         
-        # Giới hạn điểm thành thạo trong khoảng [0.05, 0.95]
         self.state['mastery_vector'][kc] = max(0.05, min(0.95, new_mastery))
         
         print(f"Đã cập nhật KC '{kc}': trình độ từ {current_mastery:.2f} -> {self.state['mastery_vector'][kc]:.2f}")
