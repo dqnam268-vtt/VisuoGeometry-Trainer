@@ -440,7 +440,8 @@
     {
         "question_id": "hinh_hop_lap_phuong_01_27",
         "content": {
-            "text": "Mặt đáy và mặt bên của hình hộp chữ nhật có vuông góc với nhau không?",
+            "text": "Mặt đáy và mặt bên của hình hộp chữ nhật có vuông góc với nhau
+;",
             "formula_latex": null,
             "image": null
         },
