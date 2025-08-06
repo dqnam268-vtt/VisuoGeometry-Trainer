@@ -1,3 +1,5 @@
+# app/api/router.py
+
 from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.responses import StreamingResponse
 import io
@@ -88,7 +90,7 @@ def export_student_data(
 ):
     mastery_vector = student_manager.get_mastery_vector()
     interactions_df = student_manager.get_interactions_df()
-
+    
     output = io.StringIO()
     output.write("--- MASTERY VECTOR ---\n")
     mastery_df = pd.DataFrame(list(mastery_vector.items()), columns=['skill_name', 'mastery_prob'])
@@ -96,7 +98,7 @@ def export_student_data(
     output.write("\n\n--- INTERACTION HISTORY ---\n")
     # SỬA LỖI: Chỉ định encoding='utf-8' khi xuất CSV
     output.write(interactions_df.to_csv(index=False, encoding='utf-8'))
-
+    
     response = StreamingResponse(
         iter([output.getvalue()]),
         # SỬA LỖI: Chỉ định encoding='utf-8' trong media_type

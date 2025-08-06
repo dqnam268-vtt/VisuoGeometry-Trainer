@@ -139,6 +139,6 @@ class StudentBKTManager:
         elif total_stars < 40:
             return "Chuyên gia cơ bản"
         elif total_stars < 60:
-            return "Chuyên gia cao cấp"
+            return "Thạc sĩ phân số"
         else:
-            return "Đại kiện tướng"
+            return "Đại kiện tướng phân số"
