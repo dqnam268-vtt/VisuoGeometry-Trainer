@@ -1,7 +1,7 @@
 cd VisuoGeometry-Trainer
 py -m venv venv
 .\venv\Scripts\activate
-pip install -r requirements.txt
+py -m pip install -r requirements.txt
 py -m uvicorn app.main:app --reload
 https://dqnam268-vtt.github.io/VisuoGeometry-Trainer/
 

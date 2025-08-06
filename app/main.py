@@ -20,7 +20,10 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Cấu hình CORS để cho phép các nguồn gốc đã xác định
+    # CẬP NHẬT: Thêm lại 'null' và 'http://localhost:8000' để cho phép thử nghiệm cục bộ
     allow_origins=[
+    "http://localhost:8000", # Cho phép khi chạy cục bộ
+    "null",                  # Cho phép khi mở index.html trực tiếp từ ổ đĩa cứng
     "https://dqnam268-vtt.github.io",
     "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",
 ],
