@@ -11,6 +11,7 @@ from .core.adaptation import AdaptationEngine
 from .core.student_bkt_manager import StudentBKTManager
 
 app = FastAPI(
+    # Cập nhật tên và mô tả dự án mới
     title="VisuoGeometry-Trainer",
     description="Ứng dụng giúp học sinh lớp 7 luyện tập hình học trực quan.",
     version="1.0.0",
@@ -18,9 +19,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
+    # Cấu hình CORS để cho phép các nguồn gốc đã xác định
     allow_origins=[
-    "http://localhost:8000",
-    "null",                  
+    "http://localhost:8000", # Cho phép khi chạy cục bộ
+    "null",                  # Cho phép khi mở index.html trực tiếp từ ổ đĩa cứng
     "https://dqnam268-vtt.github.io",
     "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",
 ],
@@ -33,6 +35,7 @@ app.add_middleware(
 async def startup_event():
     print("Ứng dụng đang khởi động...")
 
+    # Đường dẫn đến question_bank.json
     question_bank_path = 'app/data/question_bank.json'
 
     try:
