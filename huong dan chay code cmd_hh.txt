@@ -1,11 +1,10 @@
 git clone https://github.com/dqnam268-vtt/adaptive-fractions-its1
-cd adaptive-fractions-its1
+cd VisuoGeometry-Trainer
 py -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 py -m uvicorn app.main:app --reload
-https://dqnam268-vtt.github.io/adaptive-fractions-its1/
-
+https://dqnam268-vtt.github.io/VisuoGeometry-Trainer/
 
 
 git add .
