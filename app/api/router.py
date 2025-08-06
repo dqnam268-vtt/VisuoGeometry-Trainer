@@ -88,17 +88,19 @@ def export_student_data(
 ):
     mastery_vector = student_manager.get_mastery_vector()
     interactions_df = student_manager.get_interactions_df()
-    
+
     output = io.StringIO()
     output.write("--- MASTERY VECTOR ---\n")
     mastery_df = pd.DataFrame(list(mastery_vector.items()), columns=['skill_name', 'mastery_prob'])
     output.write(mastery_df.to_csv(index=False))
     output.write("\n\n--- INTERACTION HISTORY ---\n")
+    # SỬA LỖI: Chỉ định encoding='utf-8' khi xuất CSV
     output.write(interactions_df.to_csv(index=False, encoding='utf-8'))
-    
+
     response = StreamingResponse(
         iter([output.getvalue()]),
-        media_type="text/csv",
+        # SỬA LỖI: Chỉ định encoding='utf-8' trong media_type
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename=results_{student_id}.csv"}
     )
     return response
