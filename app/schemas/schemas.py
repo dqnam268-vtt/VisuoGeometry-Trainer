@@ -1,11 +1,7 @@
-# app/schemas/question.py
-
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 
-class Option(BaseModel):
-    text: str
-    is_correct: bool
+# === CÁC MODEL TỪ TỆP question.py CŨ ===
 
 class Content(BaseModel):
     text: str
@@ -16,10 +12,13 @@ class QuestionPublic(BaseModel):
     question_id: str
     content: Content
     question_type: str
-    options: List[Option]
+    options: List[str]
     knowledge_component: str
     difficulty_level: int
+    correct_answer: str
     hints: Optional[List[Dict]] = None
+
+# === CÁC MODEL TỪ TỆP student.py CŨ ===
 
 class Submission(BaseModel):
     question_id: str

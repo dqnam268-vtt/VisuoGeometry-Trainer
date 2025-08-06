@@ -2,14 +2,13 @@
 
 import random
 from typing import Tuple, Dict
-from .student_bkt_manager import StudentBKTManager
 
 class AdaptationEngine:
     def __init__(self, all_kcs: list):
         self.all_kcs = all_kcs
         print("Cơ chế Thích ứng đang chạy ở chế độ Heuristic đơn giản.")
 
-    def get_next_question_spec(self, student_manager: StudentBKTManager) -> Tuple[str, int]:
+    def get_next_question_spec(self, student_manager) -> Tuple[str, int]:
         mastery_vector = student_manager.get_mastery_vector()
         
         all_kcs_in_bank = self.all_kcs

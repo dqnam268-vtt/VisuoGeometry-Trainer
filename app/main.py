@@ -1,51 +1,61 @@
-import os
+# app/main.py
+
 import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict
+import os
 
-# Sửa lại import để trỏ đến đúng tệp
-from .api.router import router as api_router
+# Import các router và các lớp logic từ các gói con trong cùng gói 'app'
+from .api.router import router
 from .core.adaptation import AdaptationEngine
-from .core.student_model_manager import StudentModelManager 
+from .core.student_bkt_manager import StudentBKTManager
 
 app = FastAPI(
-    title="VisuoGeometry-Trainer API",
-    description="API cho Hệ thống Luyện tập Hình học Trực quan Thích ứng",
-    version="1.0.0"
+    title="VisuoGeometry-Trainer",
+    description="Ứng dụng giúp học sinh lớp 7 luyện tập hình học trực quan.",
+    version="1.0.0",
 )
 
-origins = ["*"] # Cho phép tất cả các nguồn gốc
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+    "http://localhost:8000",
+    "null",                  
+    "https://dqnam268-vtt.github.io",
+    "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.on_event("startup")
-async def load_resources():
-    """Nạp các tài nguyên cần thiết khi ứng dụng khởi động."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "question_bank.json")
-    with open(data_path, "r", encoding="utf-8") as f:
-        question_bank = json.load(f)
-    print(f"Đã tải {len(question_bank)} câu hỏi vào bộ nhớ.")
+async def startup_event():
+    print("Ứng dụng đang khởi động...")
 
-    all_kcs = sorted(list(set(
-        q.get('knowledge_component') for q in question_bank if 'knowledge_component' in q
-    )))
-    print(f"Tìm thấy {len(all_kcs)} thành phần kiến thức.")
+    question_bank_path = 'app/data/question_bank.json'
 
-    app.state.question_bank = question_bank
-    app.state.all_kcs = all_kcs
+    try:
+        with open(question_bank_path, "r", encoding="utf-8") as f:
+            question_data = json.load(f)
+        app.state.question_bank = question_data
+        print(f"Đã tải {len(question_data)} câu hỏi từ {question_bank_path}")
+    except FileNotFoundError:
+        print(f"Lỗi: Không tìm thấy tệp '{question_bank_path}'. Vui lòng đảm bảo tệp nằm đúng đường dẫn.")
+        exit(1)
+    except json.JSONDecodeError:
+        print(f"Lỗi: Không thể đọc tệp '{question_bank_path}'. Đảm bảo tệp là JSON hợp lệ.")
+        exit(1)
+
+    all_kcs = sorted(list(set(q["knowledge_component"] for q in question_data)))
+    app.state.all_knowledge_components = all_kcs
+    print(f"Đã phát hiện {len(all_kcs)} thành phần kiến thức (Knowledge Components): {', '.join(all_kcs)}")
+
     app.state.adaptation_engine = AdaptationEngine(all_kcs=all_kcs)
-    app.state.student_managers: Dict[str, StudentModelManager] = {}
-    
-    print("Hệ thống đã sẵn sàng để hỗ trợ nhiều người dùng.")
+    print("Đã khởi tạo Adaptation Engine.")
 
-app.include_router(api_router, prefix="/api/v1")
+    app.state.student_managers = {}
+    print("Đã khởi tạo bộ quản lý học sinh (cache).")
+    print("Ứng dụng khởi động hoàn tất.")
 
-@app.get("/", tags=["Root"])
-def read_root():
-    return {"message": "Chào mừng bạn đến với VisuoGeometry-Trainer API!"}
+app.include_router(router, prefix="/api/v1")

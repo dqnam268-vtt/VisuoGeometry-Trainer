@@ -1,12 +1,8 @@
-# app/core/student_bkt_manager.py
-
 import pandas as pd
 import datetime
 import json
 import os
-from typing import Dict, Any
 
-# Thư mục để lưu trữ dữ liệu học sinh.
 DATA_DIR = "./student_data"
 
 class StudentBKTManager:
@@ -50,7 +46,7 @@ class StudentBKTManager:
 
     def _save_mastery_to_file(self):
         with open(self.mastery_file, 'w', encoding='utf-8') as f:
-            json.dump(self.mastery_vector, f, indent=4, ensure_ascii=False)
+            json.dump(self.mastery_vector, f, indent=4)
 
     def _load_interactions_from_file(self) -> pd.DataFrame:
         if os.path.exists(self.interactions_file):
@@ -65,7 +61,7 @@ class StudentBKTManager:
         return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
 
     def _save_interactions_to_file(self):
-        self.interactions_df.to_csv(self.interactions_file, index=False, encoding='utf-8')
+        self.interactions_df.to_csv(self.interactions_file, index=False)
 
     def update_mastery(self, kc: str, is_correct: bool):
         p_L_prev = self.mastery_vector.get(kc, self.p_L0)
