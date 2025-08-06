@@ -176,11 +176,13 @@
                     const correctOption = currentQuestion.options.find(opt => opt.is_correct);
                     if (correctOption) {
                         allButtons.forEach(btn => {
-                            if (btn.querySelector('.math').textContent === correctOption.text) {
+                            // CẬP NHẬT: Sửa lỗi hiển thị công thức trong đáp án đúng
+                            const btnMathSpan = btn.querySelector('.math');
+                            if (btnMathSpan && btnMathSpan.textContent === correctOption.text) {
                                 btn.classList.add('reveal-correct');
                             }
                         });
-                        feedbackTextEl.textContent = `Chưa đúng. Đáp án là: ${correctOption.text}`;
+                        feedbackTextEl.innerHTML = `Chưa đúng. Đáp án là: <span class="math">${correctOption.text}</span>`;
                         feedbackTextEl.className = 'text-xl font-bold text-red-600';
                     }
                 }
@@ -188,6 +190,11 @@
                 
                 if (!progressDashboardSection.classList.contains('hidden')) {
                     await fetchAndRenderProgress();
+                }
+
+                // CẬP NHẬT: Gọi MathJax sau khi phản hồi được hiển thị
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise([feedbackTextEl]);
                 }
             }
 
