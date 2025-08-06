@@ -1,22 +1,15 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, HTTPException, status, Depends, Request
+from fastapi.responses import StreamingResponse
+import io
+import pandas as pd
+# SỬA LỖI: Import từ tệp schemas mới
+from ..schemas import QuestionPublic, Submission, SubmissionResult 
+from ..core.adaptation import AdaptationEngine
+from ..core.student_model_manager import StudentModelManager
+import random
 from typing import Dict, List
 
-# Sửa lại import để phù hợp với cấu trúc
-from ..schemas.question import QuestionPublic
-from ..schemas.student import AnswerSubmission, SubmissionResult
-from ..core.adaptation import AdaptationEngine
-from ..core.student_model import StudentBKTManager
-
 router = APIRouter()
-
-# --- Dependency Functions ---
-def get_student_manager(student_id: str, request: Request) -> StudentBKTManager:
-    """Lấy hoặc tạo mới student manager cho một ID cụ thể."""
-    student_managers: Dict[str, StudentBKTManager] = request.app.state.student_managers
-    if student_id not in student_managers:
-        all_kcs = request.app.state.all_kcs
-        student_managers[student_id] = StudentBKTManager(student_id=student_id, all_kcs=all_kcs)
-    return student_managers[student_id]
 
 def get_question_bank(request: Request) -> list:
     return request.app.state.question_bank
@@ -24,42 +17,72 @@ def get_question_bank(request: Request) -> list:
 def get_adaptation_engine(request: Request) -> AdaptationEngine:
     return request.app.state.adaptation_engine
 
-# --- API Endpoints ---
+def get_student_manager(student_id: str, request: Request) -> StudentModelManager:
+    student_managers: Dict[str, StudentModelManager] = request.app.state.student_managers
+    if student_id not in student_managers:
+        all_kcs = request.app.state.all_kcs
+        student_managers[student_id] = StudentModelManager(student_id=student_id, all_kcs=all_kcs)
+    return student_managers[student_id]
+
 @router.get("/session/{student_id}/next-question", response_model=QuestionPublic, tags=["Session"])
 def get_next_question(
-    student_manager: StudentBKTManager = Depends(get_student_manager),
+    student_id: str,
     question_bank: list = Depends(get_question_bank),
-    adaptation_engine: AdaptationEngine = Depends(get_adaptation_engine)
+    adaptation_engine: AdaptationEngine = Depends(get_adaptation_engine),
+    student_manager: StudentModelManager = Depends(get_student_manager)
 ):
-    """Lấy câu hỏi tiếp theo cho một học sinh."""
-    # Logic chọn câu hỏi... (ví dụ)
-    mastery_vector = student_manager.get_mastery_vector()
-    kc, difficulty = adaptation_engine.get_next_question_spec(student_manager)
-    
-    potential_questions = [q for q in question_bank if q.get('knowledge_component') == kc and q.get('difficulty_level') == difficulty]
+    next_kc, next_difficulty = adaptation_engine.get_next_question_spec(student_manager=student_manager)
+    potential_questions = [q for q in question_bank if q.get('knowledge_component') == next_kc and q.get('difficulty_level') == next_difficulty]
     if not potential_questions:
-        # Fallback logic
-        potential_questions = [q for q in question_bank if q.get('knowledge_component') == kc]
-
+        potential_questions = [q for q in question_bank if q.get('knowledge_component') == next_kc]
     if not potential_questions:
-        raise HTTPException(status_code=404, detail="Không tìm thấy câu hỏi phù hợp.")
+        raise HTTPException(status_code=404, detail=f"Không có câu hỏi nào cho KC: {next_kc}")
     
-    return random.choice(potential_questions)
-
+    selected_question = random.choice(potential_questions)
+    return QuestionPublic(**selected_question)
 
 @router.post("/session/{student_id}/submit-answer", response_model=SubmissionResult, tags=["Session"])
 def submit_answer(
-    submission: AnswerSubmission,
-    student_manager: StudentBKTManager = Depends(get_student_manager),
-    question_bank: list = Depends(get_question_bank)
+    student_id: str,
+    submission: Submission,
+    question_bank: list = Depends(get_question_bank),
+    student_manager: StudentModelManager = Depends(get_student_manager)
 ):
-    """Nhận và xử lý câu trả lời của học sinh."""
-    # Logic xử lý câu trả lời... (ví dụ)
     question = next((q for q in question_bank if q['question_id'] == submission.question_id), None)
     if not question:
-        raise HTTPException(status_code=404, detail="Không tìm thấy câu hỏi.")
+         raise HTTPException(status_code=404, detail=f"Không tìm thấy câu hỏi ID: {submission.question_id}")
 
-    is_correct = (submission.submitted_answer == question['correct_answer'])
-    student_manager.update_with_answer(kc=question['knowledge_component'], is_correct=is_correct)
+    question_kc = question['knowledge_component']
+    student_manager.update_with_answer(kc=question_kc, is_correct=submission.correct)
+    
+    return {"message": "Answer submitted successfully", "correct": submission.correct, "correct_answer": question.get('correct_answer', '')}
 
-    return {"is_correct": is_correct, "correct_answer": question['correct_answer'], "feedback": "Làm tốt lắm!" if is_correct else "Hãy thử lại nhé."}
+@router.get("/students/{student_id}/export", tags=["Students"])
+def export_student_data(
+    student_id: str,
+    student_manager: StudentModelManager = Depends(get_student_manager)
+):
+    mastery_vector = student_manager.get_mastery_vector()
+    interactions_df = student_manager.interactions_df
+    output = io.StringIO()
+    output.write("--- MASTERY VECTOR ---\n")
+    mastery_df = pd.DataFrame(list(mastery_vector.items()), columns=['skill_name', 'mastery_prob'])
+    output.write(mastery_df.to_csv(index=False))
+    output.write("\n\n--- INTERACTION HISTORY ---\n")
+    output.write(interactions_df.to_csv(index=False))
+    response = StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=results_{student_id}.csv"}
+    )
+    return response
+
+@router.get("/students/{student_id}/dashboard", tags=["Students"], response_model=List[Dict])
+def get_dashboard_data(
+    student_id: str,
+    student_manager: StudentModelManager = Depends(get_student_manager)
+):
+    mastery_vector = student_manager.get_mastery_vector()
+    sorted_mastery = sorted(mastery_vector.items(), key=lambda item: item[1], reverse=True)
+    dashboard_data = [{"skill": kc, "mastery": prob} for kc, prob in sorted_mastery]
+    return dashboard_data
