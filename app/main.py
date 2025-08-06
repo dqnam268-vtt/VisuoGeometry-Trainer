@@ -58,4 +58,20 @@ async def startup_event():
     print("Đã khởi tạo bộ quản lý học sinh (cache).")
     print("Ứng dụng khởi động hoàn tất.")
 
+# === ĐIỀU CHỈNH CHÍNH Ở ĐÂY ===
+# Thêm một route cho địa chỉ gốc ("/") để khắc phục lỗi "Not Found"
+@app.get("/", tags=["Default"])
+def read_root():
+    """
+    Cung cấp thông tin cơ bản về API và xác nhận dịch vụ đang hoạt động.
+    """
+    return {
+        "status": "online",
+        "title": app.title,
+        "description": app.description,
+        "version": app.version,
+        "api_docs": "/docs" # FastAPI tự động tạo tài liệu tại /docs
+    }
+# ==============================
+
 app.include_router(router, prefix="/api/v1")
