@@ -1,5 +1,3 @@
-# app/api/router.py
-
 from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.responses import StreamingResponse
 import io
