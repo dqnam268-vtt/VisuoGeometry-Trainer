@@ -1,77 +1,140 @@
-# app/main.py
-
+import pandas as pd
+import datetime
 import json
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import os
 
-# Import các router và các lớp logic từ các gói con trong cùng gói 'app'
-from .api.router import router
-from .core.adaptation import AdaptationEngine
-from .core.student_bkt_manager import StudentBKTManager
+DATA_DIR = "./student_data"
 
-app = FastAPI(
-    title="VisuoGeometry-Trainer",
-    description="Ứng dụng giúp học sinh lớp 7 luyện tập hình học trực quan.",
-    version="1.0.0",
-)
+class StudentBKTManager:
+    def __init__(self, student_id: str, all_kcs: list):
+        self.student_id = student_id
+        self.all_kcs = all_kcs
+        self.p_L0 = 0.1
+        self.p_T = 0.2
+        self.p_S = 0.1
+        self.p_G = 0.2
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-    "http://localhost:8000",
-    "null",                  
-    "https://dqnam268-vtt.github.io",
-    "https://dqnam268-vtt.github.io/VisuoGeometry-Trainer",
-],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR)
 
-@app.on_event("startup")
-async def startup_event():
-    print("Ứng dụng đang khởi động...")
+        self.mastery_file = os.path.join(DATA_DIR, f"{self.student_id}_mastery.json")
+        self.interactions_file = os.path.join(DATA_DIR, f"{self.student_id}_interactions.csv")
 
-    question_bank_path = 'app/data/question_bank.json'
+        self.mastery_vector = self._load_mastery_from_file()
+        if not self.mastery_vector:
+            self.mastery_vector = {kc: self.p_L0 for kc in all_kcs}
+            self._save_mastery_to_file()
 
-    try:
-        with open(question_bank_path, "r", encoding="utf-8") as f:
-            question_data = json.load(f)
-        app.state.question_bank = question_data
-        print(f"Đã tải {len(question_data)} câu hỏi từ {question_bank_path}")
-    except FileNotFoundError:
-        print(f"Lỗi: Không tìm thấy tệp '{question_bank_path}'. Vui lòng đảm bảo tệp nằm đúng đường dẫn.")
-        exit(1)
-    except json.JSONDecodeError:
-        print(f"Lỗi: Không thể đọc tệp '{question_bank_path}'. Đảm bảo tệp là JSON hợp lệ.")
-        exit(1)
+        self.interactions_df = self._load_interactions_from_file()
 
-    all_kcs = sorted(list(set(q["knowledge_component"] for q in question_data)))
-    app.state.all_knowledge_components = all_kcs
-    print(f"Đã phát hiện {len(all_kcs)} thành phần kiến thức (Knowledge Components): {', '.join(all_kcs)}")
+    def _ensure_data_dir_exists(self):
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR)
 
-    app.state.adaptation_engine = AdaptationEngine(all_kcs=all_kcs)
-    print("Đã khởi tạo Adaptation Engine.")
+    def _load_mastery_from_file(self) -> dict:
+        if os.path.exists(self.mastery_file):
+            try:
+                with open(self.mastery_file, 'r', encoding='utf-8') as f:
+                    loaded_mastery = json.load(f)
+                    for kc in self.all_kcs:
+                        if kc not in loaded_mastery:
+                            loaded_mastery[kc] = self.p_L0
+                    return loaded_mastery
+            except json.JSONDecodeError:
+                print(f"Lỗi đọc file JSON {self.mastery_file}. Tạo mới.")
+                return {}
+        return {}
 
-    app.state.student_managers = {}
-    print("Đã khởi tạo bộ quản lý học sinh (cache).")
-    print("Ứng dụng khởi động hoàn tất.")
+    def _save_mastery_to_file(self):
+        with open(self.mastery_file, 'w', encoding='utf-8') as f:
+            json.dump(self.mastery_vector, f, indent=4)
 
-# === ĐIỀU CHỈNH CHÍNH Ở ĐÂY ===
-# Thêm một route cho địa chỉ gốc ("/") để khắc phục lỗi "Not Found"
-@app.get("/", tags=["Default"])
-def read_root():
-    """
-    Cung cấp thông tin cơ bản về API và xác nhận dịch vụ đang hoạt động.
-    """
-    return {
-        "status": "online",
-        "title": app.title,
-        "description": app.description,
-        "version": app.version,
-        "api_docs": "/docs" # FastAPI tự động tạo tài liệu tại /docs
-    }
-# ==============================
+    def _load_interactions_from_file(self) -> pd.DataFrame:
+        if os.path.exists(self.interactions_file):
+            try:
+                return pd.read_csv(self.interactions_file)
+            except pd.errors.EmptyDataError:
+                print(f"File CSV {self.interactions_file} rỗng. Tạo DataFrame mới.")
+                return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
+            except Exception as e:
+                print(f"Lỗi đọc file CSV {self.interactions_file}: {e}. Tạo DataFrame mới.")
+                return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
+        return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
 
-app.include_router(router, prefix="/api/v1")
+    def _save_interactions_to_file(self):
+        self.interactions_df.to_csv(self.interactions_file, index=False)
+
+    def update_mastery(self, kc: str, is_correct: bool):
+        p_L_prev = self.mastery_vector.get(kc, self.p_L0)
+        
+        p_correct_given_known = (1 - self.p_S)
+        p_incorrect_given_known = self.p_S
+        p_correct_given_unknown = self.p_G
+        p_incorrect_given_unknown = (1 - self.p_G)
+
+        p_observation = (p_L_prev * (p_correct_given_known if is_correct else p_incorrect_given_known)) + \
+                        ((1 - p_L_prev) * (p_correct_given_unknown if is_correct else p_incorrect_given_unknown))
+
+        if p_observation == 0:
+            posterior_known = p_L_prev
+        else:
+            posterior_known = (p_L_prev * (p_correct_given_known if is_correct else p_incorrect_given_known)) / p_observation
+        
+        p_L_next = posterior_known + (1 - posterior_known) * self.p_T
+        
+        self.mastery_vector[kc] = max(0.0, min(1.0, p_L_next))
+
+        self._save_mastery_to_file()
+
+        new_interaction = pd.DataFrame([{
+            'timestamp': datetime.datetime.now().isoformat(),
+            'kc': kc,
+            'is_correct': is_correct,
+            'p_L_before': p_L_prev,
+            'p_L_after': self.mastery_vector[kc]
+        }])
+        self.interactions_df = pd.concat([self.interactions_df, new_interaction], ignore_index=True)
+        self._save_interactions_to_file()
+
+    def get_mastery_vector(self) -> dict:
+        return self.mastery_vector
+
+    def get_interactions_df(self) -> pd.DataFrame:
+        return self.interactions_df
+
+    def get_topic_stars(self) -> dict:
+        topic_stars = {}
+        for kc in self.all_kcs:
+            mastery_level = self.mastery_vector.get(kc, self.p_L0)
+            if mastery_level <= 0.2:
+                topic_stars[kc] = 0
+            elif mastery_level <= 0.4:
+                topic_stars[kc] = 1
+            elif mastery_level <= 0.6:
+                topic_stars[kc] = 2
+            elif mastery_level <= 0.8:
+                topic_stars[kc] = 3
+            elif mastery_level <= 0.9:
+                topic_stars[kc] = 4
+            else:
+                topic_stars[kc] = 5
+        return topic_stars
+
+    def get_total_stars(self) -> int:
+        topic_stars = self.get_topic_stars()
+        total_stars = sum(topic_stars.values())
+        return total_stars
+
+    def get_current_title(self) -> str:
+        total_stars = self.get_total_stars()
+        
+        if total_stars < 10:
+            return "Người mới học"
+        elif total_stars < 25:
+            return "Người khám phá"
+        elif total_stars < 40:
+            return "Chuyên gia cơ bản"
+        elif total_stars < 60:
+            return "Thạc sĩ phân số"
+        else:
+            return "Đại kiện tướng phân số"

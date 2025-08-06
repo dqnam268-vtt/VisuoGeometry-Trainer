@@ -23,7 +23,7 @@
         .selected-incorrect { background-color: #ef4444 !important; color: white !important; }
         .reveal-correct { background-color: #dcfce7 !important; border-color: #22c55e !important; }
         .option-btn:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transform: translateY(-2px);
         }
         .option-btn {
@@ -134,6 +134,7 @@
             };
 
             function renderQuestion(data) {
+                // Sửa đổi để hiển thị công thức toán học
                 if (data.content.formula_latex) {
                     questionTextEl.innerHTML = `
                         <p>${data.content.text}</p>
@@ -152,6 +153,7 @@
                     optionsContainerEl.appendChild(button);
                 });
                 
+                // Cập nhật MathJax sau khi nội dung được thêm
                 if (typeof MathJax !== 'undefined') {
                     MathJax.typesetPromise([optionsContainerEl, questionTextEl]);
                 }
@@ -174,6 +176,7 @@
                     const correctOption = currentQuestion.options.find(opt => opt.is_correct);
                     if (correctOption) {
                         allButtons.forEach(btn => {
+                            // CẬP NHẬT: Sửa lỗi hiển thị công thức trong đáp án đúng
                             const btnMathSpan = btn.querySelector('.math');
                             if (btnMathSpan && btnMathSpan.textContent === correctOption.text) {
                                 btn.classList.add('reveal-correct');
@@ -189,6 +192,7 @@
                     await fetchAndRenderProgress();
                 }
 
+                // CẬP NHẬT: Gọi MathJax sau khi phản hồi được hiển thị
                 if (typeof MathJax !== 'undefined') {
                     MathJax.typesetPromise([feedbackTextEl]);
                 }
