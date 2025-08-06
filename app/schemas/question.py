@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 
-# === CÁC MODEL TỪ TỆP question.py CŨ ===
+class Option(BaseModel):
+    text: str
+    is_correct: bool
 
 class Content(BaseModel):
     text: str
@@ -12,13 +14,10 @@ class QuestionPublic(BaseModel):
     question_id: str
     content: Content
     question_type: str
-    options: List[str]
+    options: List[Option]
     knowledge_component: str
     difficulty_level: int
-    correct_answer: str
     hints: Optional[List[Dict]] = None
-
-# === CÁC MODEL TỪ TỆP student.py CŨ ===
 
 class Submission(BaseModel):
     question_id: str

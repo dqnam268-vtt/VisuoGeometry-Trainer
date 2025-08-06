@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import json
 import os
+from typing import Dict, Any
 
 # Thư mục để lưu trữ dữ liệu học sinh.
 DATA_DIR = "./student_data"
@@ -48,7 +49,6 @@ class StudentBKTManager:
         return {}
 
     def _save_mastery_to_file(self):
-        # Sửa lỗi UnicodeEncodeError: thêm ensure_ascii=False
         with open(self.mastery_file, 'w', encoding='utf-8') as f:
             json.dump(self.mastery_vector, f, indent=4, ensure_ascii=False)
 
@@ -65,7 +65,6 @@ class StudentBKTManager:
         return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
 
     def _save_interactions_to_file(self):
-        # Sửa lỗi UnicodeEncodeError: Thêm encoding='utf-8' vào to_csv
         self.interactions_df.to_csv(self.interactions_file, index=False, encoding='utf-8')
 
     def update_mastery(self, kc: str, is_correct: bool):

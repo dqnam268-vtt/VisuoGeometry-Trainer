@@ -1,17 +1,21 @@
+# app/core/adaptation.py
+
 import random
 from typing import Tuple, Dict
-from .student_model_manager import StudentModelManager # <-- Sửa tên tệp ở đây
+from .student_bkt_manager import StudentBKTManager
 
 class AdaptationEngine:
     def __init__(self, all_kcs: list):
         self.all_kcs = all_kcs
         print("Cơ chế Thích ứng đang chạy ở chế độ Heuristic đơn giản.")
 
-    def get_next_question_spec(self, student_manager: StudentModelManager) -> Tuple[str, int]:
+    def get_next_question_spec(self, student_manager: StudentBKTManager) -> Tuple[str, int]:
         mastery_vector = student_manager.get_mastery_vector()
         
+        all_kcs_in_bank = self.all_kcs
+
         min_mastery = min(mastery_vector.values())
-        low_mastery_kcs = [kc for kc, prob in mastery_vector.items() if prob == min_mastery]
+        low_mastery_kcs = [kc for kc, prob in mastery_vector.items() if prob == min_mastery and kc in all_kcs_in_bank]
         
         chosen_kc = random.choice(low_mastery_kcs)
         
