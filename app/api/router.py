@@ -5,7 +5,7 @@ import pandas as pd
 # SỬA LỖI: Import từ tệp schemas mới
 from ..schemas import QuestionPublic, Submission, SubmissionResult 
 from ..core.adaptation import AdaptationEngine
-from ..core.student_model_manager import StudentModelManager
+from ..core.student_bkt_manager import StudentBKTManager
 import random
 from typing import Dict, List
 
