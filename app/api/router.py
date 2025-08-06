@@ -96,7 +96,7 @@ def export_student_data(
     mastery_df = pd.DataFrame(list(mastery_vector.items()), columns=['skill_name', 'mastery_prob'])
     output.write(mastery_df.to_csv(index=False))
     output.write("\n\n--- INTERACTION HISTORY ---\n")
-    output.write(interactions_df.to_csv(index=False))
+    output.write(interactions_df.to_csv(index=False, encoding='utf-8'))
     
     response = StreamingResponse(
         iter([output.getvalue()]),
