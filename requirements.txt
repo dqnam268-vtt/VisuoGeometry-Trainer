@@ -5,3 +5,5 @@ pydantic
 numpy
 pandas
 requests
+sqlalchemy
+psycopg2-binary
