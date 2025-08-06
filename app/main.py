@@ -11,7 +11,7 @@ from .core.adaptation import AdaptationEngine
 from .core.student_bkt_manager import StudentBKTManager
 
 app = FastAPI(
-    # CẬP NHẬT: Tên và mô tả dự án mới
+    # Cập nhật tên và mô tả dự án mới
     title="VisuoGeometry-Trainer",
     description="Ứng dụng giúp học sinh lớp 7 luyện tập hình học trực quan.",
     version="1.0.0",
@@ -20,7 +20,6 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Cấu hình CORS để cho phép các nguồn gốc đã xác định
-    # CẬP NHẬT: Thêm lại 'null' và 'http://localhost:8000' để cho phép thử nghiệm cục bộ
     allow_origins=[
     "http://localhost:8000", # Cho phép khi chạy cục bộ
     "null",                  # Cho phép khi mở index.html trực tiếp từ ổ đĩa cứng
