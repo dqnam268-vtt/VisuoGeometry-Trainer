@@ -2,15 +2,13 @@ from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.responses import StreamingResponse
 import io
 import pandas as pd
-from ..schemas.question import QuestionPublic, Submission, SubmissionResult, Option
+from ..schemas import QuestionPublic, Submission, SubmissionResult # Cập nhật import
 from ..core.adaptation import AdaptationEngine
-from ..core.student_model import StudentModelManager
+from ..core.student_model_manager import StudentModelManager # <-- Sửa tên tệp ở đây
 import random
 from typing import Dict, List
 
 router = APIRouter()
-
-# --- CÁC HÀM DEPENDENCY ---
 
 def get_question_bank(request: Request) -> list:
     return request.app.state.question_bank
@@ -19,19 +17,11 @@ def get_adaptation_engine(request: Request) -> AdaptationEngine:
     return request.app.state.adaptation_engine
 
 def get_student_manager(student_id: str, request: Request) -> StudentModelManager:
-    """
-    Lấy (hoặc tạo mới nếu chưa có) đối tượng StudentModelManager cho student_id được cung cấp.
-    """
     student_managers: Dict[str, StudentModelManager] = request.app.state.student_managers
-    
     if student_id not in student_managers:
-        print(f"Không tìm thấy mô hình cho '{student_id}'. Đang tạo mới...")
         all_kcs = request.app.state.all_kcs
         student_managers[student_id] = StudentModelManager(student_id=student_id, all_kcs=all_kcs)
-    
     return student_managers[student_id]
-
-# --- CÁC API ENDPOINT ---
 
 @router.get("/session/{student_id}/next-question", response_model=QuestionPublic, tags=["Session"])
 def get_next_question(
@@ -48,11 +38,7 @@ def get_next_question(
         raise HTTPException(status_code=404, detail=f"Không có câu hỏi nào cho KC: {next_kc}")
     
     selected_question = random.choice(potential_questions)
-    
-    # Đảm bảo frontend có thể hiển thị đáp án đúng sau khi trả lời
-    # Frontend phiên bản mới không cần logic chuyển đổi này
     return QuestionPublic(**selected_question)
-
 
 @router.post("/session/{student_id}/submit-answer", response_model=SubmissionResult, tags=["Session"])
 def submit_answer(
@@ -70,41 +56,22 @@ def submit_answer(
     
     return {"message": "Answer submitted successfully", "correct": submission.correct, "correct_answer": question.get('correct_answer', '')}
 
-
 @router.get("/students/{student_id}/export", tags=["Students"])
 def export_student_data(
     student_id: str,
     student_manager: StudentModelManager = Depends(get_student_manager)
 ):
-    """
-    Xuất dữ liệu của một học sinh ra file CSV.
-    """
     mastery_vector = student_manager.get_mastery_vector()
     interactions_df = student_manager.interactions_df
-
     output = io.StringIO()
     output.write("--- MASTERY VECTOR ---\n")
     mastery_df = pd.DataFrame(list(mastery_vector.items()), columns=['skill_name', 'mastery_prob'])
     output.write(mastery_df.to_csv(index=False))
     output.write("\n\n--- INTERACTION HISTORY ---\n")
     output.write(interactions_df.to_csv(index=False))
-
     response = StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=results_{student_id}.csv"}
     )
     return response
-
-@router.get("/students/{student_id}/dashboard", tags=["Students"], response_model=List[Dict])
-def get_dashboard_data(
-    student_id: str,
-    student_manager: StudentModelManager = Depends(get_student_manager)
-):
-    """
-    Lấy dữ liệu vector trình độ của học sinh để hiển thị trên dashboard.
-    """
-    mastery_vector = student_manager.get_mastery_vector()
-    sorted_mastery = sorted(mastery_vector.items(), key=lambda item: item[1], reverse=True)
-    dashboard_data = [{"skill": kc, "mastery": prob} for kc, prob in sorted_mastery]
-    return dashboard_data
