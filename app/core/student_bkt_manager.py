@@ -13,11 +13,11 @@ class StudentBKTManager:
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
-        # CẬP NHẬT: Thay đổi các tham số để làm chậm quá trình tăng mastery_level
-        self.p_L0 = 0.01  # Xác suất biết ban đầu
-        self.p_T = 0.02  # Giảm từ 0.2 xuống 0.02 để làm chậm quá trình học
-        self.p_S = 0.05  # Tăng từ 0.1 lên 0.05 để làm chậm quá trình tăng điểm
-        self.p_G = 0.01  # Giảm từ 0.2 xuống 0.01 để làm chậm quá trình tăng điểm
+        # Các tham số BKT mặc định
+        self.p_L0 = 0.1  # Xác suất biết ban đầu
+        self.p_T = 0.2   # Xác suất học được (transition)
+        self.p_S = 0.1   # Xác suất trả lời sai khi đã biết (slip)
+        self.p_G = 0.2   # Xác suất trả lời đúng khi chưa biết (guess)
 
         self._ensure_data_dir_exists()
 
@@ -110,7 +110,6 @@ class StudentBKTManager:
         topic_stars = {}
         for kc in self.all_kcs:
             mastery_level = self.mastery_vector.get(kc, self.p_L0)
-            # CẬP NHẬT: Ngưỡng điểm mới để tăng sao chậm hơn
             if mastery_level <= 0.2:
                 topic_stars[kc] = 0
             elif mastery_level <= 0.4:
