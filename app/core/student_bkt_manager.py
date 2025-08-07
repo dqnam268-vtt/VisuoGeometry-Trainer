@@ -88,7 +88,7 @@ class StudentBKTManager:
         
         self.mastery_vector[kc] = max(0.0, min(1.0, p_L_next))
 
-        self._save_mastery_to_file()
+        self._save_mastery_to_db()
 
         new_interaction = pd.DataFrame([{
             'timestamp': datetime.datetime.now().isoformat(),
