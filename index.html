@@ -253,16 +253,16 @@
             // --- CÁC HÀM MỚI CHO TIẾN ĐỘ HỌC TẬP VÀ BIỂU ĐỒ ---
 
             function renderStars(numStars) {
-                let starsHtml = '';
-                for (let i = 0; i < 5; i++) {
-                    if (i < numStars) {
-                        starsHtml += '<span class="text-yellow-400">&#9733;</span>';
-                    } else {
-                        starsHtml += '<span class="text-gray-300">&#9733;</span>';
-                    }
-                }
-                return starsHtml;
+        let starsHtml = '';
+        for (let i = 0; i < 10; i++) {
+            if (i < numStars) {
+                starsHtml += '<span class="text-yellow-400">&#9733;</span>';
+            } else {
+                starsHtml += '<span class="text-gray-300">&#9733;</span>';
             }
+        }
+        return starsHtml;
+    }
 
             function renderMasteryChart(topicProgressData) {
                 topicProgressData.sort((a, b) => a.topic.localeCompare(b.topic));

@@ -1,8 +1,12 @@
+# app/core/student_bkt_manager.py
+
 import pandas as pd
 import datetime
 import json
 import os
+from typing import Dict, Any
 
+# Thư mục để lưu trữ dữ liệu học sinh.
 DATA_DIR = "./student_data"
 
 class StudentBKTManager:
@@ -46,12 +50,12 @@ class StudentBKTManager:
 
     def _save_mastery_to_file(self):
         with open(self.mastery_file, 'w', encoding='utf-8') as f:
-            json.dump(self.mastery_vector, f, indent=4)
+            json.dump(self.mastery_vector, f, indent=4, ensure_ascii=False)
 
     def _load_interactions_from_file(self) -> pd.DataFrame:
         if os.path.exists(self.interactions_file):
             try:
-                return pd.read_csv(self.interactions_file)
+                return pd.read_csv(self.interactions_file, encoding='utf-8')
             except pd.errors.EmptyDataError:
                 print(f"File CSV {self.interactions_file} rỗng. Tạo DataFrame mới.")
                 return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
@@ -61,7 +65,7 @@ class StudentBKTManager:
         return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
 
     def _save_interactions_to_file(self):
-        self.interactions_df.to_csv(self.interactions_file, index=False)
+        self.interactions_df.to_csv(self.interactions_file, index=False, encoding='utf-8')
 
     def update_mastery(self, kc: str, is_correct: bool):
         p_L_prev = self.mastery_vector.get(kc, self.p_L0)
@@ -105,18 +109,28 @@ class StudentBKTManager:
         topic_stars = {}
         for kc in self.all_kcs:
             mastery_level = self.mastery_vector.get(kc, self.p_L0)
-            if mastery_level <= 0.2:
+            if mastery_level <= 0.1:
                 topic_stars[kc] = 0
-            elif mastery_level <= 0.4:
+            elif mastery_level <= 0.2:
                 topic_stars[kc] = 1
-            elif mastery_level <= 0.6:
+            elif mastery_level <= 0.3:
                 topic_stars[kc] = 2
-            elif mastery_level <= 0.8:
+            elif mastery_level <= 0.4:
                 topic_stars[kc] = 3
-            elif mastery_level <= 0.9:
+            elif mastery_level <= 0.5:
                 topic_stars[kc] = 4
-            else:
+            elif mastery_level <= 0.6:
                 topic_stars[kc] = 5
+            elif mastery_level <= 0.7:
+                topic_stars[kc] = 6
+            elif mastery_level <= 0.8:
+                topic_stars[kc] = 7
+            elif mastery_level <= 0.9:
+                topic_stars[kc] = 8
+            elif mastery_level <= 0.95:
+                topic_stars[kc] = 9
+            else:
+                topic_stars[kc] = 10
         return topic_stars
 
     def get_total_stars(self) -> int:
@@ -127,13 +141,14 @@ class StudentBKTManager:
     def get_current_title(self) -> str:
         total_stars = self.get_total_stars()
         
+        # CẬP NHẬT: Thay đổi các mốc sao và tên danh hiệu
         if total_stars < 10:
-            return "Người mới học"
-        elif total_stars < 25:
-            return "Người khám phá"
+            return "Người mới học hình học"
+        elif total_stars < 20:
+            return "Người khám phá hình học"
+        elif total_stars < 30:
+            return "Kiến trúc sư tương lai"
         elif total_stars < 40:
-            return "Chuyên gia cơ bản"
-        elif total_stars < 60:
-            return "Thạc sĩ phân số"
+            return "Thạc sĩ hình học"
         else:
-            return "Đại kiện tướng phân số"
+            return "Đại kiện tướng hình học"
