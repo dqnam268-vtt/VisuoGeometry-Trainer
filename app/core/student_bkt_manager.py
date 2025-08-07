@@ -13,11 +13,10 @@ class StudentBKTManager:
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
-        # CẬP NHẬT: Thay đổi các tham số để làm chậm quá trình tăng mastery_level
-        self.p_L0 = 0.1  # Xác suất biết ban đầu
-        self.p_T = 0.02  # Giảm xuống 0.02 để làm cho quá trình học rất chậm
-        self.p_S = 0.05  # Tăng lên 0.05 để làm chậm quá trình tăng điểm
-        self.p_G = 0.01  # Giảm xuống 0.01 để làm chậm quá trình tăng điểm
+        self.p_L0 = 0.1
+        self.p_T = 0.2
+        self.p_S = 0.1
+        self.p_G = 0.2
 
         self._ensure_data_dir_exists()
 
@@ -110,28 +109,19 @@ class StudentBKTManager:
         topic_stars = {}
         for kc in self.all_kcs:
             mastery_level = self.mastery_vector.get(kc, self.p_L0)
-            if mastery_level <= 0.1:
+            # Phục hồi về thang điểm 5 sao cũ
+            if mastery_level <= 0.2:
                 topic_stars[kc] = 0
-            elif mastery_level <= 0.2:
-                topic_stars[kc] = 1
-            elif mastery_level <= 0.3:
-                topic_stars[kc] = 2
             elif mastery_level <= 0.4:
-                topic_stars[kc] = 3
-            elif mastery_level <= 0.5:
-                topic_stars[kc] = 4
+                topic_stars[kc] = 1
             elif mastery_level <= 0.6:
-                topic_stars[kc] = 5
-            elif mastery_level <= 0.7:
-                topic_stars[kc] = 6
+                topic_stars[kc] = 2
             elif mastery_level <= 0.8:
-                topic_stars[kc] = 7
+                topic_stars[kc] = 3
             elif mastery_level <= 0.9:
-                topic_stars[kc] = 8
-            elif mastery_level <= 0.95:
-                topic_stars[kc] = 9
+                topic_stars[kc] = 4
             else:
-                topic_stars[kc] = 10
+                topic_stars[kc] = 5
         return topic_stars
 
     def get_total_stars(self) -> int:
@@ -142,13 +132,14 @@ class StudentBKTManager:
     def get_current_title(self) -> str:
         total_stars = self.get_total_stars()
         
-        if total_stars < 10: 
+        # Cập nhật danh hiệu phù hợp với tổng sao tối đa mới (4 chủ đề * 5 sao/chủ đề = 20 sao)
+        if total_stars < 5: 
             return "Người mới học hình học"
-        elif total_stars < 20:
+        elif total_stars < 10:
             return "Người khám phá hình học"
-        elif total_stars < 30:
+        elif total_stars < 15:
             return "Kiến trúc sư tương lai"
-        elif total_stars < 40:
+        elif total_stars < 20:
             return "Thạc sĩ hình học"
         else:
             return "Đại kiện tướng hình học"

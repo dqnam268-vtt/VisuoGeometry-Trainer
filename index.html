@@ -254,7 +254,7 @@
 
             function renderStars(numStars) {
         let starsHtml = '';
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) { // CẬP NHẬT: Vòng lặp chạy 5 lần
             if (i < numStars) {
                 starsHtml += '<span class="text-yellow-400">&#9733;</span>';
             } else {
@@ -263,6 +263,7 @@
         }
         return starsHtml;
     }
+
 
             function renderMasteryChart(topicProgressData) {
                 topicProgressData.sort((a, b) => a.topic.localeCompare(b.topic));
