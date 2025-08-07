@@ -1,4 +1,4 @@
-git clone https://github.com/dqnam268-vtt/adaptive-fractions-its1
+git clone https://github.com/dqnam268-vtt/VisuoGeometry-Trainer
 cd VisuoGeometry-Trainer
 py -m venv venv
 .\venv\Scripts\activate
@@ -6,37 +6,8 @@ pip install -r requirements.txt
 py -m uvicorn app.main:app --reload
 https://dqnam268-vtt.github.io/VisuoGeometry-Trainer/
 
-
 git add .
 git commit -m "Successfully recreated venv and confirmed local functionality"
 git push origin main
 
 
-
-git add app/main.py
-git commit -m "Updated CORS origins to allow GitHub Pages URL"
-git push origin main
-
-
-
-Lệnh này sẽ thông báo cho Git rằng bạn muốn bao gồm tệp Procfile vào lần commit tiếp theo của mình.
-
-
-
-git add Procfile 
-git commit -m "Rename Procfile.txt to Procfile"
-git push origin main
-
-1. Mở giao diện tài liệu (Swagger UI)
-Hãy mở trình duyệt web (Chrome, Firefox, v.v.) và truy cập vào địa chỉ sau:
-
-http://127.0.0.1:8000/docs
-
-
-cd ..	//Di chuyển ra khỏi thư mục hiện tại 
-
-move "app\schemas\student_model.py" "app\core\"		
-Lệnh này có nghĩa là: "di chuyển tệp student_model.py từ thư mục schemas đến thư mục core".
-
-rmdir /s /q "app\api\__pycache__"
-xóa cache
