@@ -146,13 +146,13 @@ class StudentBKTManager:
     def get_current_title(self) -> str:
         total_stars = self.get_total_stars()
         
-        if total_stars < 10:
+        if total_stars < 4:
             return "Người mới học"
-        elif total_stars < 25:
+        elif total_stars < 8:
             return "Người khám phá"
-        elif total_stars < 40:
+        elif total_stars < 12:
             return "Chuyên gia cơ bản"
-        elif total_stars < 60:
+        elif total_stars < 16:
             return "Chuyên gia nâng cao"
         else:
             return "Đại kiện tướng hình học"

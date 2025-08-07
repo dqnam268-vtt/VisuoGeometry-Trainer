@@ -6,7 +6,7 @@ from typing import Tuple, Dict
 class AdaptationEngine:
     def __init__(self, all_kcs: list):
         self.all_kcs = all_kcs
-        print("Cơ chế Thích ứng đang chạy ở chế độ Heuristic đơn giản.")
+        print("Cơ chế Thích ứng đang chạy ở chế độ BKT.")
 
     def get_next_question_spec(self, student_manager) -> Tuple[str, int]:
         mastery_vector = student_manager.get_mastery_vector()
