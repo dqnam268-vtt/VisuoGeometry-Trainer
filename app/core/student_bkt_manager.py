@@ -1,25 +1,21 @@
-# app/core/student_bkt_manager.py
-
 import pandas as pd
 import datetime
 import json
 import os
-from typing import Dict, Any
 
-# Thư mục để lưu trữ dữ liệu học sinh.
 DATA_DIR = "./student_data"
 
 class StudentBKTManager:
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
-        # Các tham số BKT mặc định
-        self.p_L0 = 0.1  # Xác suất biết ban đầu
-        self.p_T = 0.2   # Xác suất học được (transition)
-        self.p_S = 0.1   # Xác suất trả lời sai khi đã biết (slip)
-        self.p_G = 0.2   # Xác suất trả lời đúng khi chưa biết (guess)
+        self.p_L0 = 0.1
+        self.p_T = 0.2
+        self.p_S = 0.1
+        self.p_G = 0.2
 
-        self._ensure_data_dir_exists()
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR)
 
         self.mastery_file = os.path.join(DATA_DIR, f"{self.student_id}_mastery.json")
         self.interactions_file = os.path.join(DATA_DIR, f"{self.student_id}_interactions.csv")
@@ -51,12 +47,12 @@ class StudentBKTManager:
 
     def _save_mastery_to_file(self):
         with open(self.mastery_file, 'w', encoding='utf-8') as f:
-            json.dump(self.mastery_vector, f, indent=4, ensure_ascii=False)
+            json.dump(self.mastery_vector, f, indent=4)
 
     def _load_interactions_from_file(self) -> pd.DataFrame:
         if os.path.exists(self.interactions_file):
             try:
-                return pd.read_csv(self.interactions_file, encoding='utf-8')
+                return pd.read_csv(self.interactions_file)
             except pd.errors.EmptyDataError:
                 print(f"File CSV {self.interactions_file} rỗng. Tạo DataFrame mới.")
                 return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
@@ -66,7 +62,7 @@ class StudentBKTManager:
         return pd.DataFrame(columns=['timestamp', 'kc', 'is_correct', 'p_L_before', 'p_L_after'])
 
     def _save_interactions_to_file(self):
-        self.interactions_df.to_csv(self.interactions_file, index=False, encoding='utf-8')
+        self.interactions_df.to_csv(self.interactions_file, index=False)
 
     def update_mastery(self, kc: str, is_correct: bool):
         p_L_prev = self.mastery_vector.get(kc, self.p_L0)
@@ -88,7 +84,7 @@ class StudentBKTManager:
         
         self.mastery_vector[kc] = max(0.0, min(1.0, p_L_next))
 
-        self._save_mastery_to_db()
+        self._save_mastery_to_file()
 
         new_interaction = pd.DataFrame([{
             'timestamp': datetime.datetime.now().isoformat(),
@@ -132,13 +128,13 @@ class StudentBKTManager:
     def get_current_title(self) -> str:
         total_stars = self.get_total_stars()
         
-        if total_stars < 5: 
-            return "Người mới học hình học"
-        elif total_stars < 10:
-            return "Người khám phá hình học"
-        elif total_stars < 15:
-            return "Kiến trúc sư tương lai"
-        elif total_stars < 20:
-            return "Thạc sĩ hình học"
+        if total_stars < 10:
+            return "Người mới học"
+        elif total_stars < 25:
+            return "Người khám phá"
+        elif total_stars < 40:
+            return "Chuyên gia cơ bản"
+        elif total_stars < 60:
+            return "Chuyên gia nâng cao"
         else:
             return "Đại kiện tướng hình học"
