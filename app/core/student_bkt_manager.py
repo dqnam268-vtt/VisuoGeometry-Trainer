@@ -13,10 +13,11 @@ class StudentBKTManager:
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
-        self.p_L0 = 0.1
-        self.p_T = 0.2
-        self.p_S = 0.1
-        self.p_G = 0.2
+        # CẬP NHẬT: Thay đổi các tham số để làm chậm quá trình tăng mastery_level
+        self.p_L0 = 0.1  # Xác suất biết ban đầu
+        self.p_T = 0.02  # Giảm xuống 0.02 để làm cho quá trình học rất chậm
+        self.p_S = 0.05  # Tăng lên 0.05 để làm chậm quá trình tăng điểm
+        self.p_G = 0.01  # Giảm xuống 0.01 để làm chậm quá trình tăng điểm
 
         self._ensure_data_dir_exists()
 
@@ -141,8 +142,7 @@ class StudentBKTManager:
     def get_current_title(self) -> str:
         total_stars = self.get_total_stars()
         
-        # CẬP NHẬT: Thay đổi các mốc sao và tên danh hiệu
-        if total_stars < 10:
+        if total_stars < 10: 
             return "Người mới học hình học"
         elif total_stars < 20:
             return "Người khám phá hình học"
