@@ -2,6 +2,7 @@ import pandas as pd
 import datetime
 import json
 import os
+from bkt_params import BKT_PARAMS # Import từ file mới
 
 DATA_DIR = "./student_data"
 
@@ -9,10 +10,14 @@ class StudentBKTManager:
     def __init__(self, student_id: str, all_kcs: list):
         self.student_id = student_id
         self.all_kcs = all_kcs
-        self.p_L0 = 0.1
-        self.p_T = 0.2
-        self.p_S = 0.1
-        self.p_G = 0.2
+        
+        self.bkt_params = BKT_PARAMS
+        self.default_params = {
+            "p_L0": 0.1,
+            "p_T": 0.2,
+            "p_S": 0.1,
+            "p_G": 0.2
+        }
 
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR)
@@ -22,11 +27,15 @@ class StudentBKTManager:
 
         self.mastery_vector = self._load_mastery_from_file()
         if not self.mastery_vector:
-            self.mastery_vector = {kc: self.p_L0 for kc in all_kcs}
+            self.mastery_vector = {kc: self.bkt_params.get(kc, self.default_params)['p_L0'] for kc in all_kcs}
             self._save_mastery_to_file()
 
         self.interactions_df = self._load_interactions_from_file()
 
+    # Các phương thức khác giữ nguyên, chỉ thay đổi _get_bkt_params_for_kc
+    def _get_bkt_params_for_kc(self, kc: str):
+        return self.bkt_params.get(kc, self.default_params)
+        
     def _ensure_data_dir_exists(self):
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR)
@@ -38,7 +47,8 @@ class StudentBKTManager:
                     loaded_mastery = json.load(f)
                     for kc in self.all_kcs:
                         if kc not in loaded_mastery:
-                            loaded_mastery[kc] = self.p_L0
+                            params = self._get_bkt_params_for_kc(kc)
+                            loaded_mastery[kc] = params['p_L0']
                     return loaded_mastery
             except json.JSONDecodeError:
                 print(f"Lỗi đọc file JSON {self.mastery_file}. Tạo mới.")
@@ -65,12 +75,18 @@ class StudentBKTManager:
         self.interactions_df.to_csv(self.interactions_file, index=False)
 
     def update_mastery(self, kc: str, is_correct: bool):
-        p_L_prev = self.mastery_vector.get(kc, self.p_L0)
+        params = self._get_bkt_params_for_kc(kc)
+        p_L0 = params['p_L0']
+        p_T = params['p_T']
+        p_S = params['p_S']
+        p_G = params['p_G']
         
-        p_correct_given_known = (1 - self.p_S)
-        p_incorrect_given_known = self.p_S
-        p_correct_given_unknown = self.p_G
-        p_incorrect_given_unknown = (1 - self.p_G)
+        p_L_prev = self.mastery_vector.get(kc, p_L0)
+        
+        p_correct_given_known = (1 - p_S)
+        p_incorrect_given_known = p_S
+        p_correct_given_unknown = p_G
+        p_incorrect_given_unknown = (1 - p_G)
 
         p_observation = (p_L_prev * (p_correct_given_known if is_correct else p_incorrect_given_known)) + \
                         ((1 - p_L_prev) * (p_correct_given_unknown if is_correct else p_incorrect_given_unknown))
@@ -80,7 +96,7 @@ class StudentBKTManager:
         else:
             posterior_known = (p_L_prev * (p_correct_given_known if is_correct else p_incorrect_given_known)) / p_observation
         
-        p_L_next = posterior_known + (1 - posterior_known) * self.p_T
+        p_L_next = posterior_known + (1 - posterior_known) * p_T
         
         self.mastery_vector[kc] = max(0.0, min(1.0, p_L_next))
 
@@ -105,7 +121,9 @@ class StudentBKTManager:
     def get_topic_stars(self) -> dict:
         topic_stars = {}
         for kc in self.all_kcs:
-            mastery_level = self.mastery_vector.get(kc, self.p_L0)
+            params = self._get_bkt_params_for_kc(kc)
+            p_L0 = params['p_L0']
+            mastery_level = self.mastery_vector.get(kc, p_L0)
             if mastery_level <= 0.2:
                 topic_stars[kc] = 0
             elif mastery_level <= 0.4:
