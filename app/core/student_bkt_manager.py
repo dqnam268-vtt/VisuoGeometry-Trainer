@@ -2,7 +2,7 @@ import pandas as pd
 import datetime
 import json
 import os
-from bkt_params import BKT_PARAMS # Import từ file mới
+from .bkt_params import BKT_PARAMS
 
 DATA_DIR = "./student_data"
 
