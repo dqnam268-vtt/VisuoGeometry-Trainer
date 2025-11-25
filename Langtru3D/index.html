@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mô Phỏng Gấp Lăng Trụ Đa Năng</title>
+    <title>Mô Phỏng Gấp Lăng Trụ & Cavalieri</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -97,7 +97,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .formula-card svg {
-            width: 90px; /* Tăng kích thước khung hình một chút */
+            width: 90px;
             height: 90px;
             flex-shrink: 0;
             stroke: #34495e;
@@ -132,21 +132,51 @@
         .formula { font-weight: bold; color: #555; }
         .step { color: #1976d2; font-style: italic; }
         .result { font-weight: bold; color: #d32f2f; }
+        .highlight-cavalieri { background-color: #e3f2fd; padding: 2px 5px; border-radius: 3px; color: #0277bd; font-weight: bold; }
 
         .mode-selector {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             justify-content: center;
             align-items: center;
             margin-bottom: 5px;
             font-weight: bold;
             background: #eee;
-            padding: 5px 15px;
+            padding: 5px 10px;
             border-radius: 20px;
             width: fit-content;
             margin-left: auto;
             margin-right: auto;
+            flex-wrap: wrap;
         }
+        /* Tab style switch */
+        .view-switch {
+            display: flex;
+            background: #e0e0e0;
+            border-radius: 20px;
+            padding: 3px;
+            margin-bottom: 8px;
+            justify-content: center;
+            width: fit-content;
+            margin-left: auto; margin-right: auto;
+        }
+        .view-btn {
+            padding: 6px 15px;
+            border-radius: 17px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            background: transparent;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .view-btn.active {
+            background: white;
+            color: #2980b9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .preset-buttons {
             display: flex;
             justify-content: center;
@@ -154,7 +184,7 @@
             flex-wrap: wrap;
             margin-bottom: 5px;
         }
-        .preset-btn, .formula-btn, .play-btn {
+        .preset-btn, .formula-btn, .play-btn, .cavalieri-btn {
             padding: 4px 8px;
             background-color: #ecf0f1;
             border: 1px solid #bdc3c7;
@@ -166,15 +196,15 @@
         .formula-btn { background-color: #8e44ad; color: white; border: none; }
         .formula-btn:hover { background-color: #9b59b6; }
         
-        .play-btn {
+        .play-btn, .cavalieri-btn {
             background-color: #e67e22; 
             color: white; 
             border: none; 
             min-width: 80px;
             font-weight: bold;
         }
-        .play-btn:hover { background-color: #d35400; }
-        .play-btn.playing { background-color: #c0392b; }
+        .play-btn:hover, .cavalieri-btn:hover { background-color: #d35400; }
+        .play-btn.playing, .cavalieri-btn.running { background-color: #c0392b; }
 
         .preset-btn:hover { background-color: #dfe6e9; }
         .preset-btn.active {
@@ -252,6 +282,12 @@
     </div>
     
     <div id="controls-container">
+        <!-- Main Mode Switcher -->
+        <div class="view-switch">
+            <button class="view-btn active" id="btn-view-fold" onclick="switchViewMode('fold')">Chiếc Áo Lăng Trụ</button>
+            <button class="view-btn" id="btn-view-cavalieri" onclick="switchViewMode('cavalieri')">Chiếc Hộp Cavalieri</button>
+        </div>
+
         <div style="display:flex; justify-content:center; gap:10px; align-items:center; margin-bottom:5px;">
             <div class="mode-selector" style="margin:0;">
                 <label style="cursor: pointer;"><input type="radio" name="prismMode" value="triangle" checked onchange="toggleMode()"> Lăng trụ Tam giác</label>
@@ -276,7 +312,7 @@
             <button class="preset-btn active" onclick="setQuadPreset('general')">Tứ giác thường</button>
         </div>
 
-        <!-- Input Area -->
+        <!-- Input Area (Shared) -->
         <div class="input-group">
             <div class="input-item">
                 <label>Chiều cao (H)</label>
@@ -346,17 +382,30 @@
 
         <hr style="width: 100%; border: 0; border-top: 1px solid #eee;">
 
-        <!-- Slider Container -->
-        <div class="input-item" style="width: 100%; display: flex; align-items: center; gap: 15px;">
-            <button id="btn-play" class="play-btn" onclick="togglePlay()">▶ Tự động</button>
+        <!-- Fold Slider (Only for Fold Mode) -->
+        <div id="fold-controls" class="input-item" style="width: 100%; display: flex; align-items: center; gap: 15px;">
+            <button id="btn-play" class="play-btn" onclick="togglePlay()">▶ Gấp Tự động</button>
             <div style="flex-grow: 1;">
                 <label for="fold-slider" style="text-align: center; display: block;">Mở <span id="slider-value">0</span>% Gấp</label>
                 <input type="range" id="fold-slider" min="0" max="100" value="0" step="0.1">
             </div>
         </div>
+
+        <!-- Cavalieri Controls (Only for Cavalieri Mode) -->
+        <div id="cavalieri-controls" class="input-item hidden" style="width: 100%; display: flex; align-items: center; gap: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px;">
+            <div class="input-item">
+                <label style="font-weight:bold; color:#0277bd;">Bước nhảy (Δh)</label>
+                <input type="number" id="inp-cavalieri-step" value="0.5" min="0.1" step="0.1" style="width: 80px;">
+            </div>
+            <button id="btn-cavalieri-run" class="cavalieri-btn" onclick="toggleCavalieriRun()">▶ Bắt đầu xếp chồng</button>
+            <button class="preset-btn" onclick="resetCavalieri()" style="background:#fff;">⟲ Đặt lại</button>
+            <div style="flex-grow: 1; text-align: right; font-size: 0.9em; line-height: 1.4;">
+                <div id="cavalieri-status">Đang chờ...</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modal Công Thức -->
+    <!-- Modal Công Thức (Giữ nguyên) -->
     <div id="formula-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="toggleFormulaModal()">&times;</span>
@@ -450,7 +499,7 @@
                     </div>
                 </div>
 
-                 <!-- Hình thang CẬP NHẬT - Fix lỗi text bị khuất -->
+                 <!-- Hình thang -->
                  <div class="formula-card">
                     <svg viewBox="0 0 100 100">
                         <polygon points="15,80 85,80 65,30 35,30" stroke="#333" fill="#fef9e7"/>
@@ -478,17 +527,28 @@
         let centralFace, hingeLeft, hingeRight, hingeFarRight; 
         let leftFace, rightFace, farRightFace;
         let baseTop, baseBottom, hingeTop, hingeBottom;
-        
+        let prismGroup; // Group chứa toàn bộ mô hình gấp
+        let cavalieriGroup; // Group chứa mô hình xếp chồng
+
         let currentMode = 'triangle'; 
+        let currentView = 'fold'; // 'fold' hoặc 'cavalieri'
         let currentPreset = 'general';
         let height = 3.5;
         let triData = { a: 4, b: 3, c: 2, angleLeft: 0, angleRight: 0 };
         let quadData = { s1: 3, s2: 4, s3: 3, s4: 2, angle23: 75, vertices: [], angles: [] };
+        
+        // Dữ liệu diện tích đáy (tính toán cache)
+        let cachedBaseArea = 0;
 
-        // Animation vars
+        // Animation vars for Fold
         let isPlaying = false;
         let playDirection = 1;
         let animationValue = 0;
+
+        // Vars for Cavalieri
+        let isCavalieriRunning = false;
+        let cavalieriHeight = 0;
+        let cavalieriTimer = null;
 
         const slider = document.getElementById('fold-slider');
         const sliderValueLabel = document.getElementById('slider-value');
@@ -507,50 +567,252 @@
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
+            
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
             scene.add(ambientLight);
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(5, 10, 7.5);
             scene.add(directionalLight);
+            
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
+            
             const gridHelper = new THREE.GridHelper(40, 40, 0xcccccc, 0xcccccc);
-            gridHelper.position.y = -height / 2;
+            gridHelper.position.y = 0; // Đặt grid ở 0 cho Cavalieri dễ nhìn
             gridHelper.name = 'gridHelper';
             scene.add(gridHelper);
 
+            // Init Groups
+            prismGroup = new THREE.Group();
+            scene.add(prismGroup);
+            
+            cavalieriGroup = new THREE.Group();
+            cavalieriGroup.visible = false;
+            scene.add(cavalieriGroup);
+
             calculateTriangle();
-            createPrism();
+            createPrism(); // Tạo mô hình gấp
             updateCalculations();
 
+            // Chỉnh lại vị trí Grid và PrismGroup để khớp visual
+            // Mặc định PrismGroup được tạo xung quanh tâm 0, ta nâng nó lên hoặc hạ grid
+            // Để thống nhất: Grid tại y=0.
+            // Prism gấp sẽ điều chỉnh vị trí trong updateDimensions
+            
             window.addEventListener('resize', onWindowResize);
-            // Sự kiện 'input' để phát hiện người dùng kéo slider
             slider.addEventListener('input', onSliderUserInteraction);
         }
 
-        // --- PLAY CONTROL ---
+        // --- VIEW SWITCHING ---
+        function switchViewMode(mode) {
+            currentView = mode;
+            document.getElementById('btn-view-fold').classList.toggle('active', mode === 'fold');
+            document.getElementById('btn-view-cavalieri').classList.toggle('active', mode === 'cavalieri');
+
+            if (mode === 'fold') {
+                prismGroup.visible = true;
+                cavalieriGroup.visible = false;
+                document.getElementById('fold-controls').classList.remove('hidden');
+                document.getElementById('cavalieri-controls').classList.add('hidden');
+                resetCavalieri(); // Dừng cavalieri nếu đang chạy
+                
+                // Cập nhật vị trí grid cho chế độ gấp (giữa lăng trụ)
+                const grid = scene.getObjectByName('gridHelper');
+                if(grid) grid.position.y = -height/2; 
+                
+            } else {
+                prismGroup.visible = false;
+                cavalieriGroup.visible = true;
+                document.getElementById('fold-controls').classList.add('hidden');
+                document.getElementById('cavalieri-controls').classList.remove('hidden');
+                
+                // Cập nhật vị trí grid cho chế độ cavalieri (chân lăng trụ)
+                const grid = scene.getObjectByName('gridHelper');
+                if(grid) grid.position.y = 0;
+
+                // Reset và chuẩn bị stack mới
+                resetCavalieri();
+            }
+        }
+        window.switchViewMode = switchViewMode;
+
+        // --- PLAY CONTROL (FOLD) ---
         function togglePlay() {
             isPlaying = !isPlaying;
             if (isPlaying) {
                 btnPlay.textContent = "⏸ Dừng";
                 btnPlay.classList.add('playing');
-                // Đồng bộ giá trị hiện tại
                 animationValue = parseFloat(slider.value);
             } else {
-                btnPlay.textContent = "▶ Tự động";
+                btnPlay.textContent = "▶ Gấp Tự động";
                 btnPlay.classList.remove('playing');
             }
         }
         window.togglePlay = togglePlay;
 
         function onSliderUserInteraction(event) {
-            // Khi người dùng kéo tay, tắt chế độ tự động
-            if (isPlaying) {
-                togglePlay();
-            }
+            if (isPlaying) togglePlay();
             onSliderChange(event);
         }
 
+        // --- CAVALIERI LOGIC ---
+        function toggleCavalieriRun() {
+            const btn = document.getElementById('btn-cavalieri-run');
+            if (isCavalieriRunning) {
+                stopCavalieri();
+            } else {
+                // Nếu đã full height, reset để chạy lại
+                if (cavalieriHeight >= height - 0.01) {
+                    resetCavalieri();
+                }
+                
+                isCavalieriRunning = true;
+                btn.textContent = "⏸ Tạm dừng";
+                btn.classList.add('running');
+                
+                // Lấy step
+                const step = parseFloat(document.getElementById('inp-cavalieri-step').value) || 0.5;
+                
+                // Bắt đầu interval
+                cavalieriTimer = setInterval(() => {
+                    addCavalieriSlice(step);
+                }, 500); // Tốc độ thêm lớp (500ms)
+            }
+        }
+        window.toggleCavalieriRun = toggleCavalieriRun;
+
+        function stopCavalieri() {
+            isCavalieriRunning = false;
+            clearInterval(cavalieriTimer);
+            const btn = document.getElementById('btn-cavalieri-run');
+            btn.textContent = "▶ Bắt đầu xếp chồng";
+            btn.classList.remove('running');
+        }
+
+        function resetCavalieri() {
+            stopCavalieri();
+            // Xóa hết children trong cavalieriGroup
+            while(cavalieriGroup.children.length > 0){ 
+                const obj = cavalieriGroup.children[0];
+                cavalieriGroup.remove(obj);
+                if(obj.geometry) obj.geometry.dispose();
+                if(obj.material) {
+                    if(Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose());
+                    else obj.material.dispose();
+                }
+            }
+            cavalieriHeight = 0;
+            updateCavalieriStatus();
+        }
+        window.resetCavalieri = resetCavalieri;
+
+        function addCavalieriSlice(step) {
+            const targetH = height;
+            
+            // Tính toán chiều cao thực tế của slice này (xử lý phần dư cuối cùng)
+            let actualStep = step;
+            if (cavalieriHeight + step > targetH) {
+                actualStep = targetH - cavalieriHeight;
+            }
+
+            if (actualStep <= 0.001) {
+                stopCavalieri();
+                return;
+            }
+
+            // Tạo Mesh cho slice
+            const shape = getBaseShape();
+            const extrudeSettings = {
+                steps: 1,
+                depth: actualStep,
+                bevelEnabled: false
+            };
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            
+            // Xoay geometry để nó nằm ngang (Extrude mặc định dọc Z)
+            geometry.rotateX(-Math.PI / 2);
+
+            // --- COLOR LOGIC: Tạo màu ngẫu nhiên nhưng hài hòa ---
+            // Dùng HSL để kiểm soát độ tươi và sáng, chỉ thay đổi Hue (sắc thái)
+            // Shift Hue dựa trên số lượng slice để tạo hiệu ứng cầu vồng
+            const hue = (cavalieriGroup.children.length * 0.137) % 1; // 0.137 là số nguyên tố để tránh lặp lại màu quá gần
+            const randomColor = new THREE.Color().setHSL(hue, 0.85, 0.6);
+
+            // Vật liệu: Màu hơi trong suốt để thấy sự xếp chồng
+            const material = new THREE.MeshStandardMaterial({ 
+                color: randomColor, 
+                transparent: true, 
+                opacity: 0.85,
+                metalness: 0.1, 
+                roughness: 0.5 
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            // Tạo viền đen cho lát cắt
+            const edges = new THREE.EdgesGeometry(geometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2, transparent: true, opacity: 0.5 }));
+            mesh.add(line);
+
+            // Định vị: Y bắt đầu từ cavalieriHeight hiện tại
+            mesh.position.y = cavalieriHeight;
+            
+            cavalieriGroup.add(mesh);
+            cavalieriHeight += actualStep;
+
+            updateCavalieriStatus();
+
+            if (Math.abs(cavalieriHeight - targetH) < 0.001) {
+                stopCavalieri();
+            }
+        }
+
+        function getBaseShape() {
+            const shape = new THREE.Shape();
+            
+            if (currentMode === 'triangle') {
+                const a = triData.a; const b = triData.b; const c = triData.c;
+                // Vertices từ logic tạo nắp lăng trụ
+                const theta = triData.angleLeft;
+                const ax_rel = -triData.c * Math.cos(theta); 
+                const az_rel = triData.c * Math.sin(theta);
+                const Ax = -triData.a/2 + ax_rel; 
+                const Az = az_rel;
+                
+                // Map to Shape (x, y) -> (x, z của 3D)
+                // Đỉnh 1: (Ax, Az)
+                // Đỉnh 2: (-a/2, 0)
+                // Đỉnh 3: (a/2, 0)
+                shape.moveTo(Ax, Az);
+                shape.lineTo(triData.a/2, 0);
+                shape.lineTo(-triData.a/2, 0);
+                shape.lineTo(Ax, Az);
+            } else {
+                const v = quadData.vertices;
+                if (v && v.length === 4) {
+                    shape.moveTo(v[0].x, v[0].z);
+                    shape.lineTo(v[1].x, v[1].z);
+                    shape.lineTo(v[2].x, v[2].z);
+                    shape.lineTo(v[3].x, v[3].z);
+                    shape.lineTo(v[0].x, v[0].z);
+                }
+            }
+            return shape;
+        }
+
+        function updateCavalieriStatus() {
+            const S = cachedBaseArea;
+            const H_curr = cavalieriHeight;
+            const V_curr = S * H_curr;
+            
+            const statusDiv = document.getElementById('cavalieri-status');
+            statusDiv.innerHTML = `
+                S<sub>đáy</sub>: <b>${S.toFixed(2)}</b> &nbsp;|&nbsp; 
+                H<sub>hiện tại</sub>: <b style="color:#d35400">${H_curr.toFixed(2)}</b><br>
+                V<sub>tích lũy</sub> = ${S.toFixed(2)} × ${H_curr.toFixed(2)} = <b style="color:#27ae60; font-size:1.1em;">${V_curr.toFixed(2)}</b>
+            `;
+        }
+
+        // --- COMMON LOGIC ---
         function toggleFormulaModal() {
             const modal = document.getElementById('formula-modal');
             if (modal.style.display === "block") {
@@ -602,11 +864,18 @@
                 const p = perimeterBase / 2;
                 areaBase = Math.sqrt(p * (p - s1) * (p - s2) * (p - s3));
                 const h_a = (2 * areaBase) / s2;
+                
+                const h_display = parseFloat(h_a.toFixed(2));
+                const area_visual = 0.5 * s2 * h_display;
+                if (Math.abs(area_visual - areaBase) < 0.05) {
+                    areaBase = area_visual;
+                }
+
                 const hInput = document.getElementById('inp-tri-height');
                 if (document.activeElement !== hInput) hInput.value = h_a.toFixed(2);
 
-                areaBaseText = `<span class="formula">S<sub>đáy</sub> = ½ · a · h</span><br><span class="step">½ · ${s2} · ${h_a.toFixed(2)}</span> = <span class="result">${areaBase.toFixed(2)}</span>`;
-                volumeStep = `<span class="step">(½ · ${s2} · ${h_a.toFixed(2)}) · ${H_prism}</span>`;
+                areaBaseText = `<span class="formula">S<sub>đáy</sub> = ½ · a · h</span><br><span class="step">½ · ${s2} · ${h_display.toFixed(2)}</span> = <span class="result">${areaBase.toFixed(2)}</span>`;
+                volumeStep = `<span class="step">(½ · ${s2} · ${h_display.toFixed(2)}) · ${H_prism}</span>`;
             } else {
                 const s1 = quadData.s1; const s2 = quadData.s2; const s3 = quadData.s3; const s4 = quadData.s4;
                 perimeterBase = s1 + s2 + s3 + s4;
@@ -622,6 +891,8 @@
                 volumeStep = `<span class="step">${areaBase.toFixed(2)} · ${H_prism}</span>`;
             }
 
+            cachedBaseArea = areaBase; // Lưu cache để dùng cho Cavalieri
+
             const lateralArea = perimeterBase * H_prism;
             const lateralText = `<span class="formula">S<sub>xq</sub> = C<sub>đáy</sub> · H</span><br><span class="step">${perimeterBase.toFixed(2)} · ${H_prism}</span> = <span class="result">${lateralArea.toFixed(2)}</span>`;
 
@@ -636,6 +907,9 @@
             document.getElementById('calc-lateral').innerHTML = lateralText;
             document.getElementById('calc-total').innerHTML = totalText;
             document.getElementById('calc-volume').innerHTML = volumeText;
+            
+            // Cập nhật text Cavalieri nếu đang ở chế độ đó
+            updateCavalieriStatus();
         }
         window.updateCalculations = updateCalculations;
 
@@ -680,25 +954,21 @@
                     if (source === 2) s4El.value = val;
                     if (source === 4) s2El.value = val;
                 } else if (currentPreset === 'trapezoid') {
-                    // Tự động tính góc để đáy song song
-                    const s1 = parseFloat(s1El.value); // Bên
-                    const s2 = parseFloat(s2El.value); // Đáy
-                    const s3 = parseFloat(s3El.value); // Bên
-                    const s4 = parseFloat(s4El.value); // Đáy
+                    const s1 = parseFloat(s1El.value); 
+                    const s2 = parseFloat(s2El.value); 
+                    const s3 = parseFloat(s3El.value); 
+                    const s4 = parseFloat(s4El.value); 
                     
                     const diff = Math.abs(s2 - s4);
                     
                     if (diff > 0) {
                         const num = s3*s3 + diff*diff - s1*s1;
                         const den = 2 * s3 * diff;
-                        
                         if (den !== 0) {
                             const cosAng = num / den;
                             if (cosAng >= -1 && cosAng <= 1) {
                                 let ang = Math.acos(cosAng) * 180 / Math.PI;
-                                if (s4 > s2) {
-                                    ang = 180 - ang;
-                                }
+                                if (s4 > s2) ang = 180 - ang;
                                 angEl.value = Math.round(ang);
                                 angEl.classList.add('auto-calc');
                             }
@@ -762,7 +1032,7 @@
                 case 'rhombus': s1=3; s2=3; s3=3; s4=3; ang=60; break;
                 case 'rect': s1=2.5; s2=4; s3=2.5; s4=4; ang=90; break;
                 case 'trapezoid': 
-                    s1=2.5; s2=4; s3=3; s4=2; // Hình thang thường
+                    s1=2.5; s2=4; s3=3; s4=2; 
                     ang = Math.acos((3*3 + 2*2 - 2.5*2.5)/(2*3*2)) * 180 / Math.PI;
                     ang = Math.round(ang);
                     angEl.classList.add('auto-calc');
@@ -781,8 +1051,16 @@
 
         function updateDimensions() {
             height = parseFloat(document.getElementById('inp-height').value);
+            
+            // Cập nhật vị trí Grid tùy theo chế độ
             const grid = scene.getObjectByName('gridHelper');
-            if (grid) grid.position.y = -height / 2;
+            if (grid) {
+                if (currentView === 'fold') {
+                    grid.position.y = -height / 2;
+                } else {
+                    grid.position.y = 0;
+                }
+            }
 
             let valid = false;
 
@@ -822,12 +1100,13 @@
                 clearPrism();
                 createPrism();
                 updateCalculations(); 
-                // Giữ vị trí hiện tại thay vì reset về 0
-                // const t = slider.value / 100;
-                // applyRotation(t);
-                // Nếu đang chạy tự động thì không cần applyRotation ở đây, animate sẽ lo
-                // Nhưng nếu đang dừng, cần apply lại để khớp hình
-                if(!isPlaying) {
+                
+                // Nếu đang ở Cavalieri, reset lại vì đáy đã đổi
+                if (currentView === 'cavalieri') {
+                    resetCavalieri();
+                }
+                
+                if(!isPlaying && currentView === 'fold') {
                     applyRotation(parseFloat(slider.value) / 100);
                 }
             } else {
@@ -880,19 +1159,19 @@
 
         // --- 3D RENDER FUNCTIONS ---
         function clearPrism() {
-            const objectsToRemove = [centralFace, hingeLeft, hingeRight, hingeFarRight, baseTop, baseBottom, hingeTop, hingeBottom];
-            objectsToRemove.forEach(obj => {
-                if (obj) {
-                    scene.remove(obj);
-                    obj.traverse(child => {
-                        if (child.geometry) child.geometry.dispose();
-                        if (child.material) {
-                            if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
-                            else child.material.dispose();
-                        }
-                    });
-                }
-            });
+            // Xóa hết children trong prismGroup
+            while(prismGroup.children.length > 0){ 
+                const obj = prismGroup.children[0];
+                prismGroup.remove(obj);
+                // Dispose geometry/material
+                obj.traverse(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                        else child.material.dispose();
+                    }
+                });
+            }
             centralFace = null; hingeLeft = null; hingeRight = null; hingeFarRight = null;
             baseTop = null; baseBottom = null; hingeTop = null; hingeBottom = null;
         }
@@ -909,14 +1188,14 @@
         function createTrianglePrism(matFace, matEdge, matBase) {
             const centralGeo = new THREE.PlaneGeometry(triData.a, height);
             centralFace = new THREE.Mesh(centralGeo, matFace);
-            scene.add(centralFace); addEdges(centralFace, matEdge);
+            prismGroup.add(centralFace); addEdges(centralFace, matEdge);
 
-            hingeLeft = new THREE.Group(); hingeLeft.position.x = -triData.a / 2; scene.add(hingeLeft);
+            hingeLeft = new THREE.Group(); hingeLeft.position.x = -triData.a / 2; prismGroup.add(hingeLeft);
             const leftGeo = new THREE.PlaneGeometry(triData.c, height);
             leftFace = new THREE.Mesh(leftGeo, matFace); leftFace.position.x = -triData.c / 2; 
             hingeLeft.add(leftFace); addEdges(leftFace, matEdge);
 
-            hingeRight = new THREE.Group(); hingeRight.position.x = triData.a / 2; scene.add(hingeRight);
+            hingeRight = new THREE.Group(); hingeRight.position.x = triData.a / 2; prismGroup.add(hingeRight);
             const rightGeo = new THREE.PlaneGeometry(triData.b, height);
             rightFace = new THREE.Mesh(rightGeo, matFace); rightFace.position.x = triData.b / 2;
             hingeRight.add(rightFace); addEdges(rightFace, matEdge);
@@ -929,24 +1208,24 @@
             lidGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             lidGeo.setIndex([0, 2, 1]); lidGeo.computeVertexNormals();
 
-            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; scene.add(hingeTop); hingeTop.add(baseTop);
-            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; scene.add(hingeBottom); hingeBottom.add(baseBottom);
+            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; prismGroup.add(hingeTop); hingeTop.add(baseTop);
+            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; prismGroup.add(hingeBottom); hingeBottom.add(baseBottom);
         }
 
         function createQuadPrism(matFace, matEdge, matBase) {
             const w2 = quadData.s2;
             const centralGeo = new THREE.PlaneGeometry(w2, height);
             centralFace = new THREE.Mesh(centralGeo, matFace);
-            scene.add(centralFace); addEdges(centralFace, matEdge);
+            prismGroup.add(centralFace); addEdges(centralFace, matEdge);
 
             const w1 = quadData.s1;
-            hingeLeft = new THREE.Group(); hingeLeft.position.x = -w2 / 2; scene.add(hingeLeft);
+            hingeLeft = new THREE.Group(); hingeLeft.position.x = -w2 / 2; prismGroup.add(hingeLeft);
             const leftGeo = new THREE.PlaneGeometry(w1, height);
             leftFace = new THREE.Mesh(leftGeo, matFace); leftFace.position.x = -w1 / 2; 
             hingeLeft.add(leftFace); addEdges(leftFace, matEdge);
 
             const w3 = quadData.s3;
-            hingeRight = new THREE.Group(); hingeRight.position.x = w2 / 2; scene.add(hingeRight);
+            hingeRight = new THREE.Group(); hingeRight.position.x = w2 / 2; prismGroup.add(hingeRight);
             const rightGeo = new THREE.PlaneGeometry(w3, height);
             rightFace = new THREE.Mesh(rightGeo, matFace); rightFace.position.x = w3 / 2; 
             hingeRight.add(rightFace); addEdges(rightFace, matEdge);
@@ -966,8 +1245,8 @@
             lidGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             lidGeo.computeVertexNormals();
 
-            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; scene.add(hingeTop); hingeTop.add(baseTop);
-            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; scene.add(hingeBottom); hingeBottom.add(baseBottom);
+            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; prismGroup.add(hingeTop); hingeTop.add(baseTop);
+            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; prismGroup.add(hingeBottom); hingeBottom.add(baseBottom);
         }
 
         function addEdges(mesh, material) {
@@ -983,6 +1262,8 @@
         }
         
         function applyRotation(t) {
+            if(!prismGroup.visible) return; 
+
              if (hingeTop) hingeTop.rotation.x = (t - 1) * (Math.PI / 2);
             if (hingeBottom) hingeBottom.rotation.x = (1 - t) * (Math.PI / 2);
 
@@ -1009,12 +1290,8 @@
         function animate() {
             requestAnimationFrame(animate);
             
-            // SỬA LỖI: Logic Animation với biến riêng và tốc độ hợp lý
-            if (isPlaying) {
-                // Cập nhật giá trị animation
-                animationValue += playDirection * 0.3; // Tốc độ vừa phải (0.3)
-                
-                // Kiểm tra biên và đảo chiều
+            if (isPlaying && currentView === 'fold') {
+                animationValue += playDirection * 0.3;
                 if (animationValue >= 100) {
                     animationValue = 100;
                     playDirection = -1;
@@ -1022,13 +1299,8 @@
                     animationValue = 0;
                     playDirection = 1;
                 }
-                
-                // Đồng bộ ra giao diện
                 slider.value = animationValue;
-                // Làm tròn hiển thị nhưng giữ giá trị thực cho mượt
                 sliderValueLabel.textContent = Math.round(animationValue);
-                
-                // Áp dụng xoay
                 applyRotation(animationValue / 100);
             }
 
