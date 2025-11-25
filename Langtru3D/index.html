@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Gấp Lăng Trụ Đa Năng</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #canvas-container {
+            width: 90vw;
+            height: 50vh;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        #controls-container {
+            width: 90vw;
+            max-width: 900px;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 45vh;
+            overflow-y: auto;
+        }
+        
+        /* --- Styles Modal Công thức --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 95%;
+            max-width: 750px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+            right: 0;
+        }
+        .close-btn:hover { color: #e74c3c; }
+        
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .formula-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .formula-card svg {
+            width: 90px; /* Tăng kích thước khung hình một chút */
+            height: 90px;
+            flex-shrink: 0;
+            stroke: #34495e;
+            stroke-width: 2;
+            fill: none;
+        }
+        .formula-info { flex-grow: 1; }
+        .formula-card h5 { margin: 0 0 5px 0; color: #2980b9; font-size: 1em; }
+        .formula-card p { margin: 3px 0; font-size: 0.95em; line-height: 1.5; color: #444; }
+        
+        .svg-label { font-size: 11px; fill: #e74c3c; stroke: none; font-weight: bold; font-family: sans-serif; }
+        .svg-line-dim { stroke: #95a5a6; stroke-width: 1; stroke-dasharray: 2,2; }
+        
+        /* --- Styles Tính toán --- */
+        #calculation-box {
+            background-color: #f9fbe7;
+            border: 1px solid #dce775;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.9em;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .calc-section h4 {
+            margin: 0 0 5px 0;
+            color: #2e7d32;
+            border-bottom: 1px dashed #a5d6a7;
+            padding-bottom: 3px;
+        }
+        .calc-line { margin-bottom: 4px; line-height: 1.4; }
+        .formula { font-weight: bold; color: #555; }
+        .step { color: #1976d2; font-style: italic; }
+        .result { font-weight: bold; color: #d32f2f; }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            font-weight: bold;
+            background: #eee;
+            padding: 5px 15px;
+            border-radius: 20px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .preset-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+        .preset-btn, .formula-btn, .play-btn {
+            padding: 4px 8px;
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .formula-btn { background-color: #8e44ad; color: white; border: none; }
+        .formula-btn:hover { background-color: #9b59b6; }
+        
+        .play-btn {
+            background-color: #e67e22; 
+            color: white; 
+            border: none; 
+            min-width: 80px;
+            font-weight: bold;
+        }
+        .play-btn:hover { background-color: #d35400; }
+        .play-btn.playing { background-color: #c0392b; }
+
+        .preset-btn:hover { background-color: #dfe6e9; }
+        .preset-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 5px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .input-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85em;
+        }
+        input[type="number"] {
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 60px;
+        }
+        input.auto-calc {
+            background-color: #f3f3f3;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        button.update-btn {
+            padding: 6px 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button.update-btn:hover { background-color: #2ecc71; }
+        #error-msg {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 5px;
+            text-align: center;
+            display: none;
+            font-weight: bold;
+        }
+        #instructions {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            pointer-events: none;
+        }
+        .hidden { display: none !important; }
+        @media (max-width: 600px) {
+            #calculation-box, .formula-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <div id="instructions">
+            Kéo chuột để xoay | Lăn chuột để thu/phóng
+        </div>
+    </div>
+    
+    <div id="controls-container">
+        <div style="display:flex; justify-content:center; gap:10px; align-items:center; margin-bottom:5px;">
+            <div class="mode-selector" style="margin:0;">
+                <label style="cursor: pointer;"><input type="radio" name="prismMode" value="triangle" checked onchange="toggleMode()"> Lăng trụ Tam giác</label>
+                <label style="cursor: pointer;"><input type="radio" name="prismMode" value="quad" onchange="toggleMode()"> Lăng trụ Tứ giác</label>
+            </div>
+            <button class="formula-btn" onclick="toggleFormulaModal()">📖 Tra cứu Công thức</button>
+        </div>
+
+        <!-- Presets -->
+        <div id="tri-presets" class="preset-buttons">
+            <button class="preset-btn active" onclick="setTriPreset('general')">Thường</button>
+            <button class="preset-btn" onclick="setTriPreset('isosceles')">Cân</button>
+            <button class="preset-btn" onclick="setTriPreset('equilateral')">Đều</button>
+            <button class="preset-btn" onclick="setTriPreset('right')">Vuông (3-4-5)</button>
+        </div>
+        <div id="quad-presets" class="preset-buttons hidden">
+            <button class="preset-btn" onclick="setQuadPreset('square')">Hình vuông</button>
+            <button class="preset-btn" onclick="setQuadPreset('rhombus')">Hình thoi</button>
+            <button class="preset-btn" onclick="setQuadPreset('rect')">Hình chữ nhật</button>
+            <button class="preset-btn" onclick="setQuadPreset('parallelogram')">Hình bình hành</button>
+            <button class="preset-btn" onclick="setQuadPreset('trapezoid')">Hình thang</button>
+            <button class="preset-btn active" onclick="setQuadPreset('general')">Tứ giác thường</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-group">
+            <div class="input-item">
+                <label>Chiều cao (H)</label>
+                <input type="number" id="inp-height" value="3.5" min="0.5" step="0.1" oninput="updateDimensions()">
+            </div>
+
+            <!-- Inputs Tam Giác -->
+            <div class="input-item tri-only">
+                <label>Trái (c)</label>
+                <input type="number" id="inp-tri-left" value="3" min="0.1" step="0.1" oninput="syncInputs('tri', 'left')">
+            </div>
+            <div class="input-item tri-only" style="background: #e8f5e9; border-radius: 4px; padding: 0 4px;">
+                <label style="color: #2e7d32; font-weight:bold;">Đáy (a)</label>
+                <input type="number" id="inp-tri-center" value="4" min="0.1" step="0.1" oninput="syncInputs('tri', 'center')">
+            </div>
+            <div class="input-item tri-only">
+                <label>Phải (b)</label>
+                <input type="number" id="inp-tri-right" value="2.5" min="0.1" step="0.1" oninput="syncInputs('tri', 'right')">
+            </div>
+            
+            <div class="input-item tri-only" style="border-left: 2px solid #ddd; padding-left: 8px;">
+                <label title="Thay đổi chiều cao sẽ tạo tam giác cân">Cao đáy (h)</label>
+                <input type="number" id="inp-tri-height" value="2" min="0.1" step="0.1" onchange="updateTriFromHeight()">
+            </div>
+
+            <!-- Inputs Tứ Giác -->
+            <div class="input-item quad-only hidden">
+                <label>Cạnh 1 (Trái)</label>
+                <input type="number" id="inp-quad-1" value="3" min="0.1" step="0.1" oninput="syncInputs('quad', 1)">
+            </div>
+            <div class="input-item quad-only hidden">
+                <label style="color:#2980b9; font-weight:bold;">Cạnh 2 (Đáy)</label>
+                <input type="number" id="inp-quad-2" value="4" min="0.1" step="0.1" oninput="syncInputs('quad', 2)">
+            </div>
+            <div class="input-item quad-only hidden">
+                <label>Cạnh 3 (Phải)</label>
+                <input type="number" id="inp-quad-3" value="3" min="0.1" step="0.1" oninput="syncInputs('quad', 3)">
+            </div>
+            <div class="input-item quad-only hidden">
+                <label style="color:#2980b9; font-weight:bold;">Cạnh 4 (Đáy)</label>
+                <input type="number" id="inp-quad-4" value="2" min="0.1" step="0.1" oninput="syncInputs('quad', 4)">
+            </div>
+            <div class="input-item quad-only hidden">
+                <label>Góc C2-C3</label>
+                <input type="number" id="inp-quad-angle" value="75" min="10" max="170" step="1" oninput="updateDimensions()">
+            </div>
+
+            <button class="update-btn" onclick="updateDimensions()">Cập nhật Hình</button>
+        </div>
+        
+        <div id="error-msg">Thông số không hợp lệ!</div>
+
+        <!-- Calculation Box -->
+        <div id="calculation-box">
+            <div class="calc-section">
+                <h4>Chu vi & Diện tích Đáy</h4>
+                <div id="calc-base" class="calc-line"></div>
+                <div id="calc-area-base" class="calc-line"></div>
+            </div>
+            <div class="calc-section">
+                <h4>Diện tích & Thể tích</h4>
+                <div id="calc-lateral" class="calc-line"></div>
+                <div id="calc-total" class="calc-line"></div>
+                <div id="calc-volume" class="calc-line"></div>
+            </div>
+        </div>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee;">
+
+        <!-- Slider Container -->
+        <div class="input-item" style="width: 100%; display: flex; align-items: center; gap: 15px;">
+            <button id="btn-play" class="play-btn" onclick="togglePlay()">▶ Tự động</button>
+            <div style="flex-grow: 1;">
+                <label for="fold-slider" style="text-align: center; display: block;">Mở <span id="slider-value">0</span>% Gấp</label>
+                <input type="range" id="fold-slider" min="0" max="100" value="0" step="0.1">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Công Thức -->
+    <div id="formula-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleFormulaModal()">&times;</span>
+            <h2 style="text-align:center; color:#2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Sổ Tay Công Thức Hình Học</h2>
+            
+            <div class="formula-grid">
+                <!-- Tam giác thường -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="10,80 50,20 90,80" stroke="#333" fill="#e8f6f3"/>
+                        <line x1="50" y1="20" x2="50" y2="80" class="svg-line-dim" />
+                        <text x="52" y="55" class="svg-label">h</text>
+                        <text x="50" y="95" class="svg-label" text-anchor="middle">a</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Tam giác thường</h5>
+                        <p>Chu vi: P = a + b + c</p>
+                        <p>Diện tích: S = ½ × a × h</p>
+                    </div>
+                </div>
+
+                <!-- Tam giác vuông -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="20,80 20,20 80,80" stroke="#333" fill="#fff5e6"/>
+                        <rect x="20" y="70" width="10" height="10" stroke="#333" fill="none"/>
+                        <text x="10" y="50" class="svg-label">a</text>
+                        <text x="50" y="95" class="svg-label" text-anchor="middle">b</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Tam giác vuông</h5>
+                        <p>Diện tích: S = ½ × a × b</p>
+                        <p style="font-size:0.8em; color:#7f8c8d;">(a, b là 2 cạnh góc vuông)</p>
+                    </div>
+                </div>
+
+                <!-- Hình vuông -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <rect x="20" y="20" width="60" height="60" stroke="#333" fill="#eaf2f8"/>
+                        <text x="50" y="95" class="svg-label" text-anchor="middle">a</text>
+                        <text x="10" y="55" class="svg-label">a</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Hình vuông</h5>
+                        <p>Chu vi: P = 4 × a</p>
+                        <p>Diện tích: S = a²</p>
+                    </div>
+                </div>
+
+                <!-- Hình chữ nhật -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <rect x="10" y="30" width="80" height="40" stroke="#333" fill="#fdedec"/>
+                        <text x="50" y="85" class="svg-label" text-anchor="middle">a</text>
+                        <text x="2" y="55" class="svg-label">b</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Hình chữ nhật</h5>
+                        <p>Chu vi: P = (a + b) × 2</p>
+                        <p>Diện tích: S = a × b</p>
+                    </div>
+                </div>
+
+                <!-- Hình bình hành -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="25,80 75,80 95,30 45,30" stroke="#333" fill="#f4ecf7"/>
+                        <line x1="45" y1="30" x2="45" y2="80" class="svg-line-dim" />
+                        <text x="50" y="95" class="svg-label" text-anchor="middle">a</text>
+                        <text x="38" y="60" class="svg-label">h</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Hình bình hành</h5>
+                        <p>Diện tích: S = a × h</p>
+                    </div>
+                </div>
+
+                <!-- Hình thoi -->
+                <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="50,10 80,50 50,90 20,50" stroke="#333" fill="#e8f8f5"/>
+                        <line x1="50" y1="10" x2="50" y2="90" class="svg-line-dim" />
+                        <line x1="20" y1="50" x2="80" y2="50" class="svg-line-dim" />
+                        <text x="52" y="30" class="svg-label">d1</text>
+                        <text x="65" y="48" class="svg-label">d2</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Hình thoi</h5>
+                        <p>Diện tích: S = ½ × d1 × d2</p>
+                    </div>
+                </div>
+
+                 <!-- Hình thang CẬP NHẬT - Fix lỗi text bị khuất -->
+                 <div class="formula-card">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="15,80 85,80 65,30 35,30" stroke="#333" fill="#fef9e7"/>
+                        <line x1="35" y1="30" x2="35" y2="80" class="svg-line-dim" />
+                        <!-- Sử dụng text-anchor="middle" để căn giữa text -->
+                        <text x="50" y="95" class="svg-label" text-anchor="middle">a (đáy lớn)</text>
+                        <text x="50" y="25" class="svg-label" text-anchor="middle">b (đáy nhỏ)</text>
+                        <text x="25" y="60" class="svg-label" text-anchor="middle">h</text>
+                    </svg>
+                    <div class="formula-info">
+                        <h5>Hình thang</h5>
+                        <p>Diện tích: S = ½ × (a + b) × h</p>
+                        <p style="font-size:0.8em; color:#666;">(Lưu ý: 2 cạnh đáy luôn song song)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let centralFace, hingeLeft, hingeRight, hingeFarRight; 
+        let leftFace, rightFace, farRightFace;
+        let baseTop, baseBottom, hingeTop, hingeBottom;
+        
+        let currentMode = 'triangle'; 
+        let currentPreset = 'general';
+        let height = 3.5;
+        let triData = { a: 4, b: 3, c: 2, angleLeft: 0, angleRight: 0 };
+        let quadData = { s1: 3, s2: 4, s3: 3, s4: 2, angle23: 75, vertices: [], angles: [] };
+
+        // Animation vars
+        let isPlaying = false;
+        let playDirection = 1;
+        let animationValue = 0;
+
+        const slider = document.getElementById('fold-slider');
+        const sliderValueLabel = document.getElementById('slider-value');
+        const container = document.getElementById('canvas-container');
+        const errorMsg = document.getElementById('error-msg');
+        const quadPresets = document.getElementById('quad-presets');
+        const triPresets = document.getElementById('tri-presets');
+        const btnPlay = document.getElementById('btn-play');
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 8, 16);
+            camera.lookAt(0, 0, 0);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            const gridHelper = new THREE.GridHelper(40, 40, 0xcccccc, 0xcccccc);
+            gridHelper.position.y = -height / 2;
+            gridHelper.name = 'gridHelper';
+            scene.add(gridHelper);
+
+            calculateTriangle();
+            createPrism();
+            updateCalculations();
+
+            window.addEventListener('resize', onWindowResize);
+            // Sự kiện 'input' để phát hiện người dùng kéo slider
+            slider.addEventListener('input', onSliderUserInteraction);
+        }
+
+        // --- PLAY CONTROL ---
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                btnPlay.textContent = "⏸ Dừng";
+                btnPlay.classList.add('playing');
+                // Đồng bộ giá trị hiện tại
+                animationValue = parseFloat(slider.value);
+            } else {
+                btnPlay.textContent = "▶ Tự động";
+                btnPlay.classList.remove('playing');
+            }
+        }
+        window.togglePlay = togglePlay;
+
+        function onSliderUserInteraction(event) {
+            // Khi người dùng kéo tay, tắt chế độ tự động
+            if (isPlaying) {
+                togglePlay();
+            }
+            onSliderChange(event);
+        }
+
+        function toggleFormulaModal() {
+            const modal = document.getElementById('formula-modal');
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+        window.toggleFormulaModal = toggleFormulaModal;
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('formula-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function updateTriFromHeight() {
+            const h = parseFloat(document.getElementById('inp-tri-height').value);
+            const a = parseFloat(document.getElementById('inp-tri-center').value);
+            if (h > 0 && a > 0) {
+                const leg = Math.sqrt(h*h + (a/2)*(a/2));
+                document.getElementById('inp-tri-left').value = leg.toFixed(2);
+                document.getElementById('inp-tri-right').value = leg.toFixed(2);
+                currentPreset = 'isosceles';
+                const btns = document.querySelectorAll('#tri-presets .preset-btn');
+                btns.forEach(b => b.classList.remove('active'));
+                updateDimensions();
+            }
+        }
+        window.updateTriFromHeight = updateTriFromHeight;
+
+        function updateCalculations() {
+            const H_prism = height;
+            let perimeterBase = 0;
+            let areaBase = 0;
+            let perimeterText = "";
+            let areaBaseText = "";
+            let volumeStep = "";
+
+            if (currentMode === 'triangle') {
+                const s1 = triData.c; 
+                const s2 = triData.a; 
+                const s3 = triData.b; 
+
+                perimeterBase = s1 + s2 + s3;
+                perimeterText = `<span class="formula">C = a + b + c</span><br><span class="step">${s1.toFixed(2)} + ${s2.toFixed(2)} + ${s3.toFixed(2)}</span> = <span class="result">${perimeterBase.toFixed(2)}</span>`;
+
+                const p = perimeterBase / 2;
+                areaBase = Math.sqrt(p * (p - s1) * (p - s2) * (p - s3));
+                const h_a = (2 * areaBase) / s2;
+                const hInput = document.getElementById('inp-tri-height');
+                if (document.activeElement !== hInput) hInput.value = h_a.toFixed(2);
+
+                areaBaseText = `<span class="formula">S<sub>đáy</sub> = ½ · a · h</span><br><span class="step">½ · ${s2} · ${h_a.toFixed(2)}</span> = <span class="result">${areaBase.toFixed(2)}</span>`;
+                volumeStep = `<span class="step">(½ · ${s2} · ${h_a.toFixed(2)}) · ${H_prism}</span>`;
+            } else {
+                const s1 = quadData.s1; const s2 = quadData.s2; const s3 = quadData.s3; const s4 = quadData.s4;
+                perimeterBase = s1 + s2 + s3 + s4;
+                perimeterText = `<span class="formula">C = s1 + s2 + s3 + s4</span><br><span class="step">${s1} + ${s2} + ${s3} + ${s4}</span> = <span class="result">${perimeterBase.toFixed(2)}</span>`;
+
+                const v = quadData.vertices; 
+                if (v.length === 4) {
+                    const sum1 = v[0].x*v[1].z + v[1].x*v[2].z + v[2].x*v[3].z + v[3].x*v[0].z;
+                    const sum2 = v[0].z*v[1].x + v[1].z*v[2].x + v[2].z*v[3].x + v[3].z*v[0].x;
+                    areaBase = Math.abs(sum1 - sum2) / 2;
+                }
+                areaBaseText = `<span class="formula">S<sub>đáy</sub> (Tọa độ)</span><br><span class="step">Tính toán hình học</span> = <span class="result">${areaBase.toFixed(2)}</span>`;
+                volumeStep = `<span class="step">${areaBase.toFixed(2)} · ${H_prism}</span>`;
+            }
+
+            const lateralArea = perimeterBase * H_prism;
+            const lateralText = `<span class="formula">S<sub>xq</sub> = C<sub>đáy</sub> · H</span><br><span class="step">${perimeterBase.toFixed(2)} · ${H_prism}</span> = <span class="result">${lateralArea.toFixed(2)}</span>`;
+
+            const totalArea = lateralArea + 2 * areaBase;
+            const totalText = `<span class="formula">S<sub>tp</sub> = S<sub>xq</sub> + 2·S<sub>đáy</sub></span><br><span class="step">${lateralArea.toFixed(2)} + 2·${areaBase.toFixed(2)}</span> = <span class="result">${totalArea.toFixed(2)}</span>`;
+
+            const volume = areaBase * H_prism;
+            const volumeText = `<span class="formula">V = S<sub>đáy</sub> · H</span><br>${volumeStep} = <span class="result">${volume.toFixed(2)}</span>`;
+
+            document.getElementById('calc-base').innerHTML = perimeterText;
+            document.getElementById('calc-area-base').innerHTML = areaBaseText;
+            document.getElementById('calc-lateral').innerHTML = lateralText;
+            document.getElementById('calc-total').innerHTML = totalText;
+            document.getElementById('calc-volume').innerHTML = volumeText;
+        }
+        window.updateCalculations = updateCalculations;
+
+        function toggleMode() {
+            const radios = document.getElementsByName('prismMode');
+            for (let r of radios) if (r.checked) currentMode = r.value;
+
+            const triInputs = document.querySelectorAll('.tri-only');
+            const quadInputs = document.querySelectorAll('.quad-only');
+
+            if (currentMode === 'triangle') {
+                triInputs.forEach(el => el.classList.remove('hidden'));
+                quadInputs.forEach(el => el.classList.add('hidden'));
+                quadPresets.classList.add('hidden');
+                triPresets.classList.remove('hidden');
+                setTriPreset('general');
+            } else {
+                triInputs.forEach(el => el.classList.add('hidden'));
+                quadInputs.forEach(el => el.classList.remove('hidden'));
+                quadPresets.classList.remove('hidden');
+                triPresets.classList.add('hidden');
+                setQuadPreset('general'); 
+            }
+            updateDimensions();
+        }
+        window.toggleMode = toggleMode;
+
+        function syncInputs(type, source) {
+            if (type === 'quad') {
+                const s1El = document.getElementById('inp-quad-1');
+                const s2El = document.getElementById('inp-quad-2');
+                const s3El = document.getElementById('inp-quad-3');
+                const s4El = document.getElementById('inp-quad-4');
+                const angEl = document.getElementById('inp-quad-angle');
+                const val = parseFloat(document.getElementById(`inp-quad-${source}`).value);
+
+                if (currentPreset === 'square' || currentPreset === 'rhombus') {
+                    s1El.value = val; s2El.value = val; s3El.value = val; s4El.value = val;
+                } else if (currentPreset === 'rect' || currentPreset === 'parallelogram') {
+                    if (source === 1) s3El.value = val;
+                    if (source === 3) s1El.value = val;
+                    if (source === 2) s4El.value = val;
+                    if (source === 4) s2El.value = val;
+                } else if (currentPreset === 'trapezoid') {
+                    // Tự động tính góc để đáy song song
+                    const s1 = parseFloat(s1El.value); // Bên
+                    const s2 = parseFloat(s2El.value); // Đáy
+                    const s3 = parseFloat(s3El.value); // Bên
+                    const s4 = parseFloat(s4El.value); // Đáy
+                    
+                    const diff = Math.abs(s2 - s4);
+                    
+                    if (diff > 0) {
+                        const num = s3*s3 + diff*diff - s1*s1;
+                        const den = 2 * s3 * diff;
+                        
+                        if (den !== 0) {
+                            const cosAng = num / den;
+                            if (cosAng >= -1 && cosAng <= 1) {
+                                let ang = Math.acos(cosAng) * 180 / Math.PI;
+                                if (s4 > s2) {
+                                    ang = 180 - ang;
+                                }
+                                angEl.value = Math.round(ang);
+                                angEl.classList.add('auto-calc');
+                            }
+                        }
+                    } else if (diff === 0) {
+                        angEl.classList.remove('auto-calc');
+                    }
+                }
+            } else if (type === 'tri') {
+                const lEl = document.getElementById('inp-tri-left');
+                const cEl = document.getElementById('inp-tri-center');
+                const rEl = document.getElementById('inp-tri-right');
+                let val;
+                if(source === 'left') val = parseFloat(lEl.value);
+                if(source === 'center') val = parseFloat(cEl.value);
+                if(source === 'right') val = parseFloat(rEl.value);
+
+                if (currentPreset === 'equilateral') {
+                    lEl.value = val; cEl.value = val; rEl.value = val;
+                } else if (currentPreset === 'isosceles') {
+                    if (source === 'left') rEl.value = val;
+                    if (source === 'right') lEl.value = val;
+                }
+            }
+            updateDimensions();
+        }
+        window.syncInputs = syncInputs;
+
+        function setTriPreset(type) {
+            currentPreset = type;
+            const btns = document.querySelectorAll('#tri-presets .preset-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            let l=3, c=4, r=2.5;
+            switch(type) {
+                case 'equilateral': l=3; c=3; r=3; break;
+                case 'isosceles': l=3; c=2; r=3; break;
+                case 'right': l=3; c=4; r=5; break;
+                case 'general': l=3; c=4; r=2.5; break;
+            }
+            document.getElementById('inp-tri-left').value = l;
+            document.getElementById('inp-tri-center').value = c;
+            document.getElementById('inp-tri-right').value = r;
+            updateDimensions();
+        }
+        window.setTriPreset = setTriPreset;
+
+        function setQuadPreset(type) {
+            currentPreset = type;
+            const btns = document.querySelectorAll('#quad-presets .preset-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const angEl = document.getElementById('inp-quad-angle');
+            angEl.classList.remove('auto-calc');
+            angEl.disabled = false;
+
+            let s1=3, s2=4, s3=3, s4=2, ang=90;
+            switch(type) {
+                case 'square': s1=3; s2=3; s3=3; s4=3; ang=90; break;
+                case 'rhombus': s1=3; s2=3; s3=3; s4=3; ang=60; break;
+                case 'rect': s1=2.5; s2=4; s3=2.5; s4=4; ang=90; break;
+                case 'trapezoid': 
+                    s1=2.5; s2=4; s3=3; s4=2; // Hình thang thường
+                    ang = Math.acos((3*3 + 2*2 - 2.5*2.5)/(2*3*2)) * 180 / Math.PI;
+                    ang = Math.round(ang);
+                    angEl.classList.add('auto-calc');
+                    break;
+                case 'parallelogram': s1=2.5; s2=4; s3=2.5; s4=4; ang=60; break;
+                case 'general': s1=3; s2=4; s3=3.5; s4=2.5; ang=80; break;
+            }
+            document.getElementById('inp-quad-1').value = s1;
+            document.getElementById('inp-quad-2').value = s2;
+            document.getElementById('inp-quad-3').value = s3;
+            document.getElementById('inp-quad-4').value = s4;
+            document.getElementById('inp-quad-angle').value = ang;
+            updateDimensions();
+        }
+        window.setQuadPreset = setQuadPreset;
+
+        function updateDimensions() {
+            height = parseFloat(document.getElementById('inp-height').value);
+            const grid = scene.getObjectByName('gridHelper');
+            if (grid) grid.position.y = -height / 2;
+
+            let valid = false;
+
+            if (currentMode === 'triangle') {
+                const l = parseFloat(document.getElementById('inp-tri-left').value);
+                const c = parseFloat(document.getElementById('inp-tri-center').value);
+                const r = parseFloat(document.getElementById('inp-tri-right').value);
+
+                if (l + c > r && l + r > c && c + r > l) {
+                    triData.c = l; triData.a = c; triData.b = r;
+                    valid = true;
+                    calculateTriangle();
+                } else {
+                    errorMsg.textContent = "Ba cạnh không tạo thành tam giác hợp lệ!";
+                }
+            } else {
+                const s1 = parseFloat(document.getElementById('inp-quad-1').value);
+                const s2 = parseFloat(document.getElementById('inp-quad-2').value);
+                const s3 = parseFloat(document.getElementById('inp-quad-3').value);
+                const s4 = parseFloat(document.getElementById('inp-quad-4').value);
+                const ang = parseFloat(document.getElementById('inp-quad-angle').value);
+
+                const result = calculateQuadrilateralGeometry(s1, s2, s3, s4, ang);
+                if (result) {
+                    quadData.s1 = s1; quadData.s2 = s2; quadData.s3 = s3; quadData.s4 = s4;
+                    quadData.angle23 = ang;
+                    quadData.vertices = result.vertices;
+                    quadData.angles = result.angles;
+                    valid = true;
+                } else {
+                    errorMsg.textContent = "Không tạo được tứ giác lồi với thông số này!";
+                }
+            }
+
+            if (valid) {
+                errorMsg.style.display = 'none';
+                clearPrism();
+                createPrism();
+                updateCalculations(); 
+                // Giữ vị trí hiện tại thay vì reset về 0
+                // const t = slider.value / 100;
+                // applyRotation(t);
+                // Nếu đang chạy tự động thì không cần applyRotation ở đây, animate sẽ lo
+                // Nhưng nếu đang dừng, cần apply lại để khớp hình
+                if(!isPlaying) {
+                    applyRotation(parseFloat(slider.value) / 100);
+                }
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+        window.updateDimensions = updateDimensions;
+
+        // --- MATH FUNCTIONS ---
+        function calculateTriangle() {
+            const a = triData.a; const b = triData.b; const c = triData.c;
+            const cosB = (a*a + c*c - b*b) / (2 * a * c);
+            const cosC = (a*a + b*b - c*c) / (2 * a * b);
+            const clamp = (n) => Math.min(Math.max(n, -1), 1);
+            triData.angleLeft = Math.PI - Math.acos(clamp(cosB));
+            triData.angleRight = Math.PI - Math.acos(clamp(cosC));
+        }
+
+        function calculateQuadrilateralGeometry(s1, s2, s3, s4, angleDeg) {
+            const rad = angleDeg * Math.PI / 180;
+            const v2 = { x: -s2/2, z: 0 }; 
+            const v3 = { x: s2/2, z: 0 };
+            const v4 = { x: v3.x - s3 * Math.cos(rad), z: v3.z + s3 * Math.sin(rad) };
+            const dx = v4.x - v2.x; const dz = v4.z - v2.z;
+            const d = Math.sqrt(dx*dx + dz*dz);
+
+            if (d > s1 + s4 || d < Math.abs(s1 - s4) || d === 0) return null;
+
+            const a = (s1*s1 - s4*s4 + d*d) / (2*d);
+            const h = Math.sqrt(Math.max(0, s1*s1 - a*a));
+            const x2 = v2.x + a * (dx/d); const z2 = v2.z + a * (dz/d);
+            const v1 = { x: x2 - h * (dz/d), z: z2 + h * (dx/d) };
+
+            const vec21 = { x: v1.x - v2.x, z: v1.z - v2.z };
+            const vec23 = { x: v3.x - v2.x, z: v3.z - v2.z };
+            const angle2 = angleBetween(vec21, vec23);
+            const vec43 = { x: v3.x - v4.x, z: v3.z - v4.z };
+            const vec41 = { x: v1.x - v4.x, z: v1.z - v4.z };
+            const angle4 = angleBetween(vec43, vec41);
+
+            return { vertices: [v1, v2, v3, v4], angles: [0, angle2, rad, angle4] };
+        }
+
+        function angleBetween(vA, vB) {
+            const dot = vA.x * vB.x + vA.z * vB.z;
+            const magA = Math.sqrt(vA.x*vA.x + vA.z*vA.z);
+            const magB = Math.sqrt(vB.x*vB.x + vB.z*vB.z);
+            return Math.acos(Math.min(Math.max(dot / (magA * magB), -1), 1));
+        }
+
+        // --- 3D RENDER FUNCTIONS ---
+        function clearPrism() {
+            const objectsToRemove = [centralFace, hingeLeft, hingeRight, hingeFarRight, baseTop, baseBottom, hingeTop, hingeBottom];
+            objectsToRemove.forEach(obj => {
+                if (obj) {
+                    scene.remove(obj);
+                    obj.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                            else child.material.dispose();
+                        }
+                    });
+                }
+            });
+            centralFace = null; hingeLeft = null; hingeRight = null; hingeFarRight = null;
+            baseTop = null; baseBottom = null; hingeTop = null; hingeBottom = null;
+        }
+
+        function createPrism() {
+            const materialFace = new THREE.MeshStandardMaterial({ color: 0xf39c12, side: THREE.DoubleSide, metalness: 0.1, roughness: 0.8 });
+            const materialEdge = new THREE.LineBasicMaterial({ color: 0x333333, linewidth: 2 });
+            const materialBase = new THREE.MeshStandardMaterial({ color: 0x3498db, side: THREE.DoubleSide, metalness: 0.1, roughness: 0.8 });
+
+            if (currentMode === 'triangle') createTrianglePrism(materialFace, materialEdge, materialBase);
+            else createQuadPrism(materialFace, materialEdge, materialBase);
+        }
+
+        function createTrianglePrism(matFace, matEdge, matBase) {
+            const centralGeo = new THREE.PlaneGeometry(triData.a, height);
+            centralFace = new THREE.Mesh(centralGeo, matFace);
+            scene.add(centralFace); addEdges(centralFace, matEdge);
+
+            hingeLeft = new THREE.Group(); hingeLeft.position.x = -triData.a / 2; scene.add(hingeLeft);
+            const leftGeo = new THREE.PlaneGeometry(triData.c, height);
+            leftFace = new THREE.Mesh(leftGeo, matFace); leftFace.position.x = -triData.c / 2; 
+            hingeLeft.add(leftFace); addEdges(leftFace, matEdge);
+
+            hingeRight = new THREE.Group(); hingeRight.position.x = triData.a / 2; scene.add(hingeRight);
+            const rightGeo = new THREE.PlaneGeometry(triData.b, height);
+            rightFace = new THREE.Mesh(rightGeo, matFace); rightFace.position.x = triData.b / 2;
+            hingeRight.add(rightFace); addEdges(rightFace, matEdge);
+
+            const theta = triData.angleLeft;
+            const ax_rel = -triData.c * Math.cos(theta); const az_rel = triData.c * Math.sin(theta);
+            const Ax = -triData.a/2 + ax_rel; const Az = az_rel;
+            const vertices = new Float32Array([Ax, 0, Az, -triData.a/2, 0, 0, triData.a/2, 0, 0]);
+            const lidGeo = new THREE.BufferGeometry();
+            lidGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            lidGeo.setIndex([0, 2, 1]); lidGeo.computeVertexNormals();
+
+            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; scene.add(hingeTop); hingeTop.add(baseTop);
+            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; scene.add(hingeBottom); hingeBottom.add(baseBottom);
+        }
+
+        function createQuadPrism(matFace, matEdge, matBase) {
+            const w2 = quadData.s2;
+            const centralGeo = new THREE.PlaneGeometry(w2, height);
+            centralFace = new THREE.Mesh(centralGeo, matFace);
+            scene.add(centralFace); addEdges(centralFace, matEdge);
+
+            const w1 = quadData.s1;
+            hingeLeft = new THREE.Group(); hingeLeft.position.x = -w2 / 2; scene.add(hingeLeft);
+            const leftGeo = new THREE.PlaneGeometry(w1, height);
+            leftFace = new THREE.Mesh(leftGeo, matFace); leftFace.position.x = -w1 / 2; 
+            hingeLeft.add(leftFace); addEdges(leftFace, matEdge);
+
+            const w3 = quadData.s3;
+            hingeRight = new THREE.Group(); hingeRight.position.x = w2 / 2; scene.add(hingeRight);
+            const rightGeo = new THREE.PlaneGeometry(w3, height);
+            rightFace = new THREE.Mesh(rightGeo, matFace); rightFace.position.x = w3 / 2; 
+            hingeRight.add(rightFace); addEdges(rightFace, matEdge);
+
+            const w4 = quadData.s4;
+            hingeFarRight = new THREE.Group(); hingeFarRight.position.x = w3 / 2; rightFace.add(hingeFarRight); 
+            const farRightGeo = new THREE.PlaneGeometry(w4, height);
+            farRightFace = new THREE.Mesh(farRightGeo, matFace); farRightFace.position.x = w4 / 2;
+            hingeFarRight.add(farRightFace); addEdges(farRightFace, matEdge);
+
+            const v = quadData.vertices;
+            const vertices = new Float32Array([
+                v[0].x, 0, v[0].z, v[1].x, 0, v[1].z, v[2].x, 0, v[2].z,  
+                v[0].x, 0, v[0].z, v[2].x, 0, v[2].z, v[3].x, 0, v[3].z   
+            ]);
+            const lidGeo = new THREE.BufferGeometry();
+            lidGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            lidGeo.computeVertexNormals();
+
+            baseTop = new THREE.Mesh(lidGeo, matBase); hingeTop = new THREE.Group(); hingeTop.position.y = height/2; scene.add(hingeTop); hingeTop.add(baseTop);
+            baseBottom = new THREE.Mesh(lidGeo.clone(), matBase); hingeBottom = new THREE.Group(); hingeBottom.position.y = -height/2; scene.add(hingeBottom); hingeBottom.add(baseBottom);
+        }
+
+        function addEdges(mesh, material) {
+            const edges = new THREE.EdgesGeometry(mesh.geometry);
+            const line = new THREE.LineSegments(edges, material);
+            mesh.add(line);
+        }
+
+        function onSliderChange(event) {
+            const t = event.target.value / 100; 
+            sliderValueLabel.textContent = event.target.value;
+            applyRotation(t);
+        }
+        
+        function applyRotation(t) {
+             if (hingeTop) hingeTop.rotation.x = (t - 1) * (Math.PI / 2);
+            if (hingeBottom) hingeBottom.rotation.x = (1 - t) * (Math.PI / 2);
+
+            if (currentMode === 'triangle') {
+                if (hingeLeft) hingeLeft.rotation.y = t * triData.angleLeft;
+                if (hingeRight) hingeRight.rotation.y = -t * triData.angleRight;
+            } else {
+                const foldAngle2 = Math.PI - quadData.angles[1];
+                const foldAngle3 = Math.PI - quadData.angles[2];
+                const foldAngle4 = Math.PI - quadData.angles[3];
+
+                if (hingeLeft) hingeLeft.rotation.y = t * foldAngle2;
+                if (hingeRight) hingeRight.rotation.y = -t * foldAngle3;
+                if (hingeFarRight) hingeFarRight.rotation.y = -t * foldAngle4;
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // SỬA LỖI: Logic Animation với biến riêng và tốc độ hợp lý
+            if (isPlaying) {
+                // Cập nhật giá trị animation
+                animationValue += playDirection * 0.3; // Tốc độ vừa phải (0.3)
+                
+                // Kiểm tra biên và đảo chiều
+                if (animationValue >= 100) {
+                    animationValue = 100;
+                    playDirection = -1;
+                } else if (animationValue <= 0) {
+                    animationValue = 0;
+                    playDirection = 1;
+                }
+                
+                // Đồng bộ ra giao diện
+                slider.value = animationValue;
+                // Làm tròn hiển thị nhưng giữ giá trị thực cho mượt
+                sliderValueLabel.textContent = Math.round(animationValue);
+                
+                // Áp dụng xoay
+                applyRotation(animationValue / 100);
+            }
+
+            controls.update(); 
+            renderer.render(scene, camera);
+        }
+
+        // --- KHỞI CHẠY ---
+        function run() {
+            init();
+            animate();
+        }
+        run();
+
+    </script>
+</body>
+</html>
