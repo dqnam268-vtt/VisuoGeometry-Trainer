@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Kỹ Sư Báo Giá - Eco City Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #87CEEB;
+        }
+
+        /* UI Container bên phải */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-left: 5px solid #2980b9;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h2 { margin: 0 0 15px 0; color: #2c3e50; font-size: 1.6em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .blueprint-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px dashed #bdc3c7;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+        .blueprint-info p { margin: 5px 0; }
+        .highlight { color: #e74c3c; font-weight: bold; }
+
+        .step-container {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            opacity: 0.5; /* Mờ đi khi chưa kích hoạt */
+            pointer-events: none; /* Khóa khi chưa đến lượt */
+            transition: all 0.3s;
+        }
+        .step-container.active {
+            opacity: 1;
+            pointer-events: auto;
+            border-color: #3498db;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+        .step-container.done {
+            border-color: #2ecc71;
+            background: #e8f8f5;
+        }
+
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #34495e; }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        button.success-btn { background: #27ae60; cursor: default; }
+
+        .feedback-msg {
+            font-size: 0.9em;
+            margin-top: 5px;
+            min-height: 1.2em;
+            font-weight: bold;
+        }
+        .err-text { color: #c0392b; }
+        .success-text { color: #27ae60; }
+
+        /* Nút Chơi Lại */
+        #btn-reset {
+            margin-top: 20px;
+            background: #e67e22;
+            display: none;
+        }
+        #btn-reset:hover { background: #d35400; }
+
+        #instructions {
+            position: absolute;
+            top: 20px; left: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    
+    <div id="instructions">
+        🏗️ <b>Chuột trái:</b> Xoay | <b>Chuột phải:</b> Kéo | <b>Lăn chuột:</b> Thu/Phóng
+    </div>
+
+    <div id="ui-panel">
+        <h2>👷 Kỹ Sư Báo Giá</h2>
+        
+        <div class="blueprint-info">
+            <p>📌 <b>Dự án:</b> <span id="project-name">Đúc Khối Bê Tông</span></p>
+            <p id="row-a">📏 <b><span id="label-a">Đáy Lớn</span> (a):</b> <span id="val-a" class="highlight">0</span> m</p>
+            <p id="row-b">📏 <b>Đáy Bé (b):</b> <span id="val-b" class="highlight">0</span> m</p>
+            <p>height <b>Chiều Cao Đáy (h):</b> <span id="val-h" class="highlight">0</span> m</p>
+            <p>width <b>Chiều Dài Khối (L):</b> <span id="val-L" class="highlight">0</span> m</p>
+            <p>💰 <b>Đơn giá:</b> <span id="val-price" class="highlight">1,200,000</span> đ/m³</p>
+        </div>
+
+        <!-- Bước 1: Diện Tích -->
+        <div id="step1" class="step-container active">
+            <label>1. Tính Diện tích đáy (m²): <small style="font-weight:normal; color:#666; font-size:0.9em;">(Làm tròn 2 số thập phân)</small></label>
+            <input type="number" id="inp-area" placeholder="Nhập diện tích..." step="0.01">
+            <button onclick="checkStep1()">Kiểm tra Diện tích</button>
+            <div id="msg-1" class="feedback-msg"></div>
+        </div>
+
+        <!-- Bước 2: Thể Tích -->
+        <div id="step2" class="step-container">
+            <label>2. Tính Thể tích khối (m³): <small style="font-weight:normal; color:#666; font-size:0.9em;">(Làm tròn 2 số thập phân)</small></label>
+            <input type="number" id="inp-vol" placeholder="Nhập thể tích..." step="0.01">
+            <button onclick="checkStep2()">Gọi Xe Đổ Bê Tông</button>
+            <div id="msg-2" class="feedback-msg"></div>
+        </div>
+
+        <!-- Bước 3: Báo Giá -->
+        <div id="step3" class="step-container">
+            <label>3. Tổng chi phí vật liệu (VND):</label>
+            <input type="number" id="inp-cost" placeholder="Nhập thành tiền...">
+            <button onclick="checkStep3()">Gửi Báo Giá</button>
+            <div id="msg-3" class="feedback-msg"></div>
+        </div>
+
+        <button id="btn-reset" onclick="initGame()">📝 Dự Án Mới</button>
+    </div>
+
+    <script>
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // Góc camera nhìn từ trên cao xuống khu phố
+        camera.position.set(30, 30, 40); 
+        camera.lookAt(0, 0, 10);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        renderer.setPixelRatio(window.devicePixelRatio); 
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+        controls.target.set(0, 0, 10); 
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); 
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(50, 100, 50);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.left = -100;
+        dirLight.shadow.camera.right = 100;
+        dirLight.shadow.camera.top = 100;
+        dirLight.shadow.camera.bottom = -100;
+        scene.add(dirLight);
+
+        // --- KHU ĐÔ THỊ & THIÊN NHIÊN ---
+        const cityGroup = new THREE.Group();
+        scene.add(cityGroup);
+        
+        const animals = [];
+        const clouds = [];
+        const citizens = [];
+
+        // 1. Mặt đất
+        const groundGeo = new THREE.PlaneGeometry(400, 400);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x7CFC00 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        cityGroup.add(ground);
+
+        // 2. Hệ thống đường
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const roadGroup = new THREE.Group();
+        roadGroup.position.y = 0.02;
+        cityGroup.add(roadGroup);
+
+        // Đường chính (Trục X)
+        const mainRoad = new THREE.Mesh(new THREE.PlaneGeometry(400, 14), roadMat);
+        mainRoad.rotation.x = -Math.PI / 2;
+        mainRoad.receiveShadow = true;
+        roadGroup.add(mainRoad);
+
+        // Đường dẫn vào công trường (Trục Z) - Tại x = 0
+        const siteRoad = new THREE.Mesh(new THREE.PlaneGeometry(10, 40), new THREE.MeshStandardMaterial({color: 0x8B4513})); // Đường đất
+        siteRoad.rotation.x = -Math.PI / 2;
+        siteRoad.position.set(0, 0.025, 20); // Nối từ đường chính (Z=0) vào công trường
+        roadGroup.add(siteRoad);
+
+        // Đường cắt ngang (Trục Z) ở xa
+        const crossRoad1 = new THREE.Mesh(new THREE.PlaneGeometry(12, 400), roadMat);
+        crossRoad1.rotation.x = -Math.PI / 2;
+        crossRoad1.position.set(-60, 0.01, 0);
+        crossRoad1.receiveShadow = true;
+        roadGroup.add(crossRoad1);
+
+        const crossRoad2 = new THREE.Mesh(new THREE.PlaneGeometry(12, 400), roadMat);
+        crossRoad2.rotation.x = -Math.PI / 2;
+        crossRoad2.position.set(60, 0.01, 0);
+        crossRoad2.receiveShadow = true;
+        roadGroup.add(crossRoad2);
+
+        // Vạch kẻ đường
+        const lineGeo = new THREE.PlaneGeometry(2, 0.5);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        for(let i = -190; i < 190; i += 6) {
+            if ((i > -66 && i < -54) || (i > 54 && i < 66)) continue;
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.position.set(i, 0.03, 0);
+            cityGroup.add(line);
+        }
+
+        // 3. Khu Công Trường (Đã dời xa ra)
+        const siteGroup = new THREE.Group();
+        // Dời công trường ra Z = 25
+        siteGroup.position.set(0, 0.03, 25); 
+        cityGroup.add(siteGroup);
+
+        const siteGround = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), new THREE.MeshStandardMaterial({color: 0x8B4513, roughness: 1}));
+        siteGround.rotation.x = -Math.PI / 2;
+        siteGround.receiveShadow = true;
+        siteGroup.add(siteGround);
+
+        const barrierGeo = new THREE.BoxGeometry(1, 1, 0.2);
+        const barrierMat = new THREE.MeshStandardMaterial({color: 0xf1c40f});
+        // Vẽ hàng rào bao quanh (trừ lối vào)
+        for(let x=-18; x<=18; x+=4) {
+            // Rào sau
+            const bBack = new THREE.Mesh(barrierGeo, barrierMat);
+            bBack.position.set(x, 0.5, 14); 
+            siteGroup.add(bBack);
+            // Rào trước (trừ lối xe vào ở giữa)
+            if (Math.abs(x) > 6) {
+                const bFront = new THREE.Mesh(barrierGeo, barrierMat);
+                bFront.position.set(x, 0.5, -14);
+                siteGroup.add(bFront);
+            }
+        }
+
+        // 4. Hàm tạo vật thể thiên nhiên & Cư dân
+        function createTree() {
+            const tree = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2, 8), new THREE.MeshStandardMaterial({color: 0x5d4037}));
+            trunk.position.y = 1; trunk.castShadow = true;
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.8, 3, 8), new THREE.MeshStandardMaterial({color: 0x2e7d32}));
+            leaves.position.y = 2.5; leaves.castShadow = true;
+            tree.add(trunk, leaves);
+            return tree;
+        }
+
+        function createCitizen() {
+            const citizen = new THREE.Group();
+            const shirtColor = Math.random() * 0xffffff;
+            const pantsColor = 0x2c3e50; 
+            const skinColor = 0xffe0bd;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshStandardMaterial({color: skinColor})); head.position.y = 1.7;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.3), new THREE.MeshStandardMaterial({color: shirtColor})); body.position.y = 1.15; body.castShadow = true;
+            const legGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 8); const legMat = new THREE.MeshStandardMaterial({color: pantsColor});
+            const legL = new THREE.Mesh(legGeo, legMat); legL.position.set(-0.15, 0.4, 0); legL.castShadow = true;
+            const legR = new THREE.Mesh(legGeo, legMat); legR.position.set(0.15, 0.4, 0); legR.castShadow = true;
+            const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.7, 8); const armMat = new THREE.MeshStandardMaterial({color: shirtColor});
+            const armL = new THREE.Mesh(armGeo, armMat); armL.position.set(-0.35, 1.1, 0); armL.rotation.z = 0.2;
+            const armR = new THREE.Mesh(armGeo, armMat); armR.position.set(0.35, 1.1, 0); armR.rotation.z = -0.2;
+            citizen.add(head, body, legL, legR, armL, armR);
+            
+            citizen.userData = {
+                legL: legL, legR: legR, armL: armL, armR: armR,
+                walkSpeed: 0.05 + Math.random() * 0.03, direction: 1, zLimit: 40 + Math.random() * 20, zStart: -40 - Math.random() * 20
+            };
+            return citizen;
+        }
+
+        function createFlower() {
+            const flowerGroup = new THREE.Group();
+            const colors = [0xFF69B4, 0xFFFF00, 0xFF4500, 0xEE82EE];
+            for(let i=0; i<3; i++) {
+                const pGeo = new THREE.SphereGeometry(0.15, 4, 4);
+                const pMat = new THREE.MeshBasicMaterial({color: colors[Math.floor(Math.random()*colors.length)]});
+                const p = new THREE.Mesh(pGeo, pMat);
+                p.position.set((Math.random()-0.5)*0.3, 0.2, (Math.random()-0.5)*0.3);
+                flowerGroup.add(p);
+            }
+            return flowerGroup;
+        }
+
+        function createCloud() {
+            const geo = new THREE.SphereGeometry(2, 8, 8);
+            const mat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.8});
+            const cloud = new THREE.Group();
+            const p1 = new THREE.Mesh(geo, mat);
+            const p2 = new THREE.Mesh(geo, mat); p2.position.x = 2; p2.scale.set(0.8, 0.8, 0.8);
+            const p3 = new THREE.Mesh(geo, mat); p3.position.x = -2; p3.scale.set(0.8, 0.8, 0.8);
+            cloud.add(p1, p2, p3);
+            return cloud;
+        }
+
+        function createRabbit() {
+            const rabbit = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFFFFF})); body.scale.set(1, 0.8, 1.5); body.position.y = 0.3;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFFFFF})); head.position.set(0, 0.5, 0.4);
+            const earGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8);
+            const ear1 = new THREE.Mesh(earGeo, new THREE.MeshStandardMaterial({color: 0xFFFFFF})); ear1.position.set(0.1, 0.75, 0.4); ear1.rotation.x = -0.2; 
+            const ear2 = ear1.clone(); ear2.position.set(-0.1, 0.75, 0.4);
+            rabbit.add(body, head, ear1, ear2);
+            return rabbit;
+        }
+
+        function createBird() {
+            const bird = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 8), new THREE.MeshStandardMaterial({color: 0xFF4500})); body.rotation.x = Math.PI / 2;
+            const wingGeo = new THREE.BoxGeometry(0.6, 0.02, 0.2); const wings = new THREE.Mesh(wingGeo, new THREE.MeshStandardMaterial({color: 0x333})); wings.position.y = 0.1;
+            bird.add(body, wings);
+            return bird;
+        }
+
+        function createBuilding(width, height, depth, color) {
+            const bGeo = new THREE.BoxGeometry(width, height, depth);
+            const bMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.5 });
+            const building = new THREE.Mesh(bGeo, bMat);
+            building.castShadow = true; building.receiveShadow = true;
+            const winGeo = new THREE.BoxGeometry(0.5, 0.8, 0.1);
+            const winMat = new THREE.MeshBasicMaterial({ color: 0xadd8e6 });
+            const floors = Math.floor(height / 2);
+            const cols = Math.floor(width / 1.5);
+            for(let f=0; f<floors; f++) {
+                for(let c=0; c<cols; c++) {
+                    const win = new THREE.Mesh(winGeo, winMat);
+                    const wx = -width/2 + 1 + c*1.5;
+                    const wy = -height/2 + 1.5 + f*2;
+                    win.position.set(wx, wy, depth/2);
+                    building.add(win);
+                }
+            }
+            return building;
+        }
+
+        // --- SINH CẢNH VẬT ---
+        const buildingColors = [0xe74c3c, 0x3498db, 0xf1c40f, 0x9b59b6, 0x1abc9c, 0x95a5a6];
+
+        for (let x = -100; x <= 100; x += 15) {
+            if (Math.abs(x - 60) < 8 || Math.abs(x + 60) < 8) continue;
+
+            // Dãy nhà phía sau (Z < -10)
+            const h = 8 + Math.random() * 15;
+            const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+            const building = createBuilding(10, h, 10, color);
+            building.position.set(x, h/2, -25); 
+            cityGroup.add(building);
+            const t1 = createTree(); t1.position.set(x, 0, -12); cityGroup.add(t1); 
+
+            // Dãy nhà phía trước (Z > 10), TRỪ khu vực công trường (x từ -25 đến 25)
+            if (x < -30 || x > 30) {
+                const h2 = 6 + Math.random() * 12;
+                const color2 = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+                const b2 = createBuilding(10, h2, 10, color2);
+                b2.position.set(x, h2/2, 25);
+                b2.rotation.y = Math.PI;
+                cityGroup.add(b2);
+                const t2 = createTree(); t2.position.set(x, 0, 12); cityGroup.add(t2);
+
+                // Cư dân đi lại ở vỉa hè
+                if (Math.random() > 0.5) {
+                    const citizen = createCitizen();
+                    citizen.position.set(x, 0, 8.5 + (Math.random()-0.5)*2);
+                    citizen.userData.axis = 'x'; citizen.userData.limit = 100; citizen.rotation.y = Math.PI / 2;
+                    cityGroup.add(citizen); citizens.push(citizen);
+                }
+            }
+        }
+
+        // Hoa và Thỏ (xa công trường)
+        for(let i=0; i<30; i++) {
+            const flower = createFlower();
+            const fx = (Math.random() - 0.5) * 180; const fz = (Math.random() - 0.5) * 100;
+            if (Math.abs(fz) > 15 && Math.abs(fx) > 40) {
+                flower.position.set(fx, 0, fz);
+                cityGroup.add(flower);
+            }
+        }
+
+        for(let i=0; i<8; i++) {
+            const rabbit = createRabbit();
+            const rx = (Math.random() - 0.5) * 50;
+            const rz = 25 + Math.random() * 20; 
+            rabbit.position.set(rx, 0, rz);
+            rabbit.userData = { hopSpeed: 2 + Math.random(), hopHeight: 0.5, initialY: 0 };
+            cityGroup.add(rabbit);
+            animals.push(rabbit);
+        }
+
+        for(let i=0; i<10; i++) {
+            const cloud = createCloud();
+            cloud.position.set((Math.random()-0.5)*300, 20 + Math.random()*10, (Math.random()-0.5)*200);
+            cloud.userData = { speed: 0.02 + Math.random()*0.03 };
+            scene.add(cloud); clouds.push(cloud);
+        }
+
+        for(let i=0; i<15; i++) {
+            const bird = createBird();
+            bird.position.set(0, 15 + Math.random()*10, 0);
+            bird.userData = { 
+                type: 'bird', speed: 0.3 + Math.random()*0.2, radius: 30 + Math.random()*40, angle: Math.random() * Math.PI * 2, yBase: bird.position.y
+            };
+            scene.add(bird); animals.push(bird);
+        }
+
+
+        // --- ĐỐI TƯỢNG GAME CHÍNH ---
+        let moldMesh, concreteMesh;
+        let truckGroup;
+        
+        function createMoldAndConcrete(type, a, b, h, L) {
+            if (moldMesh) scene.remove(moldMesh);
+            if (concreteMesh) scene.remove(concreteMesh);
+
+            const shape = new THREE.Shape();
+            
+            if (type === 'trapezoid') {
+                // Hình thang cân: Đáy lớn a ở dưới, Đáy bé b ở trên
+                shape.moveTo(-a/2, 0);
+                shape.lineTo(a/2, 0);
+                shape.lineTo(b/2, h);
+                shape.lineTo(-b/2, h);
+                shape.lineTo(-a/2, 0);
+            } else {
+                // Tam giác: Đáy a ở dưới
+                shape.moveTo(-a/2, 0);
+                shape.lineTo(a/2, 0);
+                shape.lineTo(0, h);
+                shape.lineTo(-a/2, 0);
+            }
+
+            const extrudeSettings = { steps: 1, depth: L, bevelEnabled: false };
+            const moldGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            
+            // Căn giữa và đặt lên mặt đất
+            moldGeo.center(); 
+            moldGeo.translate(0, h/2, 0);
+
+            const edges = new THREE.EdgesGeometry(moldGeo);
+            moldMesh = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 }));
+            moldMesh.position.set(0, 0.05, 25); 
+            scene.add(moldMesh);
+
+            const concreteGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            concreteGeo.center();
+            concreteGeo.translate(0, h/2, 0);
+
+            const concreteMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.9, metalness: 0.1 });
+            concreteMesh = new THREE.Mesh(concreteGeo, concreteMat);
+            concreteMesh.castShadow = true;
+            concreteMesh.scale.set(1, 0.01, 1); 
+            concreteMesh.visible = false; 
+            concreteMesh.position.set(0, 0.05, 25);
+            scene.add(concreteMesh);
+        }
+
+        function createMixerTruck() {
+            const truck = new THREE.Group();
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2.5), new THREE.MeshStandardMaterial({color: 0xFFA500})); cab.position.set(3, 1.5, 0); truck.add(cab);
+            const glass = new THREE.Mesh(new THREE.PlaneGeometry(2, 1), new THREE.MeshStandardMaterial({color: 0x87CEEB})); glass.position.set(4.01, 1.8, 0); glass.rotation.y = Math.PI/2; truck.add(glass);
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(7, 0.5, 2.2), new THREE.MeshStandardMaterial({color: 0x333})); chassis.position.y = 0.8; truck.add(chassis);
+            const drumGroup = new THREE.Group(); drumGroup.position.set(-1, 2, 0);
+            const drum1 = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 3, 16), new THREE.MeshStandardMaterial({color: 0xecf0f1})); drum1.rotation.z = Math.PI/2;
+            const drum2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.5, 16), new THREE.MeshStandardMaterial({color: 0xecf0f1})); drum2.rotation.z = -Math.PI/2; drum2.position.x = -2.25;
+            drumGroup.add(drum1, drum2);
+            const stripe = new THREE.Mesh(new THREE.BoxGeometry(4, 0.1, 2.5), new THREE.MeshBasicMaterial({color: 0x3498db})); stripe.rotation.x = 0.5; drumGroup.add(stripe);
+            truck.add(drumGroup); truck.userData.drum = drumGroup; 
+            const chute = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 0.8), new THREE.MeshStandardMaterial({color: 0x95a5a6})); chute.position.set(-4, 1.5, 0); chute.rotation.z = -0.5; truck.add(chute);
+            const wGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16); const wMat = new THREE.MeshStandardMaterial({color: 0x222});
+            [[2.5, 1.2], [2.5, -1.2], [-1.5, 1.2], [-1.5, -1.2], [-3, 1.2], [-3, -1.2]].forEach(pos => { const w = new THREE.Mesh(wGeo, wMat); w.rotation.x = Math.PI/2; w.position.set(pos[0], 0.5, pos[1]); truck.add(w); });
+
+            truck.position.set(30, 0, 0); 
+            scene.add(truck);
+            return truck;
+        }
+        truckGroup = createMixerTruck();
+
+
+        // --- LOGIC GAME ---
+        let params = {};
+        const UNIT_PRICE = 1200000;
+
+        function initGame() {
+            document.getElementById('step1').classList.add('active'); document.getElementById('step1').classList.remove('done');
+            document.getElementById('step2').classList.remove('active', 'done');
+            document.getElementById('step3').classList.remove('active', 'done');
+            document.getElementById('inp-area').value = ''; document.getElementById('inp-area').disabled = false;
+            document.getElementById('inp-vol').value = ''; document.getElementById('inp-vol').disabled = false;
+            document.getElementById('inp-cost').value = ''; document.getElementById('inp-cost').disabled = false;
+            document.getElementById('msg-1').textContent = ''; document.getElementById('msg-2').textContent = ''; document.getElementById('msg-3').textContent = '';
+            document.getElementById('btn-reset').style.display = 'none';
+
+            // Random chọn loại hình: 0 - Hình thang, 1 - Tam giác
+            const isTrapezoid = Math.random() > 0.5;
+            params.type = isTrapezoid ? 'trapezoid' : 'triangle';
+
+            // Sinh số liệu chung (mét)
+            params.h = (Math.random() * 0.5 + 0.8).toFixed(1);
+            params.L = (Math.random() * 2 + 2).toFixed(1);
+            params.a = (Math.random() * 1 + 1.5).toFixed(1); // Cạnh đáy lớn hoặc cạnh đáy tam giác
+
+            if (isTrapezoid) {
+                params.b = (Math.random() * 0.5 + 0.8).toFixed(1); // Chỉ hình thang mới có b
+                params.S = ((parseFloat(params.a) + parseFloat(params.b)) * parseFloat(params.h)) / 2;
+                
+                // Cập nhật UI cho Hình Thang
+                document.getElementById('project-name').textContent = "Đúc Khối Bê Tông (Hình Thang)";
+                document.getElementById('label-a').textContent = "Đáy Lớn";
+                document.getElementById('row-b').classList.remove('hidden'); // Hiện dòng b
+                document.getElementById('val-b').textContent = params.b;
+            } else {
+                params.b = 0; // Không dùng
+                params.S = (parseFloat(params.a) * parseFloat(params.h)) / 2;
+
+                // Cập nhật UI cho Tam Giác
+                document.getElementById('project-name').textContent = "Đúc Khối Bê Tông (Tam Giác)";
+                document.getElementById('label-a').textContent = "Cạnh Đáy";
+                document.getElementById('row-b').classList.add('hidden'); // Ẩn dòng b
+            }
+
+            // Random Unit Price: 900,000 - 1,400,000 VND
+            params.unitPrice = (Math.floor(Math.random() * 51) + 90) * 10000;
+            const formattedPrice = params.unitPrice.toLocaleString('vi-VN');
+            document.getElementById('val-price').textContent = formattedPrice;
+
+            params.V = params.S * parseFloat(params.L);
+            params.Cost = params.V * params.unitPrice;
+
+            document.getElementById('val-a').textContent = params.a;
+            document.getElementById('val-h').textContent = params.h;
+            document.getElementById('val-L').textContent = params.L;
+
+            createMoldAndConcrete(params.type, parseFloat(params.a), parseFloat(params.b), parseFloat(params.h), parseFloat(params.L));
+            truckGroup.position.set(30, 0, 0); truckGroup.rotation.y = 0;
+        }
+
+        function checkStep1() {
+            const userS = parseFloat(document.getElementById('inp-area').value);
+            const msg = document.getElementById('msg-1');
+            if (Math.abs(userS - params.S) < 0.05) {
+                msg.textContent = "✅ Chính xác! S = " + params.S.toFixed(2) + " m²"; msg.className = "feedback-msg success-text";
+                document.getElementById('step1').classList.remove('active'); document.getElementById('step1').classList.add('done'); document.getElementById('inp-area').disabled = true;
+                document.getElementById('step2').classList.add('active'); document.getElementById('inp-vol').focus();
+            } else {
+                // Gợi ý tùy theo hình
+                if (params.type === 'trapezoid') {
+                    msg.innerHTML = `❌ Sai rồi. Gợi ý: S = (${params.a} + ${params.b}) * ${params.h} / 2`;
+                } else {
+                    msg.innerHTML = `❌ Sai rồi. Gợi ý: S = ${params.a} * ${params.h} / 2`;
+                }
+                msg.className = "feedback-msg err-text";
+            }
+        }
+
+        function checkStep2() {
+            const userV = parseFloat(document.getElementById('inp-vol').value);
+            const msg = document.getElementById('msg-2');
+            if (Math.abs(userV - params.V) < 0.05) {
+                msg.textContent = "✅ Chuẩn! Xe bê tông đang vào vị trí..."; msg.className = "feedback-msg success-text";
+                document.getElementById('step2').classList.remove('active'); document.getElementById('step2').classList.add('done'); document.getElementById('inp-vol').disabled = true;
+                runPouringAnimation(() => {
+                    document.getElementById('step3').classList.add('active'); document.getElementById('inp-cost').focus();
+                });
+            } else {
+                msg.innerHTML = `❌ Sai thể tích. Gợi ý: V = S_đáy * ${params.L}`; msg.className = "feedback-msg err-text";
+            }
+        }
+
+        function checkStep3() {
+            const userCost = parseFloat(document.getElementById('inp-cost').value);
+            const msg = document.getElementById('msg-3');
+            if (Math.abs(userCost - params.Cost) < 1000) { 
+                msg.textContent = "🎉 XUẤT SẮC! Hợp đồng đã được ký kết!"; msg.className = "feedback-msg success-text";
+                document.getElementById('step3').classList.remove('active'); document.getElementById('step3').classList.add('done'); document.getElementById('inp-cost').disabled = true; document.getElementById('btn-reset').style.display = 'block';
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#2ecc71', '#f1c40f'] });
+            } else {
+                msg.innerHTML = `❌ Tính sai tiền rồi sếp ơi! Lấy V * ${params.unitPrice.toLocaleString('vi-VN')}`;
+                msg.className = "feedback-msg err-text";
+            }
+        }
+
+        function runPouringAnimation(callback) {
+            // 1. Xe lùi từ đường chính (X=30) vào ngang lối rẽ (X=0)
+            new TWEEN.Tween(truckGroup.position).to({ x: 0 }, 2000).easing(TWEEN.Easing.Quadratic.Out)
+                .onComplete(() => {
+                    // 2. Xoay đuôi xe hướng vào đường đất (Z dương)
+                    new TWEEN.Tween(truckGroup.rotation).to({ y: Math.PI/2 }, 1000)
+                    .onComplete(() => {
+                        // 3. Lùi xe vào gần khuôn (Z=19, để đuôi xe chạm tới Z=25)
+                        new TWEEN.Tween(truckGroup.position).to({ z: 19 }, 1500)
+                        .onComplete(() => {
+                            concreteMesh.visible = true;
+                            const drum = truckGroup.userData.drum;
+                            const spinTween = new TWEEN.Tween(drum.rotation).to({ x: Math.PI * 6 }, 3000).start();
+                            new TWEEN.Tween(concreteMesh.scale).to({ y: 1 }, 3000).easing(TWEEN.Easing.Linear.None)
+                            .onComplete(() => {
+                                // 4. Chạy ra lại đường chính (Z=0)
+                                new TWEEN.Tween(truckGroup.position).to({ z: 0 }, 1500)
+                                .onComplete(() => {
+                                    // 5. Xoay đầu xe chạy đi tiếp
+                                    new TWEEN.Tween(truckGroup.rotation).to({ y: 0 }, 1000)
+                                    .onComplete(() => {
+                                        // 6. Chạy mất hút
+                                        new TWEEN.Tween(truckGroup.position).to({ x: 40 }, 2000).onComplete(callback).start();
+                                    }).start();
+                                }).start();
+                            }).start();
+                        }).start();
+                    }).start();
+                }).start();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+
+            // Animate Animals
+            animals.forEach(animal => {
+                if (animal.children[2] && animal.children[2].geometry.type === 'CylinderGeometry') { // Rabbit check (ear)
+                    const hop = Math.abs(Math.sin(time * 5)) * 0.5; animal.position.y = hop; // Thỏ nhảy
+                } else { // Bird
+                    const angle = time * 0.3 + animal.userData.angle;
+                    animal.position.x = Math.cos(angle) * animal.userData.radius;
+                    animal.position.z = Math.sin(angle) * animal.userData.radius;
+                    animal.rotation.y = -angle;
+                }
+            });
+
+            // Animate Clouds
+            clouds.forEach(cloud => {
+                cloud.position.x += cloud.userData.speed;
+                if(cloud.position.x > 150) cloud.position.x = -150;
+            });
+
+            // Animate Citizens
+            citizens.forEach(c => {
+                const d = c.userData;
+                c.position[d.axis] += d.walkSpeed * d.direction;
+                if (Math.abs(c.position[d.axis]) > d.limit) {
+                    d.direction *= -1; c.rotation.y += Math.PI;
+                }
+                const swing = Math.sin(time * 10);
+                d.legL.rotation.x = swing * 0.5; d.legR.rotation.x = -swing * 0.5;
+                d.armL.rotation.x = -swing * 0.5; d.armR.rotation.x = swing * 0.5;
+            });
+
+            TWEEN.update();
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        initGame();
+        animate();
+
+    </script>
+</body>
+</html>
