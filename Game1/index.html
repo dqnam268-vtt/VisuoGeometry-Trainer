@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Thợ Săn Lều Trại</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #87CEEB; /* Màu trời */
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* Header Stats */
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            pointer-events: auto;
+        }
+        .stat-box {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .level-badge {
+            background: #e67e22;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Quest Box */
+        .quest-container {
+            align-self: flex-end; 
+            margin-right: 30px;
+            margin-bottom: 30px;
+            
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            pointer-events: auto;
+            border: 3px solid #3498db;
+            transition: transform 0.3s;
+            max-height: 70vh; 
+            overflow-y: auto; 
+        }
+        .quest-container.shake {
+            animation: shake 0.5s;
+            border-color: #e74c3c;
+        }
+        
+        h2 { margin: 0 0 10px 0; color: #2980b9; font-size: 1.5em; }
+        .param-list {
+            background: #f1f8ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        input[type="number"] {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1.1em;
+            outline: none;
+        }
+        input[type="number"]:focus { border-color: #3498db; }
+        
+        button.submit-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+        button.submit-btn:hover { background: #2ecc71; }
+
+        button.retry-btn {
+            background: #e67e22;
+            width: 100%;
+            margin-top: 10px;
+            display: none; /* Ẩn mặc định */
+        }
+        button.retry-btn:hover { background: #d35400; }
+
+        /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        .big-btn {
+            background: #e67e22;
+            color: white;
+            font-size: 1.5em;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+            transition: transform 0.2s;
+        }
+        .big-btn:hover { transform: scale(1.05); }
+
+        /* Feedback Modal */
+        #feedback-msg {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        
+        /* Solution Box Styles */
+        .solution-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 0.95em;
+            display: none;
+        }
+        .solution-title {
+            font-weight: bold;
+            border-bottom: 1px dashed #856404;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .solution-step {
+            margin-bottom: 8px;
+        }
+        .highlight-val {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        .hint-text {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        #instructions {
+            position: absolute;
+            top: 60px; /* Dưới header */
+            left: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #555;
+            pointer-events: auto; /* Cho phép click nếu cần */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1 style="font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px #333;">🎪 Xây Dựng Lều Trại</h1>
+        <p style="font-size: 1.2em; max-width: 600px; text-align: center;">
+            Chào mừng bạn đến với xưởng sản xuất lều!<br>
+            Khách hàng sẽ gửi yêu cầu kích thước. <br>
+            Nhiệm vụ của bạn là tính toán chính xác để cắt vải và lắp điều hòa.
+        </p>
+        <button class="big-btn" onclick="startGame()">Bắt Đầu Làm Việc</button>
+    </div>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container" style="width:100%; height:100vh;"></div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer">
+        <div class="header">
+            <div class="stat-box">⭐ Điểm: <span id="score">0</span></div>
+            <div class="level-badge" id="level-display">Level 1: Tính Diện Tích Vải</div>
+            <div class="stat-box">Đơn hàng: <span id="q-num">1</span>/5</div>
+        </div>
+
+        <div id="instructions">
+            🖱️ <b>Chuột trái:</b> Xoay | 🖱️ <b>Chuột phải:</b> Kéo mặt phẳng | 📜 <b>Lăn chuột:</b> Thu/Phóng
+        </div>
+
+        <div class="quest-container" id="quest-box">
+            <h2 id="quest-title">Đơn hàng số 1</h2>
+            <p id="quest-desc">Khách cần một chiếc lều hình lăng trụ tam giác.</p>
+            
+            <div class="param-list" id="params">
+                <!-- Parameters will be injected here -->
+            </div>
+
+            <p style="font-weight:bold; margin-bottom:5px;" id="question-text">Tính diện tích toàn phần?</p>
+            <p style="font-size:0.85em; color:#666; margin-top:0;">(Kết quả làm tròn 2 chữ số thập phân)</p>
+
+            <div class="input-area">
+                <input type="number" id="user-answer" placeholder="Nhập kết quả..." step="0.01">
+                <button class="submit-btn" onclick="checkAnswer()">Gửi Hàng</button>
+            </div>
+            
+            <div id="feedback-msg"></div>
+            
+            <!-- Solution Container -->
+            <div id="solution-box" class="solution-box">
+                <span class="solution-title">💡 Lời giải chi tiết (cho số liệu cũ):</span>
+                <div id="solution-content"></div>
+            </div>
+
+            <div id="hint-text" class="hint-text"></div>
+            
+            <!-- Nút Sửa Lỗi / Làm Lại (Với số liệu mới) -->
+            <button id="retry-btn" class="submit-btn retry-btn" onclick="retryLevel()">🔄 Thử Lại (Số liệu mới)</button>
+            
+            <!-- Nút Qua Màn -->
+            <button id="next-btn" class="submit-btn" style="background:#3498db; width:100%; margin-top:10px; display:none;" onclick="nextLevel()">Đơn hàng tiếp theo ➝</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME LOGIC ---
+        let currentLevel = 1;
+        let score = 0;
+        let questionCount = 1;
+        let currentParams = {};
+        let isGameActive = false;
+        
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            isGameActive = true;
+            score = 0;
+            currentLevel = 1;
+            questionCount = 1;
+            updateUI();
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            // Reset UI
+            document.getElementById('user-answer').value = '';
+            document.getElementById('feedback-msg').textContent = '';
+            document.getElementById('solution-box').style.display = 'none'; 
+            document.getElementById('hint-text').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'none'; 
+            document.querySelector('.input-area').style.display = 'flex';
+            document.getElementById('quest-box').classList.remove('shake');
+            
+            // Random parameters
+            const a = Math.floor(Math.random() * 4) + 2; 
+            const h_tri = Math.floor(Math.random() * 3) + 2; 
+            const L = Math.floor(Math.random() * 5) + 3; 
+            
+            // Calculate raw side edge
+            const sideRaw = Math.sqrt(h_tri*h_tri + (a/2)*(a/2));
+            const displayedSide = parseFloat(sideRaw.toFixed(2));
+
+            currentParams = { a, h_tri, L, displayedSide };
+
+            // Update 3D Model
+            updateTentMesh(a, h_tri, L);
+
+            // Level logic
+            if (questionCount > 3) currentLevel = 2;
+            
+            const paramsDiv = document.getElementById('params');
+            paramsDiv.innerHTML = `
+                Đáy tam giác (a) = ${a} m<br>
+                Cao tam giác (h) = ${h_tri} m<br>
+                Chiều dài lều (L) = ${L} m<br>
+                <b style="color:#e67e22">Cạnh bên (c) = ${displayedSide} m</b>
+            `;
+
+            const qText = document.getElementById('question-text');
+            const hintDiv = document.getElementById('hint-text');
+
+            if (currentLevel === 1) {
+                document.getElementById('level-display').textContent = "Level 1: Thợ May Vải";
+                document.getElementById('level-display').style.background = "#e67e22";
+                
+                qText.textContent = "Tính diện tích toàn phần của lều (gồm sàn + cửa + mái)?";
+                
+                // Calc based on displayed values
+                const pBase = a + 2 * displayedSide; 
+                const sLateral = pBase * L;
+                const sBase = 0.5 * a * h_tri;
+                const totalArea = sLateral + 2 * sBase;
+                
+                currentParams.answer = parseFloat(totalArea.toFixed(2));
+
+                currentParams.solutionHTML = `
+                    <div class="solution-step">1. <b>Chu vi đáy tam giác:</b><br>
+                    (Dùng cạnh bên đã cho: ${displayedSide})<br>
+                    P = ${a} + 2 × ${displayedSide} = <span class="highlight-val">${pBase.toFixed(2)}</span> m</div>
+                    
+                    <div class="solution-step">2. <b>Diện tích xung quanh:</b><br>
+                    S<sub>xq</sub> = P × L = ${pBase.toFixed(2)} × ${L} = <span class="highlight-val">${sLateral.toFixed(2)}</span> m²</div>
+                    
+                    <div class="solution-step">3. <b>Diện tích 2 mặt đáy (cửa):</b><br>
+                    2 × S<sub>đáy</sub> = 2 × (½ × ${a} × ${h_tri}) = <span class="highlight-val">${(2*sBase).toFixed(2)}</span> m²</div>
+                    
+                    <div class="solution-step">4. <b>Tổng diện tích:</b><br>
+                    S<sub>tp</sub> = ${sLateral.toFixed(2)} + ${(2*sBase).toFixed(2)} = <span class="highlight-val">${totalArea.toFixed(2)}</span> m²</div>
+                `;
+                
+                hintDiv.innerHTML = `Gợi ý: S<sub>tp</sub> = S<sub>xq</sub> + 2.S<sub>đáy</sub>`;
+
+            } else {
+                document.getElementById('level-display').textContent = "Level 2: Kỹ Sư Điều Hòa";
+                document.getElementById('level-display').style.background = "#8e44ad";
+                
+                qText.textContent = "Tính thể tích không khí bên trong lều?";
+                
+                const sBase = 0.5 * a * h_tri;
+                const volume = sBase * L;
+                currentParams.answer = parseFloat(volume.toFixed(2));
+                
+                currentParams.solutionHTML = `
+                    <div class="solution-step">1. <b>Diện tích mặt đáy (tam giác):</b><br>
+                    S<sub>đáy</sub> = ½ × ${a} × ${h_tri} = <span class="highlight-val">${sBase.toFixed(2)}</span> m²</div>
+                    
+                    <div class="solution-step">2. <b>Thể tích không khí:</b><br>
+                    V = S<sub>đáy</sub> × L = ${sBase.toFixed(2)} × ${L} = <span class="highlight-val">${volume.toFixed(2)}</span> m³</div>
+                `;
+
+                hintDiv.innerHTML = `Gợi ý: V = S<sub>đáy</sub> . Chiều_dài_lều`;
+            }
+
+            updateUI();
+        }
+
+        function checkAnswer() {
+            const userVal = parseFloat(document.getElementById('user-answer').value);
+            const correctVal = currentParams.answer;
+            
+            if (isNaN(userVal)) return;
+
+            if (Math.abs(userVal - correctVal) <= 0.1) {
+                // CORRECT
+                score += 10;
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                document.getElementById('feedback-msg').textContent = "Chính xác! Lều rất vững chắc.";
+                document.getElementById('feedback-msg').style.color = "#27ae60";
+                document.querySelector('.input-area').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'block';
+                document.getElementById('retry-btn').style.display = 'none';
+                
+                bounceTent();
+
+            } else {
+                // WRONG - HIỂN THỊ LỜI GIẢI & NÚT LÀM LẠI
+                document.getElementById('feedback-msg').innerHTML = `Sai rồi! Hãy xem lời giải bên dưới rồi thử lại nhé.`;
+                document.getElementById('feedback-msg').style.color = "#c0392b";
+                
+                const solBox = document.getElementById('solution-box');
+                const solContent = document.getElementById('solution-content');
+                solContent.innerHTML = currentParams.solutionHTML;
+                solBox.style.display = 'block';
+                
+                // Ẩn input, hiện nút Làm Lại
+                document.querySelector('.input-area').style.display = 'none';
+                document.getElementById('retry-btn').style.display = 'block'; // Hiện nút làm lại
+                document.getElementById('next-btn').style.display = 'none';
+
+                document.getElementById('quest-box').classList.add('shake');
+                setTimeout(() => document.getElementById('quest-box').classList.remove('shake'), 500);
+                
+                collapseTent();
+            }
+            updateUI();
+        }
+
+        function retryLevel() {
+            // KHÔI PHỤC TRẠNG THÁI LỀU
+            resetTentPosition();
+            const tent = tentGroup.getObjectByName("tentMesh");
+            if(tent) tent.material.color.setHex(0xe67e22);
+
+            // TẠO SỐ LIỆU MỚI (Giữ nguyên Question Count)
+            generateQuestion();
+        }
+
+        function nextLevel() {
+            questionCount++;
+            if (questionCount > 5) {
+                alert(`Chúc mừng! Bạn đã hoàn thành khóa huấn luyện với số điểm: ${score}`);
+                startGame(); // Restart
+            } else {
+                resetTentPosition(); 
+                generateQuestion();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('q-num').textContent = questionCount;
+            document.getElementById('quest-title').textContent = `Đơn hàng số ${questionCount}`;
+        }
+
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); 
+        
+        // Ground (Green Grass)
+        const groundGeo = new THREE.PlaneGeometry(100, 100);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x7CFC00 }); // Màu cỏ tươi
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        scene.add(ground);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(10, 7, 12); 
+        camera.lookAt(-2, 1, 0); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.mouseButtons = {
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN
+        };
+
+        // Tent Group - ĐƯA LÊN TRƯỚC khi gọi addEnvironment để tránh lỗi nếu có tương tác
+        let tentGroup = new THREE.Group();
+        scene.add(tentGroup);
+
+        // Environment Group (Trees, Flowers, River, Mountains, Animals, Butterflies)
+        const envGroup = new THREE.Group();
+        scene.add(envGroup);
+        
+        // Mảng chứa các động vật để cập nhật chuyển động
+        let animals = [];
+        // Mảng chứa các con bướm
+        let butterflies = [];
+
+        addEnvironment(); // Sinh cảnh quan
+        
+        updateTentMesh(3, 2.5, 5);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001; // Thời gian tính bằng giây
+
+            if (isGameActive) {
+                tentGroup.rotation.y += 0.002;
+            }
+            
+            // Cập nhật chuyển động cho động vật
+            animals.forEach(animal => {
+                if (animal.userData.type === 'rabbit') {
+                    // Nhảy lên xuống
+                    animal.position.y = Math.abs(Math.sin(time * animal.userData.hopSpeed * 5)) * animal.userData.hopHeight;
+                } else if (animal.userData.type === 'bird') {
+                    // Mổ (peck) - Xoay đầu nhẹ
+                    const head = animal.children[1]; // Giả sử đầu là con thứ 2
+                    if (head) {
+                        head.rotation.x = Math.sin(time * animal.userData.peckSpeed * 10) * 0.2;
+                    }
+                }
+            });
+
+            // Cập nhật chuyển động cho bướm
+            butterflies.forEach((b, index) => {
+                // Bay lượn theo quỹ đạo sin/cos
+                b.position.x = b.userData.initialPos.x + Math.sin(time * b.userData.speed + index) * b.userData.radius;
+                b.position.z = b.userData.initialPos.z + Math.cos(time * b.userData.speed * 0.8 + index) * b.userData.radius;
+                b.position.y = b.userData.initialPos.y + Math.sin(time * b.userData.speed * 1.2 + index) * 0.5;
+                
+                // Vỗ cánh
+                b.children[0].rotation.y = Math.sin(time * 15 + index) * 0.4; // Cánh trái
+                b.children[1].rotation.y = -Math.sin(time * 15 + index) * 0.4; // Cánh phải
+
+                // Hướng đầu về phía di chuyển (đạo hàm của vị trí)
+                const dx = Math.cos(time * b.userData.speed + index);
+                const dz = -Math.sin(time * b.userData.speed * 0.8 + index);
+                b.rotation.y = Math.atan2(dx, dz);
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- ENVIRONMENT FUNCTIONS ---
+        function addEnvironment() {
+            // Dãy núi xa
+            createMountainRange();
+            // Con sông
+            createRiver();
+            // Cây cối
+            for(let i=0; i<30; i++) createTree();
+            // Hoa đa dạng
+            for(let i=0; i<50; i++) createDiverseFlower();
+            // Đá
+            for(let i=0; i<20; i++) createRock();
+            // Mây
+            for(let i=0; i<8; i++) createCloud();
+            // Động vật
+            for(let i=0; i<5; i++) createAnimal();
+            // Bướm
+            for(let i=0; i<10; i++) createButterfly();
+        }
+
+        function createMountainRange() {
+            // Tạo một dải núi ở phía xa (phía sau lều)
+            const mountainGeo = new THREE.PlaneGeometry(100, 30, 32, 16);
+            
+            // Biến dạng đỉnh để tạo hình núi (Displacement đơn giản)
+            const posAttribute = mountainGeo.attributes.position;
+            for (let i = 0; i < posAttribute.count; i++) {
+                const x = posAttribute.getX(i);
+                const y = posAttribute.getY(i);
+                const z = posAttribute.getZ(i);
+                
+                // Tạo độ cao ngẫu nhiên dựa trên vị trí x, y (trong không gian plane)
+                // Sử dụng hàm sin/cos để tạo sự nhấp nhô tự nhiên hơn
+                let height = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 5 + Math.random() * 2;
+                // Giảm độ cao ở các cạnh để trông liền mạch hơn với nền
+                height *= Math.max(0, 1 - Math.abs(y) / 15);
+
+                posAttribute.setZ(i, z + height);
+            }
+            mountainGeo.computeVertexNormals();
+
+            // Vật liệu núi: Chuyển sắc từ xanh rêu (chân núi) lên xám đá/trắng tuyết (đỉnh núi)
+            // Sử dụng Vertex Colors cho hiệu ứng này
+            mountainGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(posAttribute.count * 3), 3));
+            const colors = mountainGeo.attributes.color;
+            for (let i = 0; i < posAttribute.count; i++) {
+                const z = posAttribute.getZ(i); // Độ cao thực tế sau khi biến dạng
+                const normalizedHeight = Math.max(0, Math.min(1, z / 10)); // Chuẩn hóa 0-1
+                
+                const color = new THREE.Color();
+                if (normalizedHeight < 0.3) {
+                    color.setHex(0x556B2F); // Dark Olive Green (chân núi)
+                } else if (normalizedHeight < 0.7) {
+                    color.setHex(0x808080); // Gray (thân núi đá)
+                } else {
+                    color.setHex(0xFFFFFF); // White (đỉnh núi tuyết)
+                }
+                
+                colors.setXYZ(i, color.r, color.g, color.b);
+            }
+
+            const mountainMat = new THREE.MeshStandardMaterial({
+                vertexColors: true,
+                roughness: 0.9,
+                flatShading: true // Tạo phong cách low-poly
+            });
+
+            const mountain = new THREE.Mesh(mountainGeo, mountainMat);
+            mountain.rotation.x = -Math.PI / 2; // Nằm ngang
+            mountain.position.set(0, -1, -40); // Đặt ở xa phía sau
+            mountain.scale.set(1, 1, 2); // Kéo dài theo trục Z để tạo chiều sâu
+            
+            envGroup.add(mountain);
+        }
+
+        function createRiver() {
+            // Tạo một đường cong cho sông
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-40, 0.1, 20),
+                new THREE.Vector3(-20, 0.1, 15),
+                new THREE.Vector3(0, 0.1, 25),
+                new THREE.Vector3(20, 0.1, 10),
+                new THREE.Vector3(40, 0.1, 30)
+            ]);
+            
+            const tubeGeo = new THREE.TubeGeometry(curve, 64, 3, 16, false);
+            const riverMat = new THREE.MeshStandardMaterial({
+                color: 0x4682B4, // Steel Blue
+                transparent: true,
+                opacity: 0.7,
+                roughness: 0.2,
+                metalness: 0.1
+            });
+            
+            const river = new THREE.Mesh(tubeGeo, riverMat);
+            // Hạ thấp xuống một chút để mặt nước phẳng với nền cỏ
+            river.position.y = -0.15; 
+            envGroup.add(river);
+        }
+
+        function createTree() {
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({color: 0x8B4513});
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            
+            // Tán lá kiểu cây thông: nhiều tầng hình nón
+            const leavesGroup = new THREE.Group();
+            const leavesMat = new THREE.MeshStandardMaterial({color: 0x228B22, flatShading: true});
+            
+            const layer1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2, 8), leavesMat);
+            layer1.position.y = 1.5;
+            const layer2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 8), leavesMat);
+            layer2.position.y = 2.5;
+            const layer3 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 8), leavesMat);
+            layer3.position.y = 3.4;
+            
+            leavesGroup.add(layer1);
+            leavesGroup.add(layer2);
+            leavesGroup.add(layer3);
+
+            const tree = new THREE.Group();
+            tree.add(trunk);
+            tree.add(leavesGroup);
+
+            let x, z;
+            do {
+                x = (Math.random() - 0.5) * 80; 
+                z = (Math.random() - 0.5) * 60;
+            } while (Math.sqrt(x*x + z*z) < 10 || (z > 5 && z < 35)); // Tránh lều và sông
+
+            tree.position.set(x, 0.75, z); 
+            envGroup.add(tree);
+        }
+
+        function createDiverseFlower() {
+            const type = Math.floor(Math.random() * 3); // 0: Tulip, 1: Cúc, 2: Bụi hoa nhỏ
+            let flowerGroup = new THREE.Group();
+            let stem, petals;
+
+            if (type === 0) { // Tulip
+                stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 6), new THREE.MeshBasicMaterial({color: 0x006400}));
+                
+                const petalColor = Math.random() > 0.5 ? 0xFF69B4 : 0xFF4500; // Hồng hoặc Cam đỏ
+                petals = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.25, 6, 1, true), new THREE.MeshBasicMaterial({color: petalColor, side: THREE.DoubleSide}));
+                petals.rotation.x = Math.PI; // Úp ngược nón lại
+                petals.position.y = 0.4;
+            } else if (type === 1) { // Cúc (Daisy)
+                stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 6), new THREE.MeshBasicMaterial({color: 0x006400}));
+                
+                const center = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), new THREE.MeshBasicMaterial({color: 0xFFFF00})); // Nhụy vàng
+                center.position.y = 0.3;
+                
+                petals = new THREE.Group();
+                const petalGeo = new THREE.CircleGeometry(0.06, 3);
+                const petalMat = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
+                for(let i=0; i<8; i++) {
+                    const p = new THREE.Mesh(petalGeo, petalMat);
+                    p.position.y = 0.3;
+                    p.rotation.x = -Math.PI / 2;
+                    p.rotation.z = (i / 8) * Math.PI * 2;
+                    p.translateX(0.06);
+                    petals.add(p);
+                }
+                petals.add(center);
+            } else { // Bụi hoa nhỏ
+                stem = new THREE.Group(); // Không có thân rõ ràng
+                petals = new THREE.Group();
+                const colors = [0xFF69B4, 0xFFFF00, 0xADD8E6, 0xEE82EE]; // Nhiều màu
+                for(let i=0; i<5; i++) {
+                    const pGeo = new THREE.SphereGeometry(0.06, 4, 4);
+                    const pMat = new THREE.MeshBasicMaterial({color: colors[Math.floor(Math.random()*colors.length)]});
+                    const p = new THREE.Mesh(pGeo, pMat);
+                    p.position.set((Math.random()-0.5)*0.2, Math.random()*0.1 + 0.05, (Math.random()-0.5)*0.2);
+                    petals.add(p);
+                }
+            }
+
+            flowerGroup.add(stem);
+            flowerGroup.add(petals);
+
+            let x, z;
+            do {
+                x = (Math.random() - 0.5) * 60; 
+                z = (Math.random() - 0.5) * 50;
+            } while (Math.sqrt(x*x + z*z) < 6 || (z > 8 && z < 32)); // Tránh lều và sông
+
+            flowerGroup.position.set(x, 0, z);
+            envGroup.add(flowerGroup);
+        }
+
+        function createRock() {
+            const geo = new THREE.DodecahedronGeometry(0.3 + Math.random()*0.3); // Kích thước ngẫu nhiên
+            const mat = new THREE.MeshStandardMaterial({color: 0x808080, roughness: 0.8});
+            const mesh = new THREE.Mesh(geo, mat);
+            
+            // Biến dạng ngẫu nhiên
+            mesh.scale.set(1 + Math.random()*0.5, 0.5 + Math.random()*0.3, 1 + Math.random()*0.5);
+            mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+            
+            let x, z;
+            do {
+                x = (Math.random() - 0.5) * 70; 
+                z = (Math.random() - 0.5) * 60;
+            } while (Math.sqrt(x*x + z*z) < 7);
+
+            mesh.position.set(x, 0.1, z);
+            envGroup.add(mesh);
+        }
+
+        function createCloud() {
+            const geo = new THREE.SphereGeometry(1.5, 8, 8);
+            const mat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.7});
+            
+            const cloud = new THREE.Group();
+            // Gộp nhiều khối cầu lại thành mây phức tạp hơn
+            const numPuffs = 3 + Math.floor(Math.random() * 3);
+            for(let i=0; i<numPuffs; i++) {
+                const p = new THREE.Mesh(geo, mat);
+                p.position.set((Math.random()-0.5)*2.5, (Math.random()-0.5)*1, (Math.random()-0.5)*2);
+                p.scale.setScalar(0.7 + Math.random()*0.5);
+                cloud.add(p);
+            }
+            
+            const x = (Math.random() - 0.5) * 80;
+            const z = (Math.random() - 0.5) * 60;
+            const y = 12 + Math.random() * 8; // Cao độ 12-20m
+            
+            cloud.position.set(x, y, z);
+            
+            // Thêm chuyển động trôi chậm cho mây
+            cloud.userData = { speed: 0.01 + Math.random()*0.02 };
+            
+            envGroup.add(cloud);
+        }
+        
+        function createAnimal() {
+            const type = Math.random() > 0.5 ? 'rabbit' : 'bird';
+            let animalGroup = new THREE.Group();
+
+            if (type === 'rabbit') {
+                // Thân
+                const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFFFFF}));
+                body.scale.set(1, 0.8, 1.2);
+                body.position.y = 0.3;
+                // Đầu
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFFFFF}));
+                head.position.set(0, 0.5, 0.35);
+                // Tai (Sửa CapsuleGeometry -> CylinderGeometry cho r128)
+                const earGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8);
+                const ear1 = new THREE.Mesh(earGeo, new THREE.MeshStandardMaterial({color: 0xFFFFFF}));
+                ear1.position.set(0.1, 0.8, 0.35); ear1.rotation.x = -0.2;
+                const ear2 = ear1.clone();
+                ear2.position.set(-0.1, 0.8, 0.35);
+
+                animalGroup.add(body, head, ear1, ear2);
+                // Thêm dữ liệu cho chuyển động
+                animalGroup.userData = { type: 'rabbit', hopSpeed: 1 + Math.random(), hopHeight: 0.3 + Math.random() * 0.2 };
+
+            } else { // Bird (đậu trên mặt đất)
+                // Thân (Sửa CapsuleGeometry -> CylinderGeometry cho r128)
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.3, 8), new THREE.MeshStandardMaterial({color: 0x4169E1})); // Xanh dương
+                body.rotation.x = Math.PI / 2;
+                body.position.y = 0.25;
+                // Đầu
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshStandardMaterial({color: 0x4169E1}));
+                head.position.set(0, 0.35, 0.25);
+                // Mỏ
+                const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 8), new THREE.MeshStandardMaterial({color: 0xFFA500})); // Cam
+                beak.rotation.x = Math.PI / 2;
+                beak.position.set(0, 0.35, 0.4);
+
+                animalGroup.add(body, head, beak);
+                // Thêm dữ liệu cho chuyển động
+                animalGroup.userData = { type: 'bird', peckSpeed: 1 + Math.random() };
+            }
+
+            let x, z;
+            do {
+                x = (Math.random() - 0.5) * 50; 
+                z = (Math.random() - 0.5) * 50;
+            } while (Math.sqrt(x*x + z*z) < 8);
+
+            animalGroup.position.set(x, 0, z);
+            animalGroup.rotation.y = Math.random() * Math.PI * 2;
+            envGroup.add(animalGroup);
+            // Thêm vào mảng quản lý
+            animals.push(animalGroup);
+        }
+
+        function createButterfly() {
+            const butterflyGroup = new THREE.Group();
+            
+            // Tạo hình dạng cánh bướm
+            const wingShape = new THREE.Shape();
+            wingShape.moveTo(0, 0);
+            wingShape.quadraticCurveTo(0.2, 0.2, 0.2, 0.4);
+            wingShape.quadraticCurveTo(0.2, 0.6, 0, 0.8);
+            wingShape.quadraticCurveTo(-0.2, 0.6, -0.2, 0.4);
+            wingShape.quadraticCurveTo(-0.2, 0.2, 0, 0);
+
+            const extrudeSettings = { steps: 1, depth: 0.01, bevelEnabled: false };
+            const wingGeo = new THREE.ExtrudeGeometry(wingShape, extrudeSettings);
+            
+            // Màu sắc ngẫu nhiên
+            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
+            const wingMat = new THREE.MeshStandardMaterial({color: color, side: THREE.DoubleSide});
+
+            // Cánh trái
+            const leftWing = new THREE.Mesh(wingGeo, wingMat);
+            leftWing.rotation.x = Math.PI / 2;
+            leftWing.position.x = -0.01;
+            
+            // Cánh phải
+            const rightWing = new THREE.Mesh(wingGeo, wingMat);
+            rightWing.rotation.x = Math.PI / 2;
+            rightWing.rotation.z = Math.PI; // Lật ngược lại
+            rightWing.position.x = 0.01;
+            
+            butterflyGroup.add(leftWing);
+            butterflyGroup.add(rightWing);
+            
+            // Vị trí ban đầu ngẫu nhiên
+            let x = (Math.random() - 0.5) * 40;
+            let z = (Math.random() - 0.5) * 40;
+            let y = 1 + Math.random() * 3;
+            butterflyGroup.position.set(x, y, z);
+            
+            // Dữ liệu chuyển động
+            butterflyGroup.userData = {
+                speed: 0.5 + Math.random() * 0.5,
+                radius: 2 + Math.random() * 3,
+                initialPos: butterflyGroup.position.clone()
+            };
+            
+            envGroup.add(butterflyGroup);
+            butterflies.push(butterflyGroup);
+        }
+
+        // --- 3D HELPER FUNCTIONS ---
+
+        function updateTentMesh(a, h, L) {
+            while(tentGroup.children.length > 0){ 
+                tentGroup.remove(tentGroup.children[0]); 
+            }
+            tentGroup.rotation.y = -Math.PI / 4; 
+            tentGroup.position.set(-3, 0, 0); 
+            tentGroup.scale.set(1, 1, 1);
+
+            const shape = new THREE.Shape();
+            shape.moveTo(-a/2, 0);
+            shape.lineTo(a/2, 0);
+            shape.lineTo(0, h);
+            shape.lineTo(-a/2, 0);
+
+            const extrudeSettings = {
+                steps: 1,
+                depth: L,
+                bevelEnabled: false
+            };
+
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.center();
+            geometry.translate(0, h/2, 0);
+
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0xe67e22, 
+                roughness: 0.9,
+                side: THREE.DoubleSide
+            });
+
+            const tentMesh = new THREE.Mesh(geometry, material);
+            tentMesh.castShadow = true;
+            tentMesh.name = "tentMesh";
+            tentGroup.add(tentMesh);
+
+            const edges = new THREE.EdgesGeometry(geometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x2c3e50, linewidth: 2 }));
+            tentGroup.add(line);
+        }
+
+        function collapseTent() {
+            const tent = tentGroup.getObjectByName("tentMesh");
+            if (tent) {
+                let s = 1;
+                const interval = setInterval(() => {
+                    s -= 0.05;
+                    if (s <= 0.1) {
+                        s = 0.1;
+                        clearInterval(interval);
+                        tent.material.color.setHex(0xc0392b);
+                    }
+                    // Giữ nguyên vị trí X (-3) khi scale
+                    tentGroup.scale.set(1, s, 1);
+                }, 16);
+            }
+        }
+
+        function bounceTent() {
+            let s = 1;
+            let dir = 0.02;
+            let count = 0;
+            const interval = setInterval(() => {
+                s += dir;
+                if (s > 1.1) dir = -0.02;
+                if (s < 1.0) {
+                    dir = 0.02;
+                    count++;
+                }
+                tentGroup.scale.set(s, s, s);
+                if (count > 2) {
+                    clearInterval(interval);
+                    tentGroup.scale.set(1, 1, 1);
+                }
+            }, 16);
+        }
+
+        function resetTentPosition() {
+            tentGroup.scale.set(1, 1, 1);
+        }
+
+    </script>
+</body>
+</html>
