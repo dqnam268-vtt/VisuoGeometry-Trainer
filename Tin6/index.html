@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiệp Sĩ Tin Học 6: Giải Cứu Mainboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            background-color: #1a1a2e;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px #0f3460;
+            border: 4px solid #e94560;
+        }
+
+        canvas {
+            display: block;
+            background-color: #000;
+        }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .stat-box { color: #00ff00; }
+        .danger { color: #ff0000; }
+
+        /* Battle Modal */
+        #battle-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background: rgba(15, 52, 96, 0.95);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.2);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #battle-title {
+            font-family: 'Press Start 2P', cursive;
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        #question-text { font-size: 18px; margin-bottom: 20px; font-weight: bold; line-height: 1.4; }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #16213e;
+            color: #fff;
+            border: 1px solid #0f3460;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .answer-btn:hover { background: #00ff00; color: #000; font-weight: bold; }
+        
+        #victory-screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        #victory-screen h1 { font-family: 'Press Start 2P'; color: yellow; font-size: 30px; margin-bottom: 20px; text-align: center; line-height: 1.5;}
+        #restart-btn { padding: 15px 30px; font-family: 'Press Start 2P'; background: #e94560; border: none; color: white; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        
+        <div id="ui-layer">
+            <div class="stat-box">HP: <span id="hp-display">100</span>%</div>
+            <div class="stat-box">VIRUS: <span id="enemy-count">0</span></div>
+            <div class="stat-box">EXP: <span id="score-display">0</span></div>
+        </div>
+
+        <div id="battle-modal">
+            <div id="battle-title">⚠️ CẢNH BÁO VIRUS TẤN CÔNG! ⚠️</div>
+            <div id="question-text">Câu hỏi hiển thị ở đây...</div>
+            <div id="answers-area"></div>
+        </div>
+
+        <div id="victory-screen">
+            <h1 id="end-title">NHIỆM VỤ HOÀN THÀNH!</h1>
+            <p style="color:white; margin-bottom: 20px">Bạn đã bảo vệ thành công hệ thống máy tính.</p>
+            <button id="restart-btn" onclick="location.reload()">Chơi Lại</button>
+        </div>
+    </div>
+    
+    <div style="margin-top: 10px; color: #aaa; font-size: 14px;">
+        Dùng phím <b>Mũi Tên</b> hoặc <b>W A S D</b> để di chuyển. Chạm vào Virus (Màu Đỏ) để chiến đấu.
+    </div>
+
+<script>
+    // --- NGÂN HÀNG CÂU HỎI (Dữ liệu từ PDF) ---
+    //  Nội dung câu hỏi và  Đáp án
+    const questionBank = [
+        { q: "C1: Dữ liệu là gì?", a: ["Chỉ hiểu bởi người trình độ cao", "Giá trị số do con người nghĩ ra", "Con số, văn bản, hình ảnh, âm thanh", "Chỉ có trong máy tính"], correct: 2 }, // 1.C
+        { q: "C2: Thông tin là gì?", a: ["Vật mang tin", "Hiểu biết của con người", "Chữ viết, con số", "Sự hiểu biết về thế giới và chính mình"], correct: 3 }, // 2.D
+        { q: "C3: Giác quan thu nhận thông tin?", a: ["Thính, thị, xúc, khứu, đa giác", "Thính, thị, xúc, khứu, vị giác", "Thính, thị, xúc, khứu, tê giác", "Thính, thị, xúc, khứu, tam giác"], correct: 1 }, // 3.B (Sửa lỗi typo PDF: cảm giác -> vị giác cho hợp lý, hoặc giữ nguyên B nếu theo sát đề)
+        { q: "C4: Xử lý thông tin là gì?", a: ["Dùng giác quan lấy thông tin", "Vật mang tin", "Kết hợp dữ liệu + hiểu biết cũ -> thông tin mới", "Hiểu biết về thế giới"], correct: 2 }, // 4.C
+        { q: "C5: Quan hệ Thông tin - Dữ liệu?", a: ["Thông tin là kết quả xử lý dữ liệu", "Muốn có thông tin phải tốn tiền", "Không có sự phân biệt", "Dữ liệu chỉ có trong máy tính"], correct: 0 }, // 5.A
+        { q: "C6: Dữ liệu là gì (định nghĩa khác)?", a: ["Thông tin chứa trong vật mang tin", "Hiểu biết con người", "Vật mang thông tin", "Hình ảnh, âm thanh"], correct: 0 }, // 6.A
+        { q: "C7: Đĩa cứng, USB, CD có chức năng gì?", a: ["Thu nhận", "Xử lý", "Trao đổi", "Lưu trữ"], correct: 3 }, // 7.D
+        { q: "C8: Máy tính có thể ... thông tin?", a: ["Ghi lại", "Xử lý", "Truyền tải", "Sao chép"], correct: 1 }, // 8.B
+        { q: "C9: Đơn vị đo dung lượng tăng dần?", a: ["Byte, Bit, KB, MB", "Bit, Byte, MB, KB", "Bit, Byte, KB, MB", "MB, KB, Byte, Bit"], correct: 2 }, // 9.C
+        { q: "C10: Tệp (File) là gì?", a: ["Tập hợp thông tin tổ chức và đặt tên", "Một thư mục", "Một chương trình", "Một kí tự"], correct: 0 }, // 10.A
+        { q: "C11: Mục đích phân loại dữ liệu?", a: ["Dễ quản lý, tìm kiếm, sử dụng", "Làm máy nhanh hơn", "Giảm dung lượng", "Tạo thông tin mới"], correct: 0 }, // 11.A
+        { q: "C12: Tại sao âm thanh, hình ảnh tốn dung lượng hơn văn bản?", a: ["Nhiều màu sắc", "Phức tạp hơn", "Mã hóa nhiều thông tin chi tiết hơn", "Dễ bị mất"], correct: 2 }, // 12.C
+        { q: "C13: Thư mục (Folder) dùng để?", a: ["Chứa mã nhị phân", "Chứa tệp và thư mục con", "Là tệp văn bản", "Là bộ xử lý"], correct: 1 }, // 13.B
+        { q: "C14: Thư mục Anh nằm trong thư mục BaiTap gọi là?", a: ["Thư mục con", "Tệp tin", "Ổ đĩa", "Bộ nhớ"], correct: 0 }, // 14.A
+        { q: "C15: Lợi ích mạng máy tính?", a: ["Máy chạy nhanh hơn", "Chia sẻ dữ liệu", "Không bị virus", "Tiết kiệm điện"], correct: 1 }, // 15.B
+        { q: "C16: Vì sao mạng tiết kiệm chi phí?", a: ["Không cần mua máy mới", "Chia sẻ tài nguyên (máy in, phần mềm)", "Không cần Internet", "Giảm thời gian dùng máy"], correct: 1 }, // 16.B
+        { q: "C17: Mạng máy tính là tập hợp các máy tính được...?", a: ["Chia sẻ", "Kết nối", "Lưu trữ", "Xử lý"], correct: 1 }, // 17.B
+        { q: "C18: Thành phần mạng gồm?", a: ["Máy tính, máy in", "Thiết bị đầu cuối, thiết bị mạng, môi trường truyền dẫn", "Máy chủ, máy khách", "Dây điện, ổ cắm"], correct: 1 }, // 18.B
+        { q: "C19: Môi trường truyền dẫn có thể là dây hoặc...?", a: ["Sóng điện từ", "Sóng vô tuyến", "Sóng âm", "Sóng ánh sáng"], correct: 1 }, // 19.B
+        { q: "C20: Nhược điểm mạng có dây?", a: ["Dễ nhiễu", "Khó di chuyển thiết bị", "Tốc độ thấp", "Không bảo mật"], correct: 1 }, // 20.B
+        { q: "C21: Wi-Fi là kết nối gì?", a: ["Có dây", "Không dây", "Cáp quang", "Điện thoại"], correct: 1 }, // 21.B
+        { q: "C22: Mạng không dây dùng gì truyền dữ liệu?", a: ["Cáp mạng", "Sóng vô tuyến", "Dây điện", "Cáp quang"], correct: 1 }, // 22.B
+        { q: "C23: Để chia sẻ dữ liệu cần làm gì?", a: ["Kết nối mạng và thiết lập chia sẻ", "Dùng USB", "Dùng máy in", "Phần mềm đồ họa"], correct: 0 }, // 23.A
+        { q: "C24: Mạng yếu nên kiểm tra gì?", a: ["Máy in", "Tín hiệu Wi-Fi", "Ổ cứng", "RAM"], correct: 1 }, // 24.B
+        { q: "C25: Kiểm tra mạng không dây cần kiểm tra?", a: ["Tốc độ CPU", "Tín hiệu Wi-Fi", "RAM", "Ổ cứng"], correct: 1 }, // 25.B
+        { q: "C26: Thuật toán là gì?", a: ["Phần mềm", "Dãy các bước giải quyết vấn đề", "Thiết bị điện tử", "Ngôn ngữ lập trình"], correct: 1 }, // 26.B
+        { q: "C27: Thuật toán giúp gì?", a: ["Giải trí", "Giải quyết vấn đề có hệ thống", "Tăng tốc mạng", "Lưu dữ liệu"], correct: 1 }, // 27.B
+        { q: "C28: Vì sao cần thuật toán?", a: ["Giải quyết vấn đề rõ ràng, chính xác", "Giải trí", "Lưu dữ liệu", "Tăng tốc mạng"], correct: 0 }, // 28.A
+        { q: "C29: Muốn tìm số lớn nhất cần gì?", a: ["Phần mềm", "Thuật toán phù hợp", "Thiết bị", "Hình ảnh"], correct: 1 }, // 29.B
+        { q: "C30: Mô tả thuật toán bằng sơ đồ khối hoặc...?", a: ["Âm thanh", "Ngôn ngữ tự nhiên", "Hình ảnh", "Thiết bị"], correct: 1 }, // 30.B
+        { q: "C31: Cấu trúc tuần tự là?", a: ["Cơ bản nhất", "Phức tạp nhất", "Không dùng lập trình", "Chỉ dùng toán học"], correct: 0 }, // 31.A
+        { q: "C32: Tại sao mô tả thuật toán?", a: ["Để dễ hiểu và thực hiện", "Tăng tốc mạng", "Giải trí", "Lưu dữ liệu"], correct: 0 }, // 32.A
+        { q: "C33: Mô tả thuật toán bằng hình ảnh dùng gì?", a: ["Sơ đồ khối", "Văn bản", "Âm thanh", "Thiết bị"], correct: 0 }, // 33.A
+        { q: "C34: Xử lý tình huống có điều kiện dùng cấu trúc gì?", a: ["Rẽ nhánh", "Tuần tự", "Lặp", "Không cần"], correct: 0 }, // 34.A
+        { q: "C35: Rẽ nhánh xảy ra khi có?", a: ["Bước", "Lặp", "Ngẫu nhiên", "Điều kiện"], correct: 3 } // 35.D
+    ];
+
+    // --- GAME ENGINE ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const TILE_SIZE = 32;
+    const COLS = 20; // 640px
+    const ROWS = 15; // 480px
+
+    // Game State
+    let player = { x: 1, y: 1, hp: 100, maxHp: 100, exp: 0 };
+    let enemies = [];
+    let isInBattle = false;
+    let currentEnemyIndex = -1;
+    let questionsPool = [...questionBank]; // Copy để dùng dần
+    let level = 1;
+
+    // Map: 0 = sàn, 1 = tường
+    // Tạo map ngẫu nhiên đơn giản
+    let map = [];
+    function generateMap() {
+        map = [];
+        for(let y=0; y<ROWS; y++) {
+            let row = [];
+            for(let x=0; x<COLS; x++) {
+                if(x===0 || x===COLS-1 || y===0 || y===ROWS-1) row.push(1); // Tường bao quanh
+                else if (Math.random() < 0.1) row.push(1); // Chướng ngại vật ngẫu nhiên
+                else row.push(0);
+            }
+            map.push(row);
+        }
+        // Đảm bảo vị trí xuất phát an toàn
+        map[1][1] = 0; map[1][2] = 0; map[2][1] = 0;
+    }
+
+    function spawnEnemies(count) {
+        enemies = [];
+        for(let i=0; i<count; i++) {
+            let ex, ey;
+            do {
+                ex = Math.floor(Math.random() * (COLS-2)) + 1;
+                ey = Math.floor(Math.random() * (ROWS-2)) + 1;
+            } while (map[ey][ex] === 1 || (ex === player.x && ey === player.y));
+            
+            enemies.push({ x: ex, y: ey, active: true, type: 'bug' });
+        }
+        updateUI();
+    }
+
+    // --- DRAWING ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Vẽ Map
+        for(let y=0; y<ROWS; y++) {
+            for(let x=0; x<COLS; x++) {
+                if (map[y][x] === 1) {
+                    ctx.fillStyle = "#53354a"; // Tường
+                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    ctx.strokeStyle = "#2a2a40";
+                    ctx.strokeRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                } else {
+                    ctx.fillStyle = "#1a1a2e"; // Sàn
+                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        // Vẽ Virus (Enemy)
+        enemies.forEach(e => {
+            if(e.active) {
+                ctx.fillStyle = "#e94560"; // Đỏ
+                ctx.beginPath();
+                ctx.arc(e.x*TILE_SIZE + 16, e.y*TILE_SIZE + 16, 10, 0, Math.PI*2);
+                ctx.fill();
+                // Vẽ mắt virus
+                ctx.fillStyle = "white";
+                ctx.fillRect(e.x*TILE_SIZE+10, e.y*TILE_SIZE+12, 4, 4);
+                ctx.fillRect(e.x*TILE_SIZE+18, e.y*TILE_SIZE+12, 4, 4);
+            }
+        });
+
+        // Vẽ Player
+        ctx.fillStyle = "#00a8cc"; // Xanh
+        ctx.fillRect(player.x*TILE_SIZE + 4, player.y*TILE_SIZE + 4, 24, 24);
+        // Mũ hiệp sĩ
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(player.x*TILE_SIZE + 10, player.y*TILE_SIZE + 8, 12, 4);
+    }
+
+    // --- LOGIC ---
+    function movePlayer(dx, dy) {
+        if(isInBattle) return;
+        
+        const newX = player.x + dx;
+        const newY = player.y + dy;
+
+        // Check tường
+        if(map[newY][newX] === 1) return;
+
+        player.x = newX;
+        player.y = newY;
+
+        // Check va chạm Virus
+        for(let i=0; i<enemies.length; i++) {
+            if(enemies[i].active && enemies[i].x === player.x && enemies[i].y === player.y) {
+                startBattle(i);
+                break;
+            }
+        }
+        draw();
+    }
+
+    function startBattle(enemyIdx) {
+        isInBattle = true;
+        currentEnemyIndex = enemyIdx;
+        
+        // Chọn câu hỏi ngẫu nhiên chưa dùng hết
+        if(questionsPool.length === 0) questionsPool = [...questionBank]; // Reset nếu hết
+        const qIdx = Math.floor(Math.random() * questionsPool.length);
+        const question = questionsPool[qIdx];
+        
+        // Hiển thị UI
+        document.getElementById('battle-modal').style.display = 'block';
+        document.getElementById('question-text').innerText = question.q;
+        
+        const ansArea = document.getElementById('answers-area');
+        ansArea.innerHTML = '';
+        
+        question.a.forEach((ans, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.innerText = `➤ ${ans}`;
+            btn.onclick = () => resolveBattle(idx === question.correct, qIdx);
+            ansArea.appendChild(btn);
+        });
+    }
+
+    function resolveBattle(isCorrect, qPoolIdx) {
+        const feedback = isCorrect ? "CHÍNH XÁC! Tấn công thành công!" : "SAI RỒI! Bạn bị mất máu!";
+        alert(feedback); // Dùng alert đơn giản để dừng nhịp
+
+        if(isCorrect) {
+            enemies[currentEnemyIndex].active = false;
+            player.exp += 10;
+            // Xóa câu hỏi khỏi pool để không lặp lại ngay
+            questionsPool.splice(qPoolIdx, 1);
+        } else {
+            player.hp -= 20;
+            // Đẩy lùi người chơi
+            player.x = 1; player.y = 1; 
+        }
+
+        updateUI();
+        document.getElementById('battle-modal').style.display = 'none';
+        isInBattle = false;
+        draw();
+
+        checkGameStatus();
+    }
+
+    function checkGameStatus() {
+        if(player.hp <= 0) {
+            document.getElementById('end-title').innerText = "GAME OVER";
+            document.getElementById('end-title').style.color = "red";
+            document.querySelector('#victory-screen p').innerText = "Máy tính đã bị virus chiếm quyền kiểm soát.";
+            document.getElementById('victory-screen').style.display = 'flex';
+            return;
+        }
+
+        const remaining = enemies.filter(e => e.active).length;
+        if(remaining === 0) {
+            // Level up / Win
+            if(level < 3) {
+                level++;
+                alert(`LEVEL UP! Lên màn ${level}. Virus mạnh hơn (nhiều hơn)!`);
+                generateMap();
+                spawnEnemies(5 + level * 3); // Tăng số lượng địch
+                player.x = 1; player.y = 1;
+                draw();
+            } else {
+                document.getElementById('victory-screen').style.display = 'flex';
+            }
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('hp-display').innerText = player.hp;
+        document.getElementById('hp-display').className = player.hp < 40 ? 'danger' : 'stat-box';
+        document.getElementById('score-display').innerText = player.exp;
+        document.getElementById('enemy-count').innerText = enemies.filter(e => e.active).length;
+    }
+
+    // --- INPUT ---
+    window.addEventListener('keydown', (e) => {
+        switch(e.key) {
+            case 'ArrowUp': case 'w': case 'W': movePlayer(0, -1); break;
+            case 'ArrowDown': case 's': case 'S': movePlayer(0, 1); break;
+            case 'ArrowLeft': case 'a': case 'A': movePlayer(-1, 0); break;
+            case 'ArrowRight': case 'd': case 'D': movePlayer(1, 0); break;
+        }
+    });
+
+    // START
+    generateMap();
+    spawnEnemies(5);
+    draw();
+    updateUI();
+
+</script>
+</body>
+</html>
