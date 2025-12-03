@@ -3,386 +3,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiệp Sĩ Tin Học 6: Giải Cứu Mainboard</title>
+    <title>ARCADE TIN HỌC 6 - VÕ TRƯỜNG TOẢN</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff00;
+            --bg-color: #050510;
+        }
+
         body {
-            background-color: #1a1a2e;
+            background-color: var(--bg-color);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             overflow: hidden;
+            user-select: none;
         }
 
-        #game-container {
-            position: relative;
-            box-shadow: 0 0 20px #0f3460;
-            border: 4px solid #e94560;
+        /* --- MAIN MENU --- */
+        #main-menu {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(circle, #1a1a40 0%, #000000 100%);
+            z-index: 10;
         }
 
-        canvas {
-            display: block;
-            background-color: #000;
-        }
-
-        /* UI Overlay */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
+        h1.arcade-title {
             font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            text-shadow: 2px 2px #000;
+            color: var(--neon-blue);
+            text-shadow: 4px 4px var(--neon-pink);
+            font-size: 40px; margin-bottom: 50px; text-align: center;
+            line-height: 1.5;
         }
 
-        .stat-box { color: #00ff00; }
-        .danger { color: #ff0000; }
-
-        /* Battle Modal */
-        #battle-modal {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 500px;
-            background: rgba(15, 52, 96, 0.95);
-            border: 2px solid #00ff00;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.2);
-            font-family: 'Segoe UI', sans-serif;
+        .game-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
         }
 
-        #battle-title {
-            font-family: 'Press Start 2P', cursive;
-            color: #e94560;
-            margin-bottom: 20px;
-            font-size: 14px;
+        .game-card {
+            background: linear-gradient(45deg, #222, #333);
+            border: 2px solid var(--neon-blue);
+            padding: 20px; width: 250px; height: 150px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; border-radius: 15px;
+            box-shadow: 0 0 10px var(--neon-blue);
         }
 
-        #question-text { font-size: 18px; margin-bottom: 20px; font-weight: bold; line-height: 1.4; }
+        .game-card:hover { transform: scale(1.05); background: #444; box-shadow: 0 0 20px var(--neon-pink); border-color: var(--neon-pink); }
+        .game-icon { font-size: 40px; margin-bottom: 10px; }
+        .game-name { font-family: 'Press Start 2P', cursive; font-size: 12px; color: white; text-align: center; line-height: 1.5; }
 
-        .answer-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #16213e;
-            color: #fff;
-            border: 1px solid #0f3460;
-            cursor: pointer;
-            transition: 0.2s;
-            text-align: left;
-            border-radius: 5px;
+        /* --- COMMON GAME UI --- */
+        .game-container { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; }
+        .back-btn {
+            position: absolute; top: 10px; left: 10px;
+            background: #ff4444; color: white; border: none; padding: 10px 20px;
+            font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer; z-index: 100;
         }
 
-        .answer-btn:hover { background: #00ff00; color: #000; font-weight: bold; }
+        /* --- GAME 1: RACER --- */
+        #racer-canvas { display: block; margin: 0 auto; background: #333; border-left: 5px solid white; border-right: 5px solid white; }
+        #racer-ui { position: absolute; top: 10px; right: 20px; font-family: 'Press Start 2P'; color: yellow; }
+        #racer-question { 
+            position: absolute; top: 50px; left: 50%; transform: translateX(-50%); 
+            width: 80%; text-align: center; background: rgba(0,0,0,0.8); padding: 10px; 
+            border: 1px solid white; font-weight: bold; font-size: 18px;
+        }
+
+        /* --- GAME 2: BOMB --- */
+        #bomb-game { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #220000; }
+        .bomb-timer { font-size: 80px; font-family: 'Courier New', monospace; color: red; text-shadow: 0 0 20px red; margin-bottom: 20px; }
+        .bomb-question { font-size: 24px; margin-bottom: 30px; text-align: center; max-width: 800px; }
+        .wire-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .wire { 
+            padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 18px; 
+            border: 4px solid rgba(0,0,0,0.3); transition: 0.2s; color: white; min-width: 200px; text-align: center;
+        }
+        .wire:hover { transform: scale(1.1); }
         
-        #victory-screen {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+        /* --- GAME 3: MILLIONAIRE --- */
+        #mil-game { display: flex; flex-direction: column; height: 100%; background: #000044; }
+        .mil-screen { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .mil-question-box { background: #000; border: 2px solid white; padding: 20px; width: 80%; text-align: center; font-size: 22px; border-radius: 20px; margin-bottom: 20px;}
+        .mil-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; }
+        .mil-opt { 
+            background: linear-gradient(#000088, #000044); border: 2px solid #888; color: white; 
+            padding: 15px; border-radius: 30px; cursor: pointer; text-align: left; font-size: 18px; 
         }
-        #victory-screen h1 { font-family: 'Press Start 2P'; color: yellow; font-size: 30px; margin-bottom: 20px; text-align: center; line-height: 1.5;}
-        #restart-btn { padding: 15px 30px; font-family: 'Press Start 2P'; background: #e94560; border: none; color: white; cursor: pointer; }
+        .mil-opt:hover { background: #0000aa; border-color: orange; }
+        .mil-ladder { position: absolute; right: 0; top: 50px; width: 150px; background: rgba(0,0,0,0.5); padding: 10px; text-align: right; font-family: 'Press Start 2P'; font-size: 10px; }
+        .mil-ladder div { padding: 5px; color: orange; }
+        .mil-ladder .active { color: white; background: orange; }
+
+        /* --- GAME 4: LUCKY BOX --- */
+        #box-game { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #0d0d0d; }
+        .box-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .mystery-box { 
+            width: 100px; height: 100px; background: goldenrod; border: 4px solid #fff; 
+            display: flex; align-items: center; justify-content: center; font-size: 40px; 
+            cursor: pointer; border-radius: 10px; animation: float 3s infinite ease-in-out;
+        }
+        @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-10px);} 100% {transform: translateY(0px);} }
+        .box-modal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: #333; padding: 30px; border: 2px solid gold; border-radius: 10px; 
+            width: 500px; text-align: center; box-shadow: 0 0 50px gold; z-index: 200;
+        }
 
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="gameCanvas" width="640" height="480"></canvas>
-        
-        <div id="ui-layer">
-            <div class="stat-box">HP: <span id="hp-display">100</span>%</div>
-            <div class="stat-box">VIRUS: <span id="enemy-count">0</span></div>
-            <div class="stat-box">EXP: <span id="score-display">0</span></div>
-        </div>
-
-        <div id="battle-modal">
-            <div id="battle-title">⚠️ CẢNH BÁO VIRUS TẤN CÔNG! ⚠️</div>
-            <div id="question-text">Câu hỏi hiển thị ở đây...</div>
-            <div id="answers-area"></div>
-        </div>
-
-        <div id="victory-screen">
-            <h1 id="end-title">NHIỆM VỤ HOÀN THÀNH!</h1>
-            <p style="color:white; margin-bottom: 20px">Bạn đã bảo vệ thành công hệ thống máy tính.</p>
-            <button id="restart-btn" onclick="location.reload()">Chơi Lại</button>
+    <div id="main-menu">
+        <h1 class="arcade-title">ARCADE TIN HỌC 6<br><span style="font-size: 16px; color: white;">THCS VÕ TRƯỜNG TOẢN</span></h1>
+        <div class="game-grid">
+            <div class="game-card" onclick="startGame('racer')">
+                <div class="game-icon">🏎️</div>
+                <div class="game-name">ĐUA XE TỐC ĐỘ<br>(Phản xạ)</div>
+            </div>
+            <div class="game-card" onclick="startGame('bomb')">
+                <div class="game-icon">💣</div>
+                <div class="game-name">GỠ BOM<br>(Áp lực thời gian)</div>
+            </div>
+            <div class="game-card" onclick="startGame('millionaire')">
+                <div class="game-icon">💰</div>
+                <div class="game-name">AI LÀ TRIỆU PHÚ<br>(Kiến thức chuẩn)</div>
+            </div>
+            <div class="game-card" onclick="startGame('box')">
+                <div class="game-icon">🎁</div>
+                <div class="game-name">HỘP QUÀ BÍ ẨN<br>(May mắn)</div>
+            </div>
         </div>
     </div>
-    
-    <div style="margin-top: 10px; color: #aaa; font-size: 14px;">
-        Dùng phím <b>Mũi Tên</b> hoặc <b>W A S D</b> để di chuyển. Chạm vào Virus (Màu Đỏ) để chiến đấu.
+
+    <div id="game-racer" class="game-container">
+        <button class="back-btn" onclick="showMenu()">↩ QUAY LẠI</button>
+        <div id="racer-ui">Điểm: <span id="racer-score">0</span></div>
+        <div id="racer-question">Chuẩn bị...</div>
+        <canvas id="racer-canvas"></canvas>
+    </div>
+
+    <div id="game-bomb" class="game-container">
+        <button class="back-btn" onclick="showMenu()">↩ QUAY LẠI</button>
+        <div id="bomb-game">
+            <div style="color:white; margin-bottom:10px">CẮT DÂY (ĐÁP ÁN) ĐÚNG ĐỂ GỠ BOM!</div>
+            <div class="bomb-timer" id="bomb-timer">60.00</div>
+            <div class="bomb-question" id="bomb-q-text">Câu hỏi...</div>
+            <div class="wire-container" id="bomb-wires"></div>
+        </div>
+    </div>
+
+    <div id="game-millionaire" class="game-container">
+        <button class="back-btn" onclick="showMenu()">↩ QUAY LẠI</button>
+        <div id="mil-game">
+            <div class="mil-ladder" id="mil-ladder"></div>
+            <div class="mil-screen">
+                <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                    <div class="mil-question-box" id="mil-q-text">Câu hỏi...</div>
+                    <div class="mil-options" id="mil-options"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-box" class="game-container">
+        <button class="back-btn" onclick="showMenu()">↩ QUAY LẠI</button>
+        <div id="box-game">
+            <h2 style="color: gold; font-family: 'Press Start 2P'; margin-bottom: 30px;">CHỌN 1 HỘP QUÀ</h2>
+            <div class="box-grid" id="box-grid"></div>
+        </div>
+        <div id="box-modal" class="box-modal">
+            <h3 id="box-q-text" style="color:white; margin-bottom:20px;">Câu hỏi</h3>
+            <div id="box-options"></div>
+        </div>
     </div>
 
 <script>
-    // --- NGÂN HÀNG CÂU HỎI (Dữ liệu từ PDF) ---
-    //  Nội dung câu hỏi và  Đáp án
-    const questionBank = [
-        { q: "C1: Dữ liệu là gì?", a: ["Chỉ hiểu bởi người trình độ cao", "Giá trị số do con người nghĩ ra", "Con số, văn bản, hình ảnh, âm thanh", "Chỉ có trong máy tính"], correct: 2 }, // 1.C
-        { q: "C2: Thông tin là gì?", a: ["Vật mang tin", "Hiểu biết của con người", "Chữ viết, con số", "Sự hiểu biết về thế giới và chính mình"], correct: 3 }, // 2.D
-        { q: "C3: Giác quan thu nhận thông tin?", a: ["Thính, thị, xúc, khứu, đa giác", "Thính, thị, xúc, khứu, vị giác", "Thính, thị, xúc, khứu, tê giác", "Thính, thị, xúc, khứu, tam giác"], correct: 1 }, // 3.B (Sửa lỗi typo PDF: cảm giác -> vị giác cho hợp lý, hoặc giữ nguyên B nếu theo sát đề)
-        { q: "C4: Xử lý thông tin là gì?", a: ["Dùng giác quan lấy thông tin", "Vật mang tin", "Kết hợp dữ liệu + hiểu biết cũ -> thông tin mới", "Hiểu biết về thế giới"], correct: 2 }, // 4.C
-        { q: "C5: Quan hệ Thông tin - Dữ liệu?", a: ["Thông tin là kết quả xử lý dữ liệu", "Muốn có thông tin phải tốn tiền", "Không có sự phân biệt", "Dữ liệu chỉ có trong máy tính"], correct: 0 }, // 5.A
-        { q: "C6: Dữ liệu là gì (định nghĩa khác)?", a: ["Thông tin chứa trong vật mang tin", "Hiểu biết con người", "Vật mang thông tin", "Hình ảnh, âm thanh"], correct: 0 }, // 6.A
-        { q: "C7: Đĩa cứng, USB, CD có chức năng gì?", a: ["Thu nhận", "Xử lý", "Trao đổi", "Lưu trữ"], correct: 3 }, // 7.D
-        { q: "C8: Máy tính có thể ... thông tin?", a: ["Ghi lại", "Xử lý", "Truyền tải", "Sao chép"], correct: 1 }, // 8.B
-        { q: "C9: Đơn vị đo dung lượng tăng dần?", a: ["Byte, Bit, KB, MB", "Bit, Byte, MB, KB", "Bit, Byte, KB, MB", "MB, KB, Byte, Bit"], correct: 2 }, // 9.C
-        { q: "C10: Tệp (File) là gì?", a: ["Tập hợp thông tin tổ chức và đặt tên", "Một thư mục", "Một chương trình", "Một kí tự"], correct: 0 }, // 10.A
-        { q: "C11: Mục đích phân loại dữ liệu?", a: ["Dễ quản lý, tìm kiếm, sử dụng", "Làm máy nhanh hơn", "Giảm dung lượng", "Tạo thông tin mới"], correct: 0 }, // 11.A
-        { q: "C12: Tại sao âm thanh, hình ảnh tốn dung lượng hơn văn bản?", a: ["Nhiều màu sắc", "Phức tạp hơn", "Mã hóa nhiều thông tin chi tiết hơn", "Dễ bị mất"], correct: 2 }, // 12.C
-        { q: "C13: Thư mục (Folder) dùng để?", a: ["Chứa mã nhị phân", "Chứa tệp và thư mục con", "Là tệp văn bản", "Là bộ xử lý"], correct: 1 }, // 13.B
-        { q: "C14: Thư mục Anh nằm trong thư mục BaiTap gọi là?", a: ["Thư mục con", "Tệp tin", "Ổ đĩa", "Bộ nhớ"], correct: 0 }, // 14.A
-        { q: "C15: Lợi ích mạng máy tính?", a: ["Máy chạy nhanh hơn", "Chia sẻ dữ liệu", "Không bị virus", "Tiết kiệm điện"], correct: 1 }, // 15.B
-        { q: "C16: Vì sao mạng tiết kiệm chi phí?", a: ["Không cần mua máy mới", "Chia sẻ tài nguyên (máy in, phần mềm)", "Không cần Internet", "Giảm thời gian dùng máy"], correct: 1 }, // 16.B
-        { q: "C17: Mạng máy tính là tập hợp các máy tính được...?", a: ["Chia sẻ", "Kết nối", "Lưu trữ", "Xử lý"], correct: 1 }, // 17.B
-        { q: "C18: Thành phần mạng gồm?", a: ["Máy tính, máy in", "Thiết bị đầu cuối, thiết bị mạng, môi trường truyền dẫn", "Máy chủ, máy khách", "Dây điện, ổ cắm"], correct: 1 }, // 18.B
-        { q: "C19: Môi trường truyền dẫn có thể là dây hoặc...?", a: ["Sóng điện từ", "Sóng vô tuyến", "Sóng âm", "Sóng ánh sáng"], correct: 1 }, // 19.B
-        { q: "C20: Nhược điểm mạng có dây?", a: ["Dễ nhiễu", "Khó di chuyển thiết bị", "Tốc độ thấp", "Không bảo mật"], correct: 1 }, // 20.B
-        { q: "C21: Wi-Fi là kết nối gì?", a: ["Có dây", "Không dây", "Cáp quang", "Điện thoại"], correct: 1 }, // 21.B
-        { q: "C22: Mạng không dây dùng gì truyền dữ liệu?", a: ["Cáp mạng", "Sóng vô tuyến", "Dây điện", "Cáp quang"], correct: 1 }, // 22.B
-        { q: "C23: Để chia sẻ dữ liệu cần làm gì?", a: ["Kết nối mạng và thiết lập chia sẻ", "Dùng USB", "Dùng máy in", "Phần mềm đồ họa"], correct: 0 }, // 23.A
-        { q: "C24: Mạng yếu nên kiểm tra gì?", a: ["Máy in", "Tín hiệu Wi-Fi", "Ổ cứng", "RAM"], correct: 1 }, // 24.B
-        { q: "C25: Kiểm tra mạng không dây cần kiểm tra?", a: ["Tốc độ CPU", "Tín hiệu Wi-Fi", "RAM", "Ổ cứng"], correct: 1 }, // 25.B
-        { q: "C26: Thuật toán là gì?", a: ["Phần mềm", "Dãy các bước giải quyết vấn đề", "Thiết bị điện tử", "Ngôn ngữ lập trình"], correct: 1 }, // 26.B
-        { q: "C27: Thuật toán giúp gì?", a: ["Giải trí", "Giải quyết vấn đề có hệ thống", "Tăng tốc mạng", "Lưu dữ liệu"], correct: 1 }, // 27.B
-        { q: "C28: Vì sao cần thuật toán?", a: ["Giải quyết vấn đề rõ ràng, chính xác", "Giải trí", "Lưu dữ liệu", "Tăng tốc mạng"], correct: 0 }, // 28.A
-        { q: "C29: Muốn tìm số lớn nhất cần gì?", a: ["Phần mềm", "Thuật toán phù hợp", "Thiết bị", "Hình ảnh"], correct: 1 }, // 29.B
-        { q: "C30: Mô tả thuật toán bằng sơ đồ khối hoặc...?", a: ["Âm thanh", "Ngôn ngữ tự nhiên", "Hình ảnh", "Thiết bị"], correct: 1 }, // 30.B
-        { q: "C31: Cấu trúc tuần tự là?", a: ["Cơ bản nhất", "Phức tạp nhất", "Không dùng lập trình", "Chỉ dùng toán học"], correct: 0 }, // 31.A
-        { q: "C32: Tại sao mô tả thuật toán?", a: ["Để dễ hiểu và thực hiện", "Tăng tốc mạng", "Giải trí", "Lưu dữ liệu"], correct: 0 }, // 32.A
-        { q: "C33: Mô tả thuật toán bằng hình ảnh dùng gì?", a: ["Sơ đồ khối", "Văn bản", "Âm thanh", "Thiết bị"], correct: 0 }, // 33.A
-        { q: "C34: Xử lý tình huống có điều kiện dùng cấu trúc gì?", a: ["Rẽ nhánh", "Tuần tự", "Lặp", "Không cần"], correct: 0 }, // 34.A
-        { q: "C35: Rẽ nhánh xảy ra khi có?", a: ["Bước", "Lặp", "Ngẫu nhiên", "Điều kiện"], correct: 3 } // 35.D
+    [cite_start]// --- DATABASE CÂU HỎI (Lấy từ PDF) [cite: 10-215] ---
+    const rawQuestions = [
+        { q: "Dữ liệu là gì?", a: ["Con số, văn bản, hình ảnh", "Giá trị số do người nghĩ ra", "Chỉ hiểu bởi người giỏi", "Chỉ có trong máy tính"], c: 0 },
+        { q: "Thông tin là gì?", a: ["Hiểu biết về thế giới", "Vật mang tin", "Chữ viết", "Dữ liệu trong máy"], c: 0 },
+        { q: "Giác quan thu nhận thông tin?", a: ["Thính, thị, xúc, khứu, vị", "Thính, thị, đa giác", "Thính, thị, tê giác", "Thính, thị, xúc, giác quan thứ 6"], c: 0 },
+        { q: "Xử lý thông tin là?", a: ["Kết hợp dữ liệu ra thông tin mới", "Dùng giác quan", "Vật mang tin", "Lưu trữ dữ liệu"], c: 0 },
+        { q: "Quan hệ Thông tin - Dữ liệu?", a: ["Thông tin là kết quả xử lý dữ liệu", "Không có phân biệt", "Dữ liệu chỉ trong máy tính", "Muốn có tin phải mất tiền"], c: 0 },
+        { q: "Chức năng của USB, CD?", a: ["Lưu trữ thông tin", "Xử lý thông tin", "Thu nhận thông tin", "Trao đổi thông tin"], c: 0 },
+        { q: "Máy tính có thể ... thông tin?", a: ["Xử lý", "Ghi lại", "Truyền tải", "Tất cả đều đúng"], c: 0 }, // Modified slightly for gameplay
+        { q: "Thứ tự dung lượng tăng dần?", a: ["Bit, Byte, KB, MB", "Byte, Bit, KB, MB", "MB, KB, Byte, Bit", "Bit, Byte, MB, KB"], c: 0 },
+        { q: "Tệp (File) là gì?", a: ["Tập hợp thông tin có tên", "Một thư mục", "Một chương trình", "Một kí tự"], c: 0 },
+        { q: "Thư mục dùng để làm gì?", a: ["Chứa tệp và thư mục con", "Chứa mã nhị phân", "Là tệp văn bản", "Là bộ xử lý"], c: 0 },
+        { q: "Lợi ích mạng máy tính?", a: ["Chia sẻ dữ liệu", "Máy chạy nhanh hơn", "Diệt virus", "Tiết kiệm điện"], c: 0 },
+        { q: "Mạng máy tính là tập hợp máy tính...?", a: ["Được kết nối", "Được chia sẻ", "Được lưu trữ", "Được xử lý"], c: 0 },
+        { q: "Thành phần mạng gồm?", a: ["Thiết bị đầu cuối, mạng, truyền dẫn", "Máy tính, máy in", "Máy chủ, máy khách", "Dây điện, ổ cắm"], c: 0 },
+        { q: "Mạng không dây dùng gì?", a: ["Sóng vô tuyến", "Cáp quang", "Dây điện", "Cáp mạng"], c: 0 },
+        { q: "Wi-Fi là kết nối gì?", a: ["Không dây", "Có dây", "Cáp quang", "Điện thoại"], c: 0 },
+        { q: "Kiểm tra mạng Wi-Fi cần xem?", a: ["Tín hiệu Wi-Fi", "Máy in", "Ổ cứng", "RAM"], c: 0 },
+        { q: "Thuật toán là gì?", a: ["Dãy bước giải quyết vấn đề", "Phần mềm", "Thiết bị", "Ngôn ngữ lập trình"], c: 0 },
+        { q: "Thuật toán giúp gì?", a: ["Giải quyết vấn đề có hệ thống", "Giải trí", "Tăng tốc mạng", "Lưu dữ liệu"], c: 0 },
+        { q: "Mô tả thuật toán bằng?", a: ["Sơ đồ khối hoặc ngôn ngữ tự nhiên", "Âm thanh", "Hình ảnh", "Thiết bị"], c: 0 },
+        { q: "Cấu trúc tuần tự là?", a: ["Cơ bản nhất", "Phức tạp nhất", "Không dùng lập trình", "Chỉ dùng toán"], c: 0 },
+        { q: "Rẽ nhánh xảy ra khi có?", a: ["Điều kiện", "Bước", "Lặp", "Ngẫu nhiên"], c: 0 },
+        { q: "Hình ảnh tốn dung lượng hơn văn bản vì?", a: ["Mã hóa nhiều chi tiết hơn", "Nhiều màu", "Phức tạp hơn", "Dễ mất"], c: 0 }
     ];
 
-    // --- GAME ENGINE ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const TILE_SIZE = 32;
-    const COLS = 20; // 640px
-    const ROWS = 15; // 480px
-
-    // Game State
-    let player = { x: 1, y: 1, hp: 100, maxHp: 100, exp: 0 };
-    let enemies = [];
-    let isInBattle = false;
-    let currentEnemyIndex = -1;
-    let questionsPool = [...questionBank]; // Copy để dùng dần
-    let level = 1;
-
-    // Map: 0 = sàn, 1 = tường
-    // Tạo map ngẫu nhiên đơn giản
-    let map = [];
-    function generateMap() {
-        map = [];
-        for(let y=0; y<ROWS; y++) {
-            let row = [];
-            for(let x=0; x<COLS; x++) {
-                if(x===0 || x===COLS-1 || y===0 || y===ROWS-1) row.push(1); // Tường bao quanh
-                else if (Math.random() < 0.1) row.push(1); // Chướng ngại vật ngẫu nhiên
-                else row.push(0);
-            }
-            map.push(row);
-        }
-        // Đảm bảo vị trí xuất phát an toàn
-        map[1][1] = 0; map[1][2] = 0; map[2][1] = 0;
+    let currentQuestions = [];
+    
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
     }
 
-    function spawnEnemies(count) {
-        enemies = [];
-        for(let i=0; i<count; i++) {
-            let ex, ey;
-            do {
-                ex = Math.floor(Math.random() * (COLS-2)) + 1;
-                ey = Math.floor(Math.random() * (ROWS-2)) + 1;
-            } while (map[ey][ex] === 1 || (ex === player.x && ey === player.y));
+    function getShuffledQuestion() {
+        if (currentQuestions.length === 0) currentQuestions = [...rawQuestions];
+        const qIndex = Math.floor(Math.random() * currentQuestions.length);
+        const q = currentQuestions[qIndex];
+        // Shuffle answers logic
+        let answers = q.a.map((ans, i) => ({ text: ans, correct: i === q.c }));
+        answers = shuffle(answers);
+        return { q: q.q, answers: answers };
+    }
+
+    function showMenu() {
+        stopAllGames();
+        document.querySelectorAll('.game-container').forEach(el => el.style.display = 'none');
+        document.getElementById('main-menu').style.display = 'flex';
+    }
+
+    function startGame(gameId) {
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('game-' + gameId).style.display = 'block';
+        
+        if (gameId === 'racer') initRacer();
+        if (gameId === 'bomb') initBomb();
+        if (gameId === 'millionaire') initMillionaire();
+        if (gameId === 'box') initBox();
+    }
+
+    function stopAllGames() {
+        // Stop loops/timers
+        cancelAnimationFrame(racerReq);
+        clearInterval(bombInterval);
+    }
+
+    /* ================= GAME 1: RACER LOGIC ================= */
+    let racerReq;
+    function initRacer() {
+        const canvas = document.getElementById('racer-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400; canvas.height = 600;
+        
+        let score = 0;
+        let playerX = 1; // Lanes: 0, 1, 2
+        let speed = 3;
+        let lanes = [66, 200, 333]; // X coords
+        let obstacles = [];
+        let currentQ = null;
+        let frame = 0;
+
+        // Controls
+        document.onkeydown = (e) => {
+            if (e.key === 'ArrowLeft' && playerX > 0) playerX--;
+            if (e.key === 'ArrowRight' && playerX < 2) playerX++;
+        };
+
+        function spawnObstacles() {
+            currentQ = getShuffledQuestion();
+            document.getElementById('racer-question').innerText = currentQ.q;
             
-            enemies.push({ x: ex, y: ey, active: true, type: 'bug' });
-        }
-        updateUI();
-    }
-
-    // --- DRAWING ---
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Vẽ Map
-        for(let y=0; y<ROWS; y++) {
-            for(let x=0; x<COLS; x++) {
-                if (map[y][x] === 1) {
-                    ctx.fillStyle = "#53354a"; // Tường
-                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                    ctx.strokeStyle = "#2a2a40";
-                    ctx.strokeRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                } else {
-                    ctx.fillStyle = "#1a1a2e"; // Sàn
-                    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
+            // Create 3 "cars" falling, one for each lane
+            for(let i=0; i<3; i++) {
+                obstacles.push({
+                    lane: i,
+                    y: -100,
+                    text: currentQ.answers[i] ? currentQ.answers[i].text : "---",
+                    isCorrect: currentQ.answers[i] ? currentQ.answers[i].correct : false
+                });
             }
         }
 
-        // Vẽ Virus (Enemy)
-        enemies.forEach(e => {
-            if(e.active) {
-                ctx.fillStyle = "#e94560"; // Đỏ
-                ctx.beginPath();
-                ctx.arc(e.x*TILE_SIZE + 16, e.y*TILE_SIZE + 16, 10, 0, Math.PI*2);
-                ctx.fill();
-                // Vẽ mắt virus
+        spawnObstacles();
+
+        function loop() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            // Draw Road
+            ctx.fillStyle = "#555"; ctx.fillRect(0,0,400,600);
+            ctx.fillStyle = "#fff"; 
+            for(let i=0; i<600; i+=40) { ctx.fillRect(133, i + (frame%40) - 40, 4, 20); ctx.fillRect(266, i + (frame%40) - 40, 4, 20); }
+
+            // Draw Player
+            ctx.fillStyle = "cyan";
+            ctx.shadowBlur = 10; ctx.shadowColor = "cyan";
+            ctx.fillRect(lanes[playerX]-25, 500, 50, 80);
+            ctx.shadowBlur = 0;
+
+            // Draw Obstacles (Answers)
+            let passed = false;
+            for(let i=0; i<obstacles.length; i++) {
+                let obs = obstacles[i];
+                obs.y += speed;
+                
+                // Draw Box
+                ctx.fillStyle = obs.isCorrect ? "#00aa00" : "#aa0000"; // Cheat color slightly visible? No, let's make them uniform until hit or make them random colors
+                ctx.fillStyle = "#333";
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.fillRect(lanes[obs.lane]-40, obs.y, 80, 60);
+                ctx.strokeRect(lanes[obs.lane]-40, obs.y, 80, 60);
+
+                // Text
                 ctx.fillStyle = "white";
-                ctx.fillRect(e.x*TILE_SIZE+10, e.y*TILE_SIZE+12, 4, 4);
-                ctx.fillRect(e.x*TILE_SIZE+18, e.y*TILE_SIZE+12, 4, 4);
+                ctx.font = "10px Arial";
+                ctx.textAlign = "center";
+                // Wrap text logic simplified
+                ctx.fillText(obs.text.substring(0, 15), lanes[obs.lane], obs.y + 20);
+                ctx.fillText(obs.text.substring(15, 30), lanes[obs.lane], obs.y + 35);
+
+                // Collision
+                if (obs.y > 450 && obs.y < 580 && playerX === obs.lane) {
+                    if (obs.isCorrect) {
+                        score += 10;
+                        obstacles = []; // Clear
+                        spawnObstacles();
+                    } else {
+                        score = Math.max(0, score - 5);
+                        obstacles = [];
+                        spawnObstacles();
+                    }
+                }
+                
+                if (obs.y > 650) passed = true;
             }
-        });
 
-        // Vẽ Player
-        ctx.fillStyle = "#00a8cc"; // Xanh
-        ctx.fillRect(player.x*TILE_SIZE + 4, player.y*TILE_SIZE + 4, 24, 24);
-        // Mũ hiệp sĩ
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(player.x*TILE_SIZE + 10, player.y*TILE_SIZE + 8, 12, 4);
-    }
-
-    // --- LOGIC ---
-    function movePlayer(dx, dy) {
-        if(isInBattle) return;
-        
-        const newX = player.x + dx;
-        const newY = player.y + dy;
-
-        // Check tường
-        if(map[newY][newX] === 1) return;
-
-        player.x = newX;
-        player.y = newY;
-
-        // Check va chạm Virus
-        for(let i=0; i<enemies.length; i++) {
-            if(enemies[i].active && enemies[i].x === player.x && enemies[i].y === player.y) {
-                startBattle(i);
-                break;
+            if (passed) {
+                obstacles = [];
+                spawnObstacles();
             }
+
+            document.getElementById('racer-score').innerText = score;
+            frame+= speed;
+            racerReq = requestAnimationFrame(loop);
         }
-        draw();
+        loop();
     }
 
-    function startBattle(enemyIdx) {
-        isInBattle = true;
-        currentEnemyIndex = enemyIdx;
-        
-        // Chọn câu hỏi ngẫu nhiên chưa dùng hết
-        if(questionsPool.length === 0) questionsPool = [...questionBank]; // Reset nếu hết
-        const qIdx = Math.floor(Math.random() * questionsPool.length);
-        const question = questionsPool[qIdx];
-        
-        // Hiển thị UI
-        document.getElementById('battle-modal').style.display = 'block';
-        document.getElementById('question-text').innerText = question.q;
-        
-        const ansArea = document.getElementById('answers-area');
-        ansArea.innerHTML = '';
-        
-        question.a.forEach((ans, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'answer-btn';
-            btn.innerText = `➤ ${ans}`;
-            btn.onclick = () => resolveBattle(idx === question.correct, qIdx);
-            ansArea.appendChild(btn);
-        });
-    }
+    /* ================= GAME 2: BOMB LOGIC ================= */
+    let bombInterval;
+    function initBomb() {
+        let time = 60.0;
+        const timerEl = document.getElementById('bomb-timer');
+        const wireCont = document.getElementById('bomb-wires');
+        const qText = document.getElementById('bomb-q-text');
 
-    function resolveBattle(isCorrect, qPoolIdx) {
-        const feedback = isCorrect ? "CHÍNH XÁC! Tấn công thành công!" : "SAI RỒI! Bạn bị mất máu!";
-        alert(feedback); // Dùng alert đơn giản để dừng nhịp
-
-        if(isCorrect) {
-            enemies[currentEnemyIndex].active = false;
-            player.exp += 10;
-            // Xóa câu hỏi khỏi pool để không lặp lại ngay
-            questionsPool.splice(qPoolIdx, 1);
-        } else {
-            player.hp -= 20;
-            // Đẩy lùi người chơi
-            player.x = 1; player.y = 1; 
+        function loadQ() {
+            const data = getShuffledQuestion();
+            qText.innerText = data.q;
+            wireCont.innerHTML = '';
+            
+            // Colors for wires
+            const colors = ["#d32f2f", "#1976d2", "#388e3c", "#fbc02d"];
+            
+            data.answers.forEach((ans, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'wire';
+                btn.innerText = ans.text;
+                btn.style.borderColor = colors[idx % 4];
+                btn.style.color = colors[idx % 4];
+                
+                btn.onclick = () => {
+                    if(ans.correct) {
+                        // Correct
+                        time = Math.min(60, time + 5);
+                        timerEl.style.color = "#00ff00";
+                        setTimeout(() => timerEl.style.color = "red", 200);
+                        loadQ();
+                    } else {
+                        // Wrong
+                        time -= 10;
+                        timerEl.style.color = "white";
+                        setTimeout(() => timerEl.style.color = "red", 200);
+                    }
+                };
+                wireCont.appendChild(btn);
+            });
         }
 
-        updateUI();
-        document.getElementById('battle-modal').style.display = 'none';
-        isInBattle = false;
-        draw();
-
-        checkGameStatus();
-    }
-
-    function checkGameStatus() {
-        if(player.hp <= 0) {
-            document.getElementById('end-title').innerText = "GAME OVER";
-            document.getElementById('end-title').style.color = "red";
-            document.querySelector('#victory-screen p').innerText = "Máy tính đã bị virus chiếm quyền kiểm soát.";
-            document.getElementById('victory-screen').style.display = 'flex';
-            return;
-        }
-
-        const remaining = enemies.filter(e => e.active).length;
-        if(remaining === 0) {
-            // Level up / Win
-            if(level < 3) {
-                level++;
-                alert(`LEVEL UP! Lên màn ${level}. Virus mạnh hơn (nhiều hơn)!`);
-                generateMap();
-                spawnEnemies(5 + level * 3); // Tăng số lượng địch
-                player.x = 1; player.y = 1;
-                draw();
-            } else {
-                document.getElementById('victory-screen').style.display = 'flex';
+        loadQ();
+        clearInterval(bombInterval);
+        bombInterval = setInterval(() => {
+            time -= 0.1;
+            timerEl.innerText = time.toFixed(1);
+            if(time <= 0) {
+                clearInterval(bombInterval);
+                alert("BOM ĐÃ NỔ! Hết giờ.");
+                showMenu();
             }
-        }
+        }, 100);
     }
 
-    function updateUI() {
-        document.getElementById('hp-display').innerText = player.hp;
-        document.getElementById('hp-display').className = player.hp < 40 ? 'danger' : 'stat-box';
-        document.getElementById('score-display').innerText = player.exp;
-        document.getElementById('enemy-count').innerText = enemies.filter(e => e.active).length;
+    /* ================= GAME 3: MILLIONAIRE LOGIC ================= */
+    function initMillionaire() {
+        const ladderEl = document.getElementById('mil-ladder');
+        const qText = document.getElementById('mil-q-text');
+        const optCont = document.getElementById('mil-options');
+        let level = 1;
+        
+        // Build Ladder
+        ladderEl.innerHTML = '';
+        for(let i=10; i>=1; i--) {
+            ladderEl.innerHTML += `<div id="lvl-${i}">Câu ${i}</div>`;
+        }
+
+        function loadLevel() {
+            // Update Ladder Visual
+            document.querySelectorAll('.mil-ladder div').forEach(d => d.classList.remove('active'));
+            const activeDiv = document.getElementById(`lvl-${level}`);
+            if(activeDiv) activeDiv.classList.add('active');
+
+            if(level > 10) {
+                alert("CHÚC MỪNG! BẠN LÀ TRIỆU PHÚ KIẾN THỨC!");
+                showMenu();
+                return;
+            }
+
+            const data = getShuffledQuestion();
+            qText.innerText = `Câu ${level}: ` + data.q;
+            optCont.innerHTML = '';
+
+            data.answers.forEach(ans => {
+                const btn = document.createElement('div');
+                btn.className = 'mil-opt';
+                btn.innerText = ans.text;
+                btn.onclick = () => {
+                    if(ans.correct) {
+                        level++;
+                        loadLevel();
+                    } else {
+                        alert("Sai rồi! Bạn dừng cuộc chơi tại câu " + level);
+                        showMenu();
+                    }
+                };
+                optCont.appendChild(btn);
+            });
+        }
+        loadLevel();
     }
 
-    // --- INPUT ---
-    window.addEventListener('keydown', (e) => {
-        switch(e.key) {
-            case 'ArrowUp': case 'w': case 'W': movePlayer(0, -1); break;
-            case 'ArrowDown': case 's': case 'S': movePlayer(0, 1); break;
-            case 'ArrowLeft': case 'a': case 'A': movePlayer(-1, 0); break;
-            case 'ArrowRight': case 'd': case 'D': movePlayer(1, 0); break;
-        }
-    });
+    /* ================= GAME 4: LUCKY BOX LOGIC ================= */
+    function initBox() {
+        const grid = document.getElementById('box-grid');
+        const modal = document.getElementById('box-modal');
+        const qText = document.getElementById('box-q-text');
+        const optCont = document.getElementById('box-options');
+        
+        grid.innerHTML = '';
+        modal.style.display = 'none';
 
-    // START
-    generateMap();
-    spawnEnemies(5);
-    draw();
-    updateUI();
+        // 16 Boxes
+        for(let i=0; i<16; i++) {
+            const box = document.createElement('div');
+            box.className = 'mystery-box';
+            box.innerText = "?";
+            box.onclick = () => openBox(box);
+            grid.appendChild(box);
+        }
+
+        function openBox(boxElement) {
+            if(boxElement.style.background === 'gray') return; // Opened
+
+            const data = getShuffledQuestion();
+            modal.style.display = 'block';
+            qText.innerText = data.q;
+            optCont.innerHTML = '';
+
+            data.answers.forEach(ans => {
+                const btn = document.createElement('button');
+                btn.style.display = 'block';
+                btn.style.width = '100%';
+                btn.style.margin = '10px 0';
+                btn.style.padding = '10px';
+                btn.style.cursor = 'pointer';
+                btn.style.background = '#444';
+                btn.style.color = 'white';
+                btn.style.border = '1px solid gold';
+                btn.innerText = ans.text;
+
+                btn.onclick = () => {
+                    if(ans.correct) {
+                        alert("CHÍNH XÁC! Bạn nhận được một phần quà ảo!");
+                        boxElement.style.background = 'gray';
+                        boxElement.innerText = "🎁";
+                        boxElement.style.animation = 'none';
+                    } else {
+                        alert("Sai rồi! Hộp quà bị khóa.");
+                        boxElement.style.background = 'red';
+                        boxElement.innerText = "🔒";
+                    }
+                    modal.style.display = 'none';
+                };
+                optCont.appendChild(btn);
+            });
+        }
+    }
 
 </script>
 </body>
