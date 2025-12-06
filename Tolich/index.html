@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng Lịch Để Bàn 3D - Tết & Giáng Sinh</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #f0f0f0; font-family: sans-serif; }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #333;
+            pointer-events: none;
+            z-index: 10;
+            background: rgba(255,255,255,0.7);
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>Mô phỏng Lịch Để Bàn (Tháng 1 & Tháng 12)</h2>
+        <p>Dùng chuột trái để xoay - Chuột phải để di chuyển - Con lăn để phóng to</p>
+    </div>
+    
+    <!-- Import Three.js từ CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Cấu hình Scene ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0); 
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(25, 20, 30); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; 
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // --- Ánh sáng ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- Thông số lịch ---
+        const width = 16;       
+        const slantHeight = 15; 
+        const baseDepth = 7;    
+
+        const halfBase = baseDepth / 2;
+        const verticalHeight = Math.sqrt(Math.pow(slantHeight, 2) - Math.pow(halfBase, 2));
+        const tiltAngle = Math.asin(halfBase / slantHeight);
+
+        // --- Tạo Vật liệu ---
+        const coverMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xB22222, // Màu Đỏ Đô
+            roughness: 0.6,
+            side: THREE.DoubleSide
+        });
+        
+        const whiteMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.5
+        });
+
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            color: 0x111111,
+            metalness: 0.7,
+            roughness: 0.2
+        });
+
+        // --- HÀM VẼ HOA MAI (Tháng 1) ---
+        function drawApricotBlossom(ctx, x, y) {
+            ctx.beginPath();
+            ctx.moveTo(0, 240);
+            ctx.bezierCurveTo(150, 200, 200, 280, 400, 100);
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = '#5D4037'; 
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(250, 180);
+            ctx.quadraticCurveTo(300, 150, 350, 180);
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            function drawFlower(cx, cy) {
+                ctx.fillStyle = '#FFD700'; 
+                for(let i=0; i<5; i++){
+                    ctx.beginPath();
+                    const angle = (i * 2 * Math.PI) / 5;
+                    const px = cx + Math.cos(angle) * 15;
+                    const py = cy + Math.sin(angle) * 15;
+                    ctx.arc(px, py, 10, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#FF4500';
+                ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.fill();
+            }
+
+            drawFlower(400, 100); drawFlower(350, 180); drawFlower(250, 180);
+            drawFlower(300, 120); drawFlower(150, 210); drawFlower(80, 230);
+            
+            ctx.fillStyle = '#90EE90'; 
+            ctx.beginPath(); ctx.arc(380, 80, 4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(320, 160, 4, 0, Math.PI*2); ctx.fill();
+        }
+
+        // --- HÀM VẼ CÂY THÔNG (Tháng 12) ---
+        function drawPineTree(ctx) {
+            // Vẽ tuyết nền
+            ctx.fillStyle = "#E0F7FA"; // Màu tuyết
+            ctx.beginPath();
+            ctx.ellipse(256, 220, 200, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Thân cây
+            ctx.fillStyle = "#5D4037";
+            ctx.fillRect(236, 180, 40, 40);
+
+            // Tán lá
+            ctx.fillStyle = "#2E7D32"; // Xanh lá đậm
+            // Tầng 1 (dưới cùng)
+            ctx.beginPath(); ctx.moveTo(156, 180); ctx.lineTo(356, 180); ctx.lineTo(256, 100); ctx.fill();
+            // Tầng 2
+            ctx.beginPath(); ctx.moveTo(176, 120); ctx.lineTo(336, 120); ctx.lineTo(256, 60); ctx.fill();
+            // Tầng 3 (trên cùng)
+            ctx.beginPath(); ctx.moveTo(196, 70); ctx.lineTo(316, 70); ctx.lineTo(256, 30); ctx.fill();
+
+            // Tuyết rơi
+            ctx.fillStyle = "white";
+            for(let i=0; i<30; i++) {
+                const sx = Math.random() * 472 + 20;
+                const sy = Math.random() * 220 + 20;
+                ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI*2); ctx.fill();
+            }
+
+            // Ngôi sao
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath(); ctx.arc(256, 30, 8, 0, Math.PI*2); ctx.fill();
+        }
+
+        // --- HÀM TẠO TEXTURE TRANG LỊCH ---
+        function createCalendarTexture(monthIndex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Nền trắng
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 512, 512);
+
+            // 2. Phần Hình ảnh (Top half)
+            const colors = ['#FF9A9E', '#FECFEF', '#A18CD1', '#FBC2EB', '#8FD3F4', '#84FAB0', '#ffc3a0', '#ffafbd', '#c9ffbf', '#ffcc33', '#2193b0', '#6dd5ed'];
+            const color = colors[monthIndex % 12];
+            
+            // Vẽ nền trời
+            ctx.fillStyle = color;
+            ctx.fillRect(20, 20, 472, 220); 
+
+            if (monthIndex % 12 === 0) { 
+                // --- THÁNG 1: HOA MAI ---
+                ctx.fillStyle = 'rgba(255,0,0,0.1)';
+                ctx.beginPath(); ctx.arc(100, 80, 50, 0, Math.PI*2); ctx.fill();
+                drawApricotBlossom(ctx, 20, 20);
+                
+                ctx.font = 'italic bold 25px Arial';
+                ctx.fillStyle = '#d00';
+                ctx.textAlign = 'right';
+                ctx.fillText("Chúc Mừng Năm Mới", 470, 60);
+
+            } else if (monthIndex % 12 === 11) {
+                // --- THÁNG 12: CÂY THÔNG ---
+                drawPineTree(ctx);
+                
+                ctx.font = 'italic bold 25px Arial';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'left';
+                ctx.fillText("Merry Christmas", 30, 60);
+
+            } else {
+                // --- CÁC THÁNG KHÁC ---
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.beginPath(); ctx.arc(400, 80, 40, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.9)'; 
+                ctx.beginPath(); ctx.moveTo(20, 240); ctx.lineTo(150, 120); ctx.lineTo(300, 240); ctx.fill(); 
+                ctx.beginPath(); ctx.moveTo(200, 240); ctx.lineTo(350, 100); ctx.lineTo(492, 240); ctx.fill(); 
+            }
+
+            // Viền khung tranh
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(20, 20, 472, 220);
+
+            // 3. Tên Tháng
+            // Tháng 1 đỏ, Tháng 12 xanh lá đậm, còn lại đen
+            if (monthIndex % 12 === 0) ctx.fillStyle = '#d00';
+            else if (monthIndex % 12 === 11) ctx.fillStyle = '#006400';
+            else ctx.fillStyle = '#000';
+
+            ctx.font = 'bold 50px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`THÁNG ${monthIndex + 1}`, 256, 300);
+
+            // 4. Lưới ngày
+            ctx.font = 'bold 24px monospace';
+            ctx.fillStyle = '#333';
+            let startX = 60;
+            let startY = 350;
+            let day = 1;
+            
+            const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            for(let i=0; i<7; i++) {
+                 ctx.fillStyle = (i===0) ? '#d00' : '#000';
+                 ctx.fillText(days[i], startX + i * 60, startY - 30);
+            }
+
+            for(let row = 0; row < 5; row++) {
+                for(let col = 0; col < 7; col++) {
+                    if (day > 30) break;
+                    if (col === 0) ctx.fillStyle = '#d00'; 
+                    else ctx.fillStyle = '#333';
+                    
+                    ctx.fillText(day.toString(), startX + col * 60, startY + row * 40);
+                    day++;
+                }
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        const calendarGroup = new THREE.Group();
+        scene.add(calendarGroup);
+
+        // --- KHUNG LỊCH (BÌA) ---
+        const thickness = 0.2;
+        const coverGeo = new THREE.BoxGeometry(width, slantHeight, thickness);
+
+        const frontCover = new THREE.Mesh(coverGeo, coverMaterial);
+        frontCover.position.y = verticalHeight / 2;
+        frontCover.position.z = halfBase / 2;
+        frontCover.rotation.x = -tiltAngle; 
+        frontCover.castShadow = true;
+        frontCover.receiveShadow = true;
+        calendarGroup.add(frontCover);
+
+        const backCover = new THREE.Mesh(coverGeo, coverMaterial);
+        backCover.position.y = verticalHeight / 2;
+        backCover.position.z = -halfBase / 2;
+        backCover.rotation.x = tiltAngle; 
+        backCover.castShadow = true;
+        backCover.receiveShadow = true;
+        calendarGroup.add(backCover);
+
+        const bottomGeo = new THREE.BoxGeometry(width, baseDepth - 0.5, thickness);
+        const bottomCover = new THREE.Mesh(bottomGeo, coverMaterial);
+        bottomCover.rotation.x = -Math.PI / 2;
+        bottomCover.position.y = 0.1;
+        bottomCover.receiveShadow = true;
+        calendarGroup.add(bottomCover);
+
+        // --- CÁC TRANG LỊCH ---
+        function addPages(isFrontSide) {
+            const pageCount = 6;
+            
+            // LOGIC SẮP XẾP:
+            for(let i = 0; i < pageCount; i++) {
+                let currentMonth;
+                if (isFrontSide) {
+                     // Mặt trước: Tháng 1 nằm trên cùng (Index 0)
+                     // i=5 (ngoài cùng) -> 0
+                     currentMonth = 5 - i; 
+                } else {
+                     // Mặt sau: Tháng 12 nằm trên cùng (Index 11)
+                     // i=5 (ngoài cùng) -> 11 (Tháng 12)
+                     // i=0 (trong cùng) -> 6 (Tháng 7)
+                     currentMonth = 6 + i;
+                }
+
+                const texture = createCalendarTexture(currentMonth);
+                const pageMat = new THREE.MeshBasicMaterial({ map: texture }); 
+                
+                const materials = [
+                    whiteMaterial, whiteMaterial, 
+                    whiteMaterial, whiteMaterial, 
+                    pageMat,       pageMat        
+                ];
+
+                const page = new THREE.Mesh(new THREE.BoxGeometry(width - 1, slantHeight - 1, 0.05), materials);
+
+                const zOffset = 0.2 + (i * 0.06); 
+                
+                if (isFrontSide) {
+                    page.position.y = verticalHeight / 2 - 0.5;
+                    page.position.z = (halfBase / 2) + zOffset; 
+                    page.rotation.x = -tiltAngle;
+                } else {
+                    page.position.y = verticalHeight / 2 - 0.5;
+                    page.position.z = -(halfBase / 2) - zOffset; 
+                    page.rotation.x = tiltAngle; 
+                    page.rotation.y = Math.PI; 
+                }
+                calendarGroup.add(page);
+            }
+        }
+        addPages(true);  
+        addPages(false); 
+
+        // --- LÒ XO ---
+        const ringCount = 12;
+        const ringRadius = 0.6;
+        const tubeRadius = 0.08;
+        const startX = -width / 2 + 1;
+        const stepX = (width - 2) / (ringCount - 1);
+        for (let i = 0; i < ringCount; i++) {
+            const torusGeo = new THREE.TorusGeometry(ringRadius, tubeRadius, 8, 20);
+            const ring = new THREE.Mesh(torusGeo, ringMaterial);
+            ring.position.set(startX + i * stepX, verticalHeight, 0);
+            ring.rotation.y = Math.PI / 2;
+            calendarGroup.add(ring);
+        }
+
+        // --- KÍCH THƯỚC ---
+        function createDimensionLabel(text, startPoint, endPoint, offsetDir) {
+            const group = new THREE.Group();
+            const arrowColor = 0xcc0000;
+            const p1 = startPoint.clone().add(offsetDir);
+            const p2 = endPoint.clone().add(offsetDir);
+
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+            const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: arrowColor }));
+            group.add(line);
+
+            const coneGeo = new THREE.ConeGeometry(0.2, 0.6, 8);
+            const coneMat = new THREE.MeshBasicMaterial({ color: arrowColor });
+            const cone1 = new THREE.Mesh(coneGeo, coneMat);
+            cone1.position.copy(p1); cone1.lookAt(p2); cone1.rotateX(-Math.PI/2); group.add(cone1);
+            const cone2 = new THREE.Mesh(coneGeo, coneMat);
+            cone2.position.copy(p2); cone2.lookAt(p1); cone2.rotateX(-Math.PI/2); group.add(cone2);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.font = "Bold 40px Arial"; ctx.fillStyle = "black"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(text, 128, 64);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
+            
+            const midPoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            const textOffset = offsetDir.clone().normalize().multiplyScalar(0.5);
+            sprite.position.copy(midPoint).add(textOffset);
+            sprite.scale.set(6, 3, 1);
+            group.add(sprite);
+            scene.add(group);
+        }
+
+        const topLeft = new THREE.Vector3(-width/2, verticalHeight, 0);
+        const bottomLeft = new THREE.Vector3(-width/2, 0, halfBase);
+        createDimensionLabel("15 cm", topLeft, bottomLeft, new THREE.Vector3(-2, 0, 0));
+
+        const yOffset = 0.25; 
+
+        // Kích thước 16 cm
+        const bottomLeft_W = new THREE.Vector3(-width/2, yOffset, halfBase);
+        const bottomRight_W = new THREE.Vector3(width/2, yOffset, halfBase);
+        createDimensionLabel("16 cm", bottomLeft_W, bottomRight_W, new THREE.Vector3(0, 0, 2));
+
+        // Kích thước 7 cm
+        const baseFrontRight = new THREE.Vector3(width/2 + 1, yOffset, halfBase);
+        const baseBackRight = new THREE.Vector3(width/2 + 1, yOffset, -halfBase);
+        createDimensionLabel("7 cm", baseFrontRight, baseBackRight, new THREE.Vector3(1, 0, 0));
+
+        // --- MÔI TRƯỜNG ---
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: 0.1 }));
+        plane.rotation.x = -Math.PI / 2; plane.receiveShadow = true; scene.add(plane);
+        scene.add(new THREE.GridHelper(100, 50, 0xcccccc, 0xe5e5e5));
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        animate();
+    </script>
+</body>
+</html>
