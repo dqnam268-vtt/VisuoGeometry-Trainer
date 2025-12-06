@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tính Lăng Trụ Đứng (Tự Động Co Giãn)</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --bg: #f8f9fa;
+            --text: #2b2d42;
+            --border: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #eef2f5;
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            background: white;
+            width: 100%;
+            max-width: 1200px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+
+        /* --- CỘT TRÁI: NHẬP LIỆU --- */
+        .sidebar {
+            width: 350px;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        h2 { margin-top: 0; color: var(--primary); font-size: 22px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+
+        .form-group { margin-bottom: 15px; }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fcfdff;
+        }
+
+        .input-section { display: none; animation: slideDown 0.3s ease; }
+        .input-section.active { display: block; }
+
+        .btn-calc {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: auto;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-calc:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        /* --- CỘT PHẢI: HIỂN THỊ --- */
+        .display-area {
+            flex: 1;
+            padding: 30px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+
+        /* VISUALIZATION (2D & 3D) */
+        .viz-wrapper {
+            display: flex;
+            gap: 20px;
+            height: 350px; /* Tăng chiều cao để hiển thị rõ hơn */
+        }
+
+        .viz-box {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .viz-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            border: 1px solid #eee;
+            z-index: 10;
+        }
+
+        svg { width: 100%; height: 100%; }
+        
+        /* SVG Elements Style */
+        .shape-2d { fill: rgba(67, 97, 238, 0.1); stroke: var(--primary); stroke-width: 2; vector-effect: non-scaling-stroke; }
+        .dim-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4; vector-effect: non-scaling-stroke; }
+        .text-label { font-family: sans-serif; font-size: 14px; fill: #444; font-weight: bold; text-anchor: middle; }
+
+        .prism-face { fill: rgba(67, 97, 238, 0.15); stroke: var(--primary); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+        .prism-face-top { fill: rgba(67, 97, 238, 0.3); stroke: var(--primary); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+        .prism-edge-hidden { stroke: #adb5bd; stroke-width: 1; stroke-dasharray: 3; vector-effect: non-scaling-stroke; }
+        
+        /* Mũi tên chiều cao */
+        .h-line { stroke: #e74c3c; stroke-width: 2; vector-effect: non-scaling-stroke; marker-end: url(#arrow); }
+
+        /* RESULTS */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            border-left: 5px solid #ccc;
+        }
+
+        .result-card.blue { border-left-color: var(--primary); }
+        .result-card.green { border-left-color: var(--success); }
+        .result-card.pink { border-left-color: var(--accent); }
+
+        .res-title { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .res-value { font-size: 28px; font-weight: 800; color: var(--text); }
+        .res-unit { font-size: 14px; color: #999; font-weight: normal; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+            .viz-wrapper { flex-direction: column; height: auto; }
+            .viz-box { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>🧮 Nhập Thông Số</h2>
+        
+        <div class="form-group">
+            <label>1. Chọn hình đáy:</label>
+            <select id="shapeType" onchange="updateUI()">
+                <option value="triangle">🔺 Tam Giác Thường</option>
+                <option value="square">🔲 Hình Vuông</option>
+                <option value="rectangle">▭ Hình Chữ Nhật</option>
+                <option value="rhombus">🔶 Hình Thoi</option>
+                <option value="parallelogram">▱ Hình Bình Hành</option>
+                <option value="trapezoid">⏢ Hình Thang</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>2. Chiều cao lăng trụ (h):</label>
+            <input type="number" id="prismHeight" placeholder="Ví dụ: 10" value="10">
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+        
+        <!-- INPUTS -->
+        <div id="inputs-container">
+            <!-- Tam Giác -->
+            <div id="input-triangle" class="input-section active">
+                <label>Cạnh đáy (a):</label> <input type="number" id="tri-a" placeholder="Cạnh đáy" value="6">
+                <label style="margin-top:10px">Chiều cao đáy (h_a):</label> <input type="number" id="tri-h" placeholder="Chiều cao tương ứng" value="4">
+                <label style="margin-top:10px">Cạnh bên 1 (b):</label> <input type="number" id="tri-b" placeholder="Để tính chu vi" value="5">
+                <label style="margin-top:10px">Cạnh bên 2 (c):</label> <input type="number" id="tri-c" placeholder="Để tính chu vi" value="5">
+            </div>
+            <!-- Hình Vuông -->
+            <div id="input-square" class="input-section">
+                <label>Cạnh (a):</label> <input type="number" id="sq-a" placeholder="Độ dài cạnh" value="5">
+            </div>
+            <!-- Hình CN -->
+            <div id="input-rectangle" class="input-section">
+                <label>Chiều dài (a):</label> <input type="number" id="rect-a" placeholder="Dài" value="8">
+                <label style="margin-top:10px">Chiều rộng (b):</label> <input type="number" id="rect-b" placeholder="Rộng" value="5">
+            </div>
+            <!-- Hình Thoi -->
+            <div id="input-rhombus" class="input-section">
+                <label>Đường chéo 1 (d1):</label> <input type="number" id="rho-d1" placeholder="Đường chéo lớn" value="8">
+                <label style="margin-top:10px">Đường chéo 2 (d2):</label> <input type="number" id="rho-d2" placeholder="Đường chéo nhỏ" value="6">
+                <p style="font-size:12px; color:#666"><i>*Cạnh bên sẽ được tự động tính toán.</i></p>
+            </div>
+            <!-- HBH -->
+            <div id="input-parallelogram" class="input-section">
+                <label>Cạnh đáy (a):</label> <input type="number" id="para-a" placeholder="Cạnh đáy" value="10">
+                <label style="margin-top:10px">Chiều cao (h_a):</label> <input type="number" id="para-h" placeholder="Chiều cao" value="5">
+                <label style="margin-top:10px">Cạnh bên (b):</label> <input type="number" id="para-b" placeholder="Để tính chu vi" value="6">
+            </div>
+            <!-- Hình Thang -->
+            <div id="input-trapezoid" class="input-section">
+                <label>Đáy lớn (a):</label> <input type="number" id="trap-a" placeholder="Đáy lớn" value="10">
+                <label style="margin-top:10px">Đáy nhỏ (b):</label> <input type="number" id="trap-b" placeholder="Đáy nhỏ" value="6">
+                <label style="margin-top:10px">Chiều cao (h_t):</label> <input type="number" id="trap-h" placeholder="Chiều cao" value="4">
+                <label style="margin-top:10px">Cạnh bên 1 (c):</label> <input type="number" id="trap-c" placeholder="Để tính chu vi" value="5">
+                <label style="margin-top:10px">Cạnh bên 2 (d):</label> <input type="number" id="trap-d" placeholder="Để tính chu vi" value="5">
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="calculate()">Tính Toán & Vẽ Hình</button>
+    </div>
+
+    <!-- DISPLAY -->
+    <div class="display-area">
+        <div class="viz-wrapper">
+            <!-- 2D -->
+            <div class="viz-box">
+                <div class="viz-tag">Mặt Đáy (2D)</div>
+                <svg id="svg2d" viewBox="-10 -10 120 120" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+            <!-- 3D -->
+            <div class="viz-box">
+                <div class="viz-tag">Mô Hình 3D</div>
+                <svg id="svg3d" viewBox="-10 -10 120 120" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <div class="result-card blue">
+                <div class="res-title">Chu vi đáy (C)</div>
+                <div class="res-value" id="res-P">0</div>
+            </div>
+            <div class="result-card blue">
+                <div class="res-title">Diện tích đáy (S_đáy)</div>
+                <div class="res-value" id="res-Sbase">0</div>
+            </div>
+            <div class="result-card pink">
+                <div class="res-title">Diện tích Xung quanh</div>
+                <div class="res-value" id="res-Sxq">0</div>
+                <div class="res-unit">S_xq = C × h</div>
+            </div>
+            <div class="result-card green">
+                <div class="res-title">Thể tích (V)</div>
+                <div class="res-value" id="res-V">0</div>
+                <div class="res-unit">V = S_đáy × h</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateUI() {
+        document.querySelectorAll('.input-section').forEach(el => el.classList.remove('active'));
+        const type = document.getElementById('shapeType').value;
+        document.getElementById('input-' + type).classList.add('active');
+        document.getElementById('svg2d').innerHTML = `<text x="50" y="50" class="text-label">Nhập & Bấm Tính</text>`;
+        document.getElementById('svg3d').innerHTML = `<text x="50" y="50" class="text-label">Chưa có hình</text>`;
+    }
+
+    function calculate() {
+        const h_prism = parseFloat(document.getElementById('prismHeight').value) || 0;
+        const shape = document.getElementById('shapeType').value;
+        
+        if (h_prism <= 0) { alert("Chiều cao lăng trụ phải lớn hơn 0!"); return; }
+
+        let P = 0, S_base = 0;
+        let points = []; // Tọa độ đỉnh cho 2D
+        let labelText = ""; // Chữ chú thích
+
+        // --- TÍNH TOÁN & TẠO TỌA ĐỘ ---
+        if (shape === 'triangle') {
+            const a = parseFloat(document.getElementById('tri-a').value);
+            const h = parseFloat(document.getElementById('tri-h').value);
+            const b = parseFloat(document.getElementById('tri-b').value);
+            const c = parseFloat(document.getElementById('tri-c').value);
+            if (!a || !h) return;
+            
+            P = a + b + c;
+            S_base = 0.5 * a * h;
+            
+            // Tạo tam giác (đỉnh A ở trên)
+            // Giả sử chân đường cao nằm ở a/3 để hình trông tự nhiên
+            const topX = a/3; 
+            points = [{x: 0, y: h}, {x: a, y: h}, {x: topX, y: 0}]; 
+        }
+        else if (shape === 'square') {
+            const a = parseFloat(document.getElementById('sq-a').value);
+            if (!a) return;
+            P = 4 * a;
+            S_base = a * a;
+            points = [{x:0, y:0}, {x:a, y:0}, {x:a, y:a}, {x:0, y:a}];
+        }
+        else if (shape === 'rectangle') {
+            const a = parseFloat(document.getElementById('rect-a').value);
+            const b = parseFloat(document.getElementById('rect-b').value);
+            if (!a || !b) return;
+            P = 2*(a+b); S_base = a*b;
+            points = [{x:0, y:0}, {x:a, y:0}, {x:a, y:b}, {x:0, y:b}];
+        }
+        else if (shape === 'rhombus') {
+            const d1 = parseFloat(document.getElementById('rho-d1').value);
+            const d2 = parseFloat(document.getElementById('rho-d2').value);
+            if (!d1 || !d2) return;
+            S_base = 0.5 * d1 * d2;
+            const side = Math.sqrt((d1/2)**2 + (d2/2)**2);
+            P = 4 * side;
+            // Vẽ thoi từ tâm
+            points = [{x:d1/2, y:0}, {x:d1, y:d2/2}, {x:d1/2, y:d2}, {x:0, y:d2/2}];
+        }
+        else if (shape === 'parallelogram') {
+            const a = parseFloat(document.getElementById('para-a').value);
+            const h = parseFloat(document.getElementById('para-h').value);
+            const b = parseFloat(document.getElementById('para-b').value);
+            if (!a || !h) return;
+            S_base = a * h; P = 2*(a+b);
+            // Tính độ lệch (shift) dựa trên cạnh bên b và cao h: shift = sqrt(b^2 - h^2)
+            const shift = Math.sqrt(Math.max(0, b*b - h*h));
+            points = [{x:shift, y:0}, {x:shift+a, y:0}, {x:a, y:h}, {x:0, y:h}];
+        }
+        else if (shape === 'trapezoid') {
+            const a = parseFloat(document.getElementById('trap-a').value); // Đáy lớn
+            const b = parseFloat(document.getElementById('trap-b').value); // Đáy nhỏ
+            const h = parseFloat(document.getElementById('trap-h').value);
+            const c = parseFloat(document.getElementById('trap-c').value);
+            const d = parseFloat(document.getElementById('trap-d').value);
+            if (!a || !b || !h) return;
+            S_base = (a+b)*h/2; P = a+b+c+d;
+            // Vẽ thang cân tương đối
+            const offset = (a - b)/2;
+            points = [{x:offset, y:0}, {x:offset+b, y:0}, {x:a, y:h}, {x:0, y:h}];
+        }
+
+        const S_xq = P * h_prism;
+        const V = S_base * h_prism;
+
+        // Cập nhật số liệu
+        document.getElementById('res-P').innerText = parseFloat(P.toFixed(2));
+        document.getElementById('res-Sbase').innerText = parseFloat(S_base.toFixed(2));
+        document.getElementById('res-Sxq').innerText = parseFloat(S_xq.toFixed(2));
+        document.getElementById('res-V').innerText = parseFloat(V.toFixed(2));
+
+        // --- VẼ HÌNH (AUTO FIT) ---
+        renderShapes(points, h_prism);
+    }
+
+    function renderShapes(points, h3d) {
+        // 1. TÌM BOUNDING BOX CỦA HÌNH 2D GỐC
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+        });
+
+        const width2D = maxX - minX;
+        const height2D = maxY - minY;
+        
+        // 2. TÍNH SCALE FACTOR CHO 2D (Vẽ vào khung 100x100, chừa lề 10px)
+        // ViewBox của SVG 2D là 0 0 120 120 (đã set trong HTML) -> target size ~100
+        const targetSize = 100;
+        const scale2D = Math.min(targetSize / width2D, targetSize / height2D);
+        
+        // Center offsets
+        const offsetX = (120 - width2D * scale2D) / 2 - minX * scale2D;
+        const offsetY = (120 - height2D * scale2D) / 2 - minY * scale2D;
+
+        // Tạo Path 2D đã scale
+        let d2 = `M ${(points[0].x * scale2D + offsetX)} ${(points[0].y * scale2D + offsetY)} `;
+        for(let i=1; i<points.length; i++) {
+            d2 += `L ${(points[i].x * scale2D + offsetX)} ${(points[i].y * scale2D + offsetY)} `;
+        }
+        d2 += "Z";
+
+        document.getElementById('svg2d').innerHTML = 
+            `<path d="${d2}" class="shape-2d" />`;
+
+
+        // 3. XỬ LÝ SCALE CHO 3D
+        // Hình 3D gồm: Đáy dưới (giống 2D nhưng nghiêng/nhỏ hơn) + Đáy trên (dịch lên)
+        // Cần tính bounding box của TOÀN BỘ khối 3D để scale cho vừa
+        
+        // Giả lập phối cảnh đơn giản: x' = x, y' = y * 0.5 (nghiêng)
+        // Chiều cao h3d được vẽ thẳng lên trục Y (trừ đi giá trị y)
+        
+        // Tọa độ các điểm đáy dưới (đã nghiêng)
+        const ptsBot = points.map(p => ({
+            x: p.x,
+            y: p.y * 0.6 // Nghiêng 1 chút
+        }));
+        
+        // Tọa độ các điểm đáy trên (dịch lên h3d)
+        const ptsTop = ptsBot.map(p => ({
+            x: p.x,
+            y: p.y - h3d
+        }));
+
+        const allPts3D = [...ptsBot, ...ptsTop];
+        
+        // Tìm bbox của khối 3D
+        let minX3 = Infinity, maxX3 = -Infinity, minY3 = Infinity, maxY3 = -Infinity;
+        allPts3D.forEach(p => {
+            if (p.x < minX3) minX3 = p.x;
+            if (p.x > maxX3) maxX3 = p.x;
+            if (p.y < minY3) minY3 = p.y;
+            if (p.y > maxY3) maxY3 = p.y;
+        });
+        
+        const w3 = maxX3 - minX3;
+        const h3 = maxY3 - minY3;
+        
+        // Scale factor cho 3D (Khung 120x120, lề 20 -> target 80)
+        // Ta cần chừa chỗ cho chữ số h=... nên scale nhỏ hơn chút
+        const scale3D = Math.min(90 / w3, 90 / h3);
+        
+        const offX3 = (120 - w3 * scale3D) / 2 - minX3 * scale3D;
+        const offY3 = (120 - h3 * scale3D) / 2 - minY3 * scale3D;
+
+        // Hàm transform điểm
+        const tr = (p) => ({
+            x: p.x * scale3D + offX3,
+            y: p.y * scale3D + offY3
+        });
+
+        // Tạo SVG 3D
+        const finalBot = ptsBot.map(tr);
+        const finalTop = ptsTop.map(tr);
+        
+        // Path Đáy dưới
+        let dBot = `M ${finalBot[0].x} ${finalBot[0].y} `;
+        finalBot.slice(1).forEach(p => dBot += `L ${p.x} ${p.y} `);
+        dBot += "Z";
+
+        // Path Đáy trên
+        let dTop = `M ${finalTop[0].x} ${finalTop[0].y} `;
+        finalTop.slice(1).forEach(p => dTop += `L ${p.x} ${p.y} `);
+        dTop += "Z";
+
+        // Các cạnh bên
+        let edges = "";
+        finalBot.forEach((p, i) => {
+            edges += `<line x1="${p.x}" y1="${p.y}" x2="${finalTop[i].x}" y2="${finalTop[i].y}" class="prism-face"/>`;
+        });
+        
+        // Đường kích thước chiều cao (Vẽ bên phải hình)
+        // Tìm điểm cực phải của đáy dưới để vẽ thước đo bên cạnh
+        let rightMostIdx = 0;
+        finalBot.forEach((p, i) => { if(p.x > finalBot[rightMostIdx].x) rightMostIdx = i; });
+        
+        const pBase = finalBot[rightMostIdx];
+        const pTop = finalTop[rightMostIdx];
+        const lineX = pBase.x + 10;
+        
+        const hLine = `<line x1="${lineX}" y1="${pBase.y}" x2="${lineX}" y2="${pTop.y}" class="h-line" />
+                       <text x="${lineX + 5}" y="${(pBase.y + pTop.y)/2}" fill="#e74c3c" font-weight="bold">h=${h3d}</text>`;
+
+        document.getElementById('svg3d').innerHTML = 
+            `<defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
+                </marker>
+            </defs>
+            <path d="${dBot}" class="prism-face" />
+            <path d="${dTop}" class="prism-face-top" />
+            ${edges}
+            ${hLine}`;
+    }
+    
+    // Khởi chạy
+    updateUI();
+</script>
+
+</body>
+</html>
