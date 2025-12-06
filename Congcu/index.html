@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công Cụ Tính Lăng Trụ Đứng (Tự Động Co Giãn)</title>
+    <title>Công Cụ Tính Lăng Trụ Đứng (Chỉ 2D)</title>
     <style>
         :root {
             --primary: #4361ee;
@@ -111,11 +111,11 @@
             min-width: 300px;
         }
 
-        /* VISUALIZATION (2D & 3D) */
+        /* VISUALIZATION (CHỈ CÒN 2D) */
         .viz-wrapper {
             display: flex;
             gap: 20px;
-            height: 350px; /* Tăng chiều cao để hiển thị rõ hơn */
+            height: 350px;
         }
 
         .viz-box {
@@ -149,15 +149,7 @@
         
         /* SVG Elements Style */
         .shape-2d { fill: rgba(67, 97, 238, 0.1); stroke: var(--primary); stroke-width: 2; vector-effect: non-scaling-stroke; }
-        .dim-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4; vector-effect: non-scaling-stroke; }
         .text-label { font-family: sans-serif; font-size: 14px; fill: #444; font-weight: bold; text-anchor: middle; }
-
-        .prism-face { fill: rgba(67, 97, 238, 0.15); stroke: var(--primary); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-        .prism-face-top { fill: rgba(67, 97, 238, 0.3); stroke: var(--primary); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-        .prism-edge-hidden { stroke: #adb5bd; stroke-width: 1; stroke-dasharray: 3; vector-effect: non-scaling-stroke; }
-        
-        /* Mũi tên chiều cao */
-        .h-line { stroke: #e74c3c; stroke-width: 2; vector-effect: non-scaling-stroke; marker-end: url(#arrow); }
 
         /* RESULTS */
         .results-container {
@@ -191,8 +183,7 @@
         @media (max-width: 900px) {
             .container { flex-direction: column; }
             .sidebar { width: 100%; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
-            .viz-wrapper { flex-direction: column; height: auto; }
-            .viz-box { height: 300px; }
+            .viz-wrapper { height: 300px; }
         }
     </style>
 </head>
@@ -273,17 +264,7 @@
                 <div class="viz-tag">Mặt Đáy (2D)</div>
                 <svg id="svg2d" viewBox="-10 -10 120 120" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
-            <!-- 3D -->
-            <div class="viz-box">
-                <div class="viz-tag">Mô Hình 3D</div>
-                <svg id="svg3d" viewBox="-10 -10 120 120" preserveAspectRatio="xMidYMid meet">
-                    <defs>
-                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                            <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
-                        </marker>
-                    </defs>
-                </svg>
-            </div>
+            <!-- 3D đã bị xóa -->
         </div>
 
         <div class="results-container">
@@ -315,7 +296,6 @@
         const type = document.getElementById('shapeType').value;
         document.getElementById('input-' + type).classList.add('active');
         document.getElementById('svg2d').innerHTML = `<text x="50" y="50" class="text-label">Nhập & Bấm Tính</text>`;
-        document.getElementById('svg3d').innerHTML = `<text x="50" y="50" class="text-label">Chưa có hình</text>`;
     }
 
     function calculate() {
@@ -325,8 +305,7 @@
         if (h_prism <= 0) { alert("Chiều cao lăng trụ phải lớn hơn 0!"); return; }
 
         let P = 0, S_base = 0;
-        let points = []; // Tọa độ đỉnh cho 2D
-        let labelText = ""; // Chữ chú thích
+        let points = []; 
 
         // --- TÍNH TOÁN & TẠO TỌA ĐỘ ---
         if (shape === 'triangle') {
@@ -339,8 +318,6 @@
             P = a + b + c;
             S_base = 0.5 * a * h;
             
-            // Tạo tam giác (đỉnh A ở trên)
-            // Giả sử chân đường cao nằm ở a/3 để hình trông tự nhiên
             const topX = a/3; 
             points = [{x: 0, y: h}, {x: a, y: h}, {x: topX, y: 0}]; 
         }
@@ -365,7 +342,6 @@
             S_base = 0.5 * d1 * d2;
             const side = Math.sqrt((d1/2)**2 + (d2/2)**2);
             P = 4 * side;
-            // Vẽ thoi từ tâm
             points = [{x:d1/2, y:0}, {x:d1, y:d2/2}, {x:d1/2, y:d2}, {x:0, y:d2/2}];
         }
         else if (shape === 'parallelogram') {
@@ -374,19 +350,17 @@
             const b = parseFloat(document.getElementById('para-b').value);
             if (!a || !h) return;
             S_base = a * h; P = 2*(a+b);
-            // Tính độ lệch (shift) dựa trên cạnh bên b và cao h: shift = sqrt(b^2 - h^2)
             const shift = Math.sqrt(Math.max(0, b*b - h*h));
             points = [{x:shift, y:0}, {x:shift+a, y:0}, {x:a, y:h}, {x:0, y:h}];
         }
         else if (shape === 'trapezoid') {
-            const a = parseFloat(document.getElementById('trap-a').value); // Đáy lớn
-            const b = parseFloat(document.getElementById('trap-b').value); // Đáy nhỏ
+            const a = parseFloat(document.getElementById('trap-a').value); 
+            const b = parseFloat(document.getElementById('trap-b').value); 
             const h = parseFloat(document.getElementById('trap-h').value);
             const c = parseFloat(document.getElementById('trap-c').value);
             const d = parseFloat(document.getElementById('trap-d').value);
             if (!a || !b || !h) return;
             S_base = (a+b)*h/2; P = a+b+c+d;
-            // Vẽ thang cân tương đối
             const offset = (a - b)/2;
             points = [{x:offset, y:0}, {x:offset+b, y:0}, {x:a, y:h}, {x:0, y:h}];
         }
@@ -400,11 +374,11 @@
         document.getElementById('res-Sxq').innerText = parseFloat(S_xq.toFixed(2));
         document.getElementById('res-V').innerText = parseFloat(V.toFixed(2));
 
-        // --- VẼ HÌNH (AUTO FIT) ---
-        renderShapes(points, h_prism);
+        // --- VẼ HÌNH 2D (AUTO FIT) ---
+        renderShapes(points);
     }
 
-    function renderShapes(points, h3d) {
+    function renderShapes(points) {
         // 1. TÌM BOUNDING BOX CỦA HÌNH 2D GỐC
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         points.forEach(p => {
@@ -418,7 +392,6 @@
         const height2D = maxY - minY;
         
         // 2. TÍNH SCALE FACTOR CHO 2D (Vẽ vào khung 100x100, chừa lề 10px)
-        // ViewBox của SVG 2D là 0 0 120 120 (đã set trong HTML) -> target size ~100
         const targetSize = 100;
         const scale2D = Math.min(targetSize / width2D, targetSize / height2D);
         
@@ -435,96 +408,6 @@
 
         document.getElementById('svg2d').innerHTML = 
             `<path d="${d2}" class="shape-2d" />`;
-
-
-        // 3. XỬ LÝ SCALE CHO 3D
-        // Hình 3D gồm: Đáy dưới (giống 2D nhưng nghiêng/nhỏ hơn) + Đáy trên (dịch lên)
-        // Cần tính bounding box của TOÀN BỘ khối 3D để scale cho vừa
-        
-        // Giả lập phối cảnh đơn giản: x' = x, y' = y * 0.5 (nghiêng)
-        // Chiều cao h3d được vẽ thẳng lên trục Y (trừ đi giá trị y)
-        
-        // Tọa độ các điểm đáy dưới (đã nghiêng)
-        const ptsBot = points.map(p => ({
-            x: p.x,
-            y: p.y * 0.6 // Nghiêng 1 chút
-        }));
-        
-        // Tọa độ các điểm đáy trên (dịch lên h3d)
-        const ptsTop = ptsBot.map(p => ({
-            x: p.x,
-            y: p.y - h3d
-        }));
-
-        const allPts3D = [...ptsBot, ...ptsTop];
-        
-        // Tìm bbox của khối 3D
-        let minX3 = Infinity, maxX3 = -Infinity, minY3 = Infinity, maxY3 = -Infinity;
-        allPts3D.forEach(p => {
-            if (p.x < minX3) minX3 = p.x;
-            if (p.x > maxX3) maxX3 = p.x;
-            if (p.y < minY3) minY3 = p.y;
-            if (p.y > maxY3) maxY3 = p.y;
-        });
-        
-        const w3 = maxX3 - minX3;
-        const h3 = maxY3 - minY3;
-        
-        // Scale factor cho 3D (Khung 120x120, lề 20 -> target 80)
-        // Ta cần chừa chỗ cho chữ số h=... nên scale nhỏ hơn chút
-        const scale3D = Math.min(90 / w3, 90 / h3);
-        
-        const offX3 = (120 - w3 * scale3D) / 2 - minX3 * scale3D;
-        const offY3 = (120 - h3 * scale3D) / 2 - minY3 * scale3D;
-
-        // Hàm transform điểm
-        const tr = (p) => ({
-            x: p.x * scale3D + offX3,
-            y: p.y * scale3D + offY3
-        });
-
-        // Tạo SVG 3D
-        const finalBot = ptsBot.map(tr);
-        const finalTop = ptsTop.map(tr);
-        
-        // Path Đáy dưới
-        let dBot = `M ${finalBot[0].x} ${finalBot[0].y} `;
-        finalBot.slice(1).forEach(p => dBot += `L ${p.x} ${p.y} `);
-        dBot += "Z";
-
-        // Path Đáy trên
-        let dTop = `M ${finalTop[0].x} ${finalTop[0].y} `;
-        finalTop.slice(1).forEach(p => dTop += `L ${p.x} ${p.y} `);
-        dTop += "Z";
-
-        // Các cạnh bên
-        let edges = "";
-        finalBot.forEach((p, i) => {
-            edges += `<line x1="${p.x}" y1="${p.y}" x2="${finalTop[i].x}" y2="${finalTop[i].y}" class="prism-face"/>`;
-        });
-        
-        // Đường kích thước chiều cao (Vẽ bên phải hình)
-        // Tìm điểm cực phải của đáy dưới để vẽ thước đo bên cạnh
-        let rightMostIdx = 0;
-        finalBot.forEach((p, i) => { if(p.x > finalBot[rightMostIdx].x) rightMostIdx = i; });
-        
-        const pBase = finalBot[rightMostIdx];
-        const pTop = finalTop[rightMostIdx];
-        const lineX = pBase.x + 10;
-        
-        const hLine = `<line x1="${lineX}" y1="${pBase.y}" x2="${lineX}" y2="${pTop.y}" class="h-line" />
-                       <text x="${lineX + 5}" y="${(pBase.y + pTop.y)/2}" fill="#e74c3c" font-weight="bold">h=${h3d}</text>`;
-
-        document.getElementById('svg3d').innerHTML = 
-            `<defs>
-                <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
-                </marker>
-            </defs>
-            <path d="${dBot}" class="prism-face" />
-            <path d="${dTop}" class="prism-face-top" />
-            ${edges}
-            ${hLine}`;
     }
     
     // Khởi chạy
