@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám Phá Thể Tích Đa Hình</title>
+    <style>
+        :root {
+            --primary-color: #2980b9;
+            --secondary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --bg-color: #ecf0f1;
+            --success-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            background: white;
+            width: 1000px;
+            height: 650px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 15px;
+        }
+
+        /* SHAPE SELECTOR */
+        .shape-selector {
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .shape-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #bdc3c7;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .shape-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* STEP BUTTONS */
+        .step-btn {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ecf0f1;
+            text-align: left;
+        }
+
+        .step-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+        }
+
+        .step-btn.active {
+            background: white;
+            color: var(--secondary-color);
+            border-color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .step-btn.active .step-icon {
+            background: var(--secondary-color);
+        }
+
+        .reset-btn {
+            margin-top: auto;
+            padding: 12px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .reset-btn:hover { background: #7f8c8d; }
+
+        /* --- DISPLAY AREA --- */
+        .display-area {
+            flex: 1;
+            position: relative;
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            border: 1px solid #ecf0f1;
+            border-radius: 15px;
+            background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px 25px;
+            background: #e8f8f5;
+            border-left: 5px solid var(--success-color);
+            border-radius: 8px;
+            color: var(--secondary-color);
+            font-size: 16px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 80%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+        .feedback-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .formula-highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-left: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Mô Phỏng Thể Tích</h2>
+
+            <!-- Nút chọn hình -->
+            <div class="shape-selector">
+                <button class="shape-btn active" id="btn-tri" onclick="setShape('triangle')">▲ Tam Giác</button>
+                <button class="shape-btn" id="btn-quad" onclick="setShape('quad')">▱ Tứ Giác</button>
+            </div>
+            
+            <div class="step-btn" id="btn-step1" onclick="setStep(1)">
+                <div class="step-icon">1</div>
+                <div>
+                    <div>Diện tích đáy</div>
+                    <small style="opacity:0.7">Khởi tạo mặt phẳng</small>
+                </div>
+            </div>
+
+            <div class="step-btn" id="btn-step2" onclick="setStep(2)">
+                <div class="step-icon">2</div>
+                <div>
+                    <div>Chiều cao (h)</div>
+                    <small style="opacity:0.7">Xếp chồng các lớp</small>
+                </div>
+            </div>
+
+            <div class="step-btn" id="btn-step3" onclick="setStep(3)">
+                <div class="step-icon">3</div>
+                <div>
+                    <div>Thể tích (V)</div>
+                    <small style="opacity:0.7">Tổng kết công thức</small>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetAll()">↺ Đặt lại</button>
+        </div>
+
+        <div class="display-area">
+            <canvas id="mainCanvas" width="640" height="480"></canvas>
+            <div class="feedback-box" id="feedback">
+                Vui lòng chọn loại hình và bắt đầu Bước 1!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const feedback = document.getElementById('feedback');
+
+        // Cấu hình chung
+        let currentShape = 'triangle'; // 'triangle' hoặc 'quad'
+        let currentStep = 0;
+        let animationId = null;
+        
+        // Thông số hình học (Tọa độ 2D giả lập 3D)
+        const config = {
+            triangle: {
+                basePoints: [ {x: 150, y: 400}, {x: 450, y: 400}, {x: 300, y: 320} ], // Đáy tam giác
+                colorRange: [200, 280], // HSL Hue range (Blue -> Purple)
+                labelPos: {x: 300, y: 380}
+            },
+            quad: {
+                // Đáy tứ giác thường (Không đều)
+                basePoints: [ 
+                    {x: 120, y: 420},  // Trái dưới
+                    {x: 480, y: 420},  // Phải dưới
+                    {x: 400, y: 340},  // Phải trên
+                    {x: 200, y: 320}   // Trái trên (thấp hơn để tạo độ méo)
+                ],
+                colorRange: [30, 60], // HSL Hue range (Orange -> Yellow)
+                labelPos: {x: 300, y: 380}
+            },
+            maxHeight: 250,
+            layerCount: 60
+        };
+
+        // Hàm xóa canvas
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Hàm vẽ đa giác (lớp cắt)
+        // points: mảng các điểm {x,y} của đáy
+        // yOffset: độ cao so với đáy gốc
+        // color: màu tô
+        // stroke: màu viền
+        function drawPolygon(points, yOffset, color, stroke) {
+            ctx.fillStyle = color;
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            
+            const startX = points[0].x;
+            const startY = points[0].y - yOffset;
+            
+            ctx.moveTo(startX, startY);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y - yOffset);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Vẽ cạnh bên (nối xuống) để tạo cảm giác khối đặc
+            // Chỉ vẽ 2 cạnh bìa để tạo hiệu ứng khối đơn giản
+            if (yOffset > 0) {
+                const stepH = config.maxHeight / config.layerCount;
+                const leftP = points[0]; // Giả sử điểm 0 là góc trái dưới
+                const rightP = points[1]; // Giả sử điểm 1 là góc phải dưới (cho tam giác) hoặc điểm xa nhất
+                
+                // Logic tìm điểm biên trái/phải đơn giản (dựa trên x min/max)
+                let minX = points[0], maxX = points[0];
+                points.forEach(p => {
+                    if(p.x < minX.x) minX = p;
+                    if(p.x > maxX.x) maxX = p;
+                });
+
+                // Vẽ các đường sinh ở các đỉnh biên
+                points.forEach(p => {
+                   // Chỉ vẽ các đường ở biên trái và phải để tạo khối
+                   if (p === minX || p === maxX) {
+                       ctx.beginPath();
+                       ctx.moveTo(p.x, p.y - yOffset);
+                       ctx.lineTo(p.x, p.y - yOffset + stepH);
+                       ctx.stroke();
+                   }
+                });
+            }
+        }
+
+        // Vẽ khung dây mờ (Wireframe) để định hướng
+        function drawWireframe() {
+            const pts = config[currentShape].basePoints;
+            const h = config.maxHeight;
+            
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+            ctx.lineWidth = 2;
+            
+            // Đáy dưới
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Đáy trên
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y - h);
+            for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y - h);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Cạnh bên
+            pts.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x, p.y - h);
+                ctx.stroke();
+            });
+        }
+
+        // --- XỬ LÝ LOGIC ---
+
+        function setShape(shape) {
+            currentShape = shape;
+            resetAll();
+            
+            // Update UI nút
+            document.getElementById('btn-tri').classList.toggle('active', shape === 'triangle');
+            document.getElementById('btn-quad').classList.toggle('active', shape === 'quad');
+            
+            const shapeName = shape === 'triangle' ? 'Tam Giác' : 'Tứ Giác';
+            feedback.innerHTML = `Đã chuyển sang <b>Lăng Trụ ${shapeName}</b>. Hãy bắt đầu Bước 1.`;
+            feedback.classList.add('show');
+            
+            drawWireframe();
+        }
+
+        function setStep(step) {
+            // Dừng animation cũ
+            if(animationId) clearInterval(animationId);
+            currentStep = step;
+
+            // Update UI Step Buttons
+            document.querySelectorAll('.step-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-step' + step).classList.add('active');
+
+            clearCanvas();
+            drawWireframe();
+
+            if (step === 1) {
+                runStep1();
+            } else if (step === 2) {
+                runStep2();
+            } else if (step === 3) {
+                runStep3();
+            }
+        }
+
+        function runStep1() {
+            const pts = config[currentShape].basePoints;
+            const colorRange = config[currentShape].colorRange;
+            
+            // Vẽ 1 lớp đáy
+            drawPolygon(pts, 0, `hsl(${colorRange[0]}, 70%, 60%)`, '#333');
+            
+            // Vẽ nhãn
+            const labelPos = config[currentShape].labelPos;
+            ctx.fillStyle = "#2c3e50";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText("S_đáy", labelPos.x, labelPos.y);
+
+            feedback.innerHTML = "Đây là Mặt Đáy. Diện tích ký hiệu là S_đáy";
+            feedback.classList.add('show');
+        }
+
+        function runStep2() {
+            const pts = config[currentShape].basePoints;
+            const colorRange = config[currentShape].colorRange;
+            const totalLayers = config.layerCount;
+            const stepH = config.maxHeight / totalLayers;
+            
+            let currentLayer = 0;
+            feedback.innerHTML = "Đang xếp chồng... Quan sát chiều cao h xuất hiện.";
+            
+            animationId = setInterval(() => {
+                if (currentLayer >= totalLayers) {
+                    clearInterval(animationId);
+                    
+                    // Vẽ mũi tên chiều cao sau khi xong
+                    // Chọn điểm neo để vẽ chiều cao (thường là cạnh ngoài cùng bên phải)
+                    let maxX = pts[0].x;
+                    let pIndex = 0;
+                    pts.forEach((p, idx) => { if(p.x > maxX) { maxX = p.x; pIndex = idx; } });
+                    
+                    const arrowX = pts[pIndex].x + 20; 
+                    const baseY = pts[pIndex].y;
+                    const topY = baseY - config.maxHeight;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(arrowX, baseY);
+                    ctx.lineTo(arrowX, topY);
+                    ctx.strokeStyle = "#e74c3c";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    // Đầu mũi tên
+                    ctx.beginPath();
+                    ctx.moveTo(arrowX - 5, topY + 10);
+                    ctx.lineTo(arrowX, topY);
+                    ctx.lineTo(arrowX + 5, topY + 10);
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#e74c3c";
+                    ctx.font = "bold 24px Arial";
+                    ctx.fillText("h", arrowX + 10, (baseY + topY)/2);
+
+                    feedback.innerHTML = `Các lớp đã xếp đầy! Chiều cao là h `;
+                    return;
+                }
+
+                // Màu biến thiên theo độ cao
+                const hue = colorRange[0] + (currentLayer / totalLayers) * (colorRange[1] - colorRange[0]);
+                const color = `hsl(${hue}, 80%, 60%)`;
+                const stroke = `hsl(${hue}, 80%, 40%)`;
+
+                drawPolygon(pts, currentLayer * stepH, color, stroke);
+                currentLayer++;
+            }, 30); // Tốc độ 30ms/lớp
+        }
+
+        function runStep3() {
+            // Vẽ full ngay lập tức
+            const pts = config[currentShape].basePoints;
+            const colorRange = config[currentShape].colorRange;
+            const totalLayers = config.layerCount;
+            const stepH = config.maxHeight / totalLayers;
+
+            for (let i = 0; i < totalLayers; i++) {
+                const hue = colorRange[0] + (i / totalLayers) * (colorRange[1] - colorRange[0]);
+                drawPolygon(pts, i * stepH, `hsl(${hue}, 80%, 60%)`, `hsl(${hue}, 80%, 40%)`);
+            }
+
+            // Vẽ chữ V to
+            const center = config[currentShape].labelPos;
+            ctx.fillStyle = "white";
+            ctx.font = "900 60px Arial";
+            ctx.shadowColor="rgba(0,0,0,0.5)";
+            ctx.shadowBlur=15;
+            ctx.fillText("V", center.x - 20, center.y - config.maxHeight/2);
+            ctx.shadowBlur=0;
+
+            feedback.innerHTML = "Hình khối hoàn chỉnh! Công thức: <span class='formula-highlight'>V = S_đáy × h</span>";
+        }
+
+        function resetAll() {
+            if(animationId) clearInterval(animationId);
+            currentStep = 0;
+            clearCanvas();
+            drawWireframe();
+            document.querySelectorAll('.step-btn').forEach(btn => btn.classList.remove('active'));
+            feedback.classList.remove('show');
+        }
+
+        // Khởi chạy
+        drawWireframe();
+        feedback.innerHTML = "Chọn loại hình và bắt đầu khám phá!";
+        feedback.classList.add('show');
+
+    </script>
+</body>
+</html>
