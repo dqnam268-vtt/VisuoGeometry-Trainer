@@ -3,267 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hộp Quà Hello Kitty</title>
+    <title>Bài Tập Hộp Quà Hello Kitty 3D</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
-            background-color: #fce7f3; /* Pink-100 */
-            /* Nền chấm bi hồng nhạt */
+            background-color: #fce7f3;
             background-image: radial-gradient(#f9a8d4 20%, transparent 20%), radial-gradient(#f9a8d4 20%, transparent 20%);
             background-size: 50px 50px;
             background-position: 0 0, 25px 25px;
             height: 100vh;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
             overflow: hidden;
             margin: 0;
+            gap: 50px;
         }
 
         /* --- Sân khấu 3D --- */
         .scene {
-            width: 400px;
-            height: 500px;
+            width: 500px;
+            height: 600px;
             perspective: 1200px;
-            margin-top: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            transform: scale(0.9);
         }
 
         .prism-box {
             position: relative;
-            width: 200px;
-            height: 300px;
+            width: 200px; /* 15cm */
+            height: 333px; /* 25cm */
             transform-style: preserve-3d;
-            /* Góc nhìn từ dưới lên một chút để thấy đáy */
-            transform: rotateX(-30deg) rotateY(30deg);
-            animation: spin 15s infinite linear;
-            cursor: pointer;
+            transform: rotateX(-20deg) rotateY(30deg);
+            animation: spin 20s infinite linear;
             transition: transform 0.5s ease;
         }
 
-        .scene:hover .prism-box {
+        .prism-box.unlocked:hover {
             animation-play-state: paused;
+        }
+        
+        /* Trạng thái mở nắp */
+        .prism-box.open-now .top-cap {
+             transform: translateY(-115.47px) rotateX(90deg) rotateX(-50deg) translateY(-50px) !important;
+             transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .prism-box.unlocked:hover .top-cap {
+             transform: translateY(-115.47px) rotateX(90deg) rotateX(-50deg) translateY(-50px);
+             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes spin {
-            from { transform: rotateX(-30deg) rotateY(0deg); }
-            to { transform: rotateX(-30deg) rotateY(360deg); }
+            from { transform: rotateX(-20deg) rotateY(0deg); }
+            to { transform: rotateX(-20deg) rotateY(360deg); }
         }
 
-        /* --- Họa tiết Hello Kitty (SVG Pattern) --- */
+        /* --- Texture --- */
         .hello-kitty-pattern {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M10 25 Q10 15 20 15 L22 10 L28 15 L32 15 L38 10 L40 15 Q50 15 50 25 Q50 35 30 35 Q10 35 10 25 Z' fill='white' stroke='%23be185d' stroke-width='1'/%3E%3Cpath d='M40 15 Q45 10 45 15 Q45 20 40 15 Z' fill='%23ef4444'/%3E%3Ccircle cx='18' cy='25' r='1.5' fill='%23374151'/%3E%3Ccircle cx='42' cy='25' r='1.5' fill='%23374151'/%3E%3Cellipse cx='30' cy='28' rx='2' ry='1.5' fill='%23fbbf24'/%3E%3Cline x1='8' y1='26' x2='14' y2='25' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='8' y1='28' x2='14' y2='29' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='46' y1='26' x2='52' y2='25' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='46' y1='28' x2='52' y2='29' stroke='%23374151' stroke-width='1'/%3E%3C/svg%3E");
             background-size: 60px 60px;
         }
-
         .hello-kitty-skin {
-            background-color: #fbcfe8; /* Pink-200 base */
+            background-color: #fbcfe8;
             border: 2px solid #f9a8d4;
         }
 
-        /* --- Các mặt bên --- */
+        /* --- Faces --- */
         .face {
             position: absolute;
-            width: 200px;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Ẩn mặt sau để tránh lộn xộn khi nhìn xuyên thấu, 
-               nhưng với vật thể kín thì không quá quan trọng nếu khớp khít */
+            width: 200px; height: 333px;
+            display: flex; justify-content: center; align-items: center;
             backface-visibility: hidden; 
         }
-
-        /* Mặt 1 (Trước) */
         .face-1 { transform: rotateY(0deg) translateZ(57.735px); }
-        /* Mặt 2 (Phải) */
         .face-2 { transform: rotateY(120deg) translateZ(57.735px); filter: brightness(0.95); }
-        /* Mặt 3 (Trái) */
         .face-3 { transform: rotateY(240deg) translateZ(57.735px); filter: brightness(0.9); }
 
-        /* --- Mặt đáy (Caps) --- */
+        /* --- Caps --- */
         .cap {
             position: absolute;
-            width: 200px;
-            height: 173.205px;
-            /* Tạo hình tam giác cho container chính */
+            width: 200px; height: 173.205px;
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            display: flex;
-            justify-content: center;
-            /* Tâm xoay tại trọng tâm tam giác (100, 115.47) */
+            display: flex; justify-content: center;
             transform-origin: 100px 115.47px;
-            backface-visibility: visible; /* Để nhìn thấy mặt trong khi mở */
         }
-
-        /* Nắp trên (Top) - Container chính chịu trách nhiệm xoay */
         .top-cap {
-            /* Dịch trọng tâm về gốc -> Xoay nằm ngang */
             transform: translateY(-115.47px) rotateX(90deg);
-            z-index: 10;
-            background-color: #f472b6; /* Màu mặt trong nắp */
-            transform-style: preserve-3d; /* Quan trọng để các phần tử con 3D (nơ) hoạt động */
+            z-index: 20; background-color: #f472b6; transform-style: preserve-3d;
         }
-
-        /* Lớp da bên ngoài của nắp (Chứa họa tiết và ruy-băng) */
         .top-cap-skin {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            /* Kế thừa clip-path để cắt theo hình tam giác */
-            clip-path: inherit;
-            z-index: 2; /* Nằm trên nền của .top-cap */
-            background-color: #fbcfe8; /* Pink-200 base */
-            border: 2px solid #f9a8d4;
-            /* Nâng nhẹ lên một chút để tránh lẹm màu (Z-fighting) */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            clip-path: inherit; z-index: 2;
+            background-color: #fbcfe8; border: 2px solid #f9a8d4;
             transform: translateZ(0.1px); 
         }
-
-        /* Hiệu ứng mở nắp */
-        .prism-box:hover .top-cap {
-             transform: translateY(-115.47px) rotateX(90deg) rotateX(-45deg) translateY(-40px);
-             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* Đáy dưới (Bottom) */
         .bottom-cap {
-            /* 1. Dịch xuống đáy hộp (Y=300)
-               2. Dịch trọng tâm về trục (Y=-115.47)
-               => Tổng Y = 184.53px
-               3. Xoay -90 độ để úp mặt ra ngoài (xuống dưới)
-            */
-            transform: translateY(184.53px) rotateX(-90deg);
-            /* Màu đậm hơn chút vì ở dưới đáy */
-            filter: brightness(0.8);
-            backface-visibility: hidden;
+            transform: translateY(217.53px) rotateX(-90deg) rotateZ(180deg);
+            filter: brightness(0.8); backface-visibility: visible;
         }
 
-        /* Ruy băng dọc (Màu hồng đậm) */
-        .ribbon-v {
+        /* --- 3D HELLO KITTY CONSTRUCT --- */
+        /* Wrapper chính: Chịu trách nhiệm bay lên/xuống (Transition) */
+        .kitty-3d-wrapper {
             position: absolute;
-            width: 40px;
-            height: 100%;
+            width: 80px; height: 100px;
+            left: 50%; top: 50%;
+            /* Ban đầu ẩn bên dưới */
+            transform: translateX(-50%) translateY(0px) translateZ(0) scale(0.5);
+            opacity: 0;
+            transform-style: preserve-3d;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Khi mở hộp: Bay lên cao */
+        .prism-box.open-now .kitty-3d-wrapper {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-180px) translateZ(0) scale(1.2);
+        }
+
+        /* Wrapper xoay ngược: Triệt tiêu xoay của hộp (Animation Counter-Spin) */
+        .kitty-rotator {
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            animation: counter-spin 20s infinite linear;
+        }
+
+        /* Wrapper nhún nhảy (Animation Bounce) */
+        .kitty-bouncer {
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+        }
+        
+        .prism-box.open-now .kitty-bouncer {
+            animation: kitty-jump 0.8s infinite alternate;
+        }
+
+        /* Xoay ngược chiều kim đồng hồ để luôn nhìn về phía trước */
+        @keyframes counter-spin {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(-360deg); }
+        }
+
+        @keyframes kitty-jump {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+
+        /* Cấu tạo các khối 3D */
+        .cube {
+            position: absolute;
+            transform-style: preserve-3d;
+        }
+        .cube-face {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* -- Đầu Kitty -- */
+        .k-head {
+            width: 80px; height: 60px;
+            top: 0; left: 0;
+            transform-style: preserve-3d;
+        }
+        .k-head .f-front { 
+            width: 80px; height: 60px; transform: translateZ(25px); 
+            background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><ellipse cx="25" cy="35" rx="3" ry="5" fill="%23374151"/><ellipse cx="55" cy="35" rx="3" ry="5" fill="%23374151"/><ellipse cx="40" cy="42" rx="4" ry="3" fill="%23fbbf24" stroke="%23374151"/><line x1="5" y1="30" x2="15" y2="35" stroke="%23374151" stroke-width="2"/><line x1="5" y1="40" x2="15" y2="40" stroke="%23374151" stroke-width="2"/><line x1="5" y1="50" x2="15" y2="45" stroke="%23374151" stroke-width="2"/><line x1="75" y1="30" x2="65" y2="35" stroke="%23374151" stroke-width="2"/><line x1="75" y1="40" x2="65" y2="40" stroke="%23374151" stroke-width="2"/><line x1="75" y1="50" x2="65" y2="45" stroke="%23374151" stroke-width="2"/></svg>') no-repeat center center;
+            background-size: cover; border-radius: 15px; 
+        }
+        .k-head .f-back  { width: 80px; height: 60px; transform: translateZ(-25px) rotateY(180deg); border-radius: 15px; }
+        .k-head .f-right { width: 50px; height: 60px; transform: rotateY(90deg) translateZ(40px); border-radius: 10px; }
+        .k-head .f-left  { width: 50px; height: 60px; transform: rotateY(-90deg) translateZ(40px); border-radius: 10px; }
+        .k-head .f-top   { width: 80px; height: 50px; transform: rotateX(90deg) translateZ(30px); border-radius: 15px; }
+        .k-head .f-bottom{ width: 80px; height: 50px; transform: rotateX(-90deg) translateZ(30px); }
+
+        .k-ear {
+            width: 20px; height: 20px; background: white; position: absolute; top: -10px;
+            transform: translateZ(20px); clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+        }
+        .ear-l { left: 10px; transform: rotate(-10deg) translateZ(10px); }
+        .ear-r { right: 10px; transform: rotate(10deg) translateZ(10px); }
+
+        .k-bow {
+            position: absolute; top: -5px; right: 10px;
+            width: 24px; height: 16px; transform: translateZ(26px);
+            background: #ef4444; border-radius: 5px;
+        }
+        .k-bow::before, .k-bow::after {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            background: #ef4444; border-radius: 50%;
+        }
+        .k-bow::before { left: -6px; } .k-bow::after { right: -6px; }
+
+        /* -- Thân -- */
+        .k-body {
+            width: 50px; height: 40px; top: 55px; left: 15px;
+            transform-style: preserve-3d;
+        }
+        .k-body .f-front { width: 50px; height: 40px; transform: translateZ(15px); background: #3b82f6; border-radius: 10px; }
+        .k-body .f-back  { width: 50px; height: 40px; transform: translateZ(-15px) rotateY(180deg); background: #3b82f6; border-radius: 10px; }
+        .k-body .f-right { width: 30px; height: 40px; transform: rotateY(90deg) translateZ(25px); background: #3b82f6; }
+        .k-body .f-left  { width: 30px; height: 40px; transform: rotateY(-90deg) translateZ(25px); background: #3b82f6; }
+        .k-body .f-top   { width: 50px; height: 30px; transform: rotateX(90deg) translateZ(20px); background: #3b82f6; }
+        .k-body .f-bottom{ width: 50px; height: 30px; transform: rotateX(-90deg) translateZ(20px); background: #3b82f6; }
+
+        .k-arm {
+            width: 15px; height: 30px; background: white; position: absolute; top: 58px;
+            transform-style: preserve-3d; border-radius: 10px; border: 1px solid #ddd;
+        }
+        .arm-l { left: 0px; transform: rotateZ(30deg) translateZ(10px); }
+        .arm-r { right: 0px; transform: rotateZ(-30deg) translateZ(10px); }
+        
+        /* Vẫy tay */
+        .prism-box.open-now .arm-r { animation: wave 1s infinite alternate; }
+        @keyframes wave { from { transform: rotateZ(-30deg) translateZ(10px); } to { transform: rotateZ(-60deg) translateZ(10px); } }
+
+        .k-leg {
+            width: 18px; height: 15px; background: white; position: absolute; top: 90px;
+            transform: translateZ(10px); border-radius: 0 0 5px 5px; border: 1px solid #ddd;
+        }
+        .leg-l { left: 18px; } .leg-r { right: 18px; }
+
+        /* --- Decorations & UI --- */
+        .ribbon-v {
+            position: absolute; width: 40px; height: 100%;
             background: linear-gradient(90deg, #ec4899, #db2777, #ec4899);
-            border-left: 1px dashed white;
-            border-right: 1px dashed white;
+            border-left: 1px dashed white; border-right: 1px dashed white;
             z-index: 2;
         }
-
-        /* Ruy băng trên nắp */
         .cap-ribbon {
-            position: absolute;
-            top: 115.47px;
-            left: 100px;
-            width: 30px;
-            height: 130px;
-            background: #db2777;
-            transform-origin: 50% 0;
-            border-left: 1px dashed white;
-            border-right: 1px dashed white;
-            z-index: 3; /* Nằm trên lớp skin */
+            position: absolute; top: 115.47px; left: 100px;
+            width: 30px; height: 130px;
+            background: #db2777; transform-origin: 50% 0;
+            border-left: 1px dashed white; border-right: 1px dashed white;
+            z-index: 3;
         }
         .ribbon-1 { transform: translate(-50%, 0) rotate(30deg); }
         .ribbon-2 { transform: translate(-50%, 0) rotate(-30deg); }
         .ribbon-3 { transform: translate(-50%, 0) rotate(180deg); }
 
-        /* --- Cái Nơ Hello Kitty (Bow) --- */
         .bow-container {
-            position: absolute;
-            top: 115.47px; 
-            left: 100px;
-            /* Nổi lên trên bề mặt nắp (Z=10px so với nắp) */
+            position: absolute; top: 115.47px; left: 100px;
             transform: translateX(-50%) translateZ(10px) rotateX(-90deg); 
-            z-index: 100;
-            pointer-events: none;
+            z-index: 100; pointer-events: none;
         }
-        
         .bow-wing {
-            position: absolute;
-            width: 70px;
-            height: 50px;
-            background: #ef4444; /* Đỏ tươi đặc trưng */
-            border: 3px solid #991b1b;
-            border-radius: 20px;
-            top: -25px;
+            position: absolute; width: 70px; height: 50px;
+            background: #ef4444; border: 3px solid #991b1b;
+            border-radius: 20px; top: -25px;
         }
         .wing-left { left: -65px; transform: rotate(-10deg); }
         .wing-right { left: -5px; transform: rotate(10deg); }
-        
         .bow-center {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: #ef4444;
-            border: 3px solid #991b1b;
-            border-radius: 50%;
-            top: -12.5px;
-            left: -12.5px;
-            z-index: 101;
+            position: absolute; width: 25px; height: 25px;
+            background: #ef4444; border: 3px solid #991b1b;
+            border-radius: 50%; top: -12.5px; left: -12.5px; z-index: 101;
         }
 
-        .tag {
-            position: absolute;
-            bottom: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 3px solid #f9a8d4;
-            font-family: 'Pacifico', cursive;
-            color: #db2777;
-            font-size: 1.2rem;
-            white-space: nowrap;
-            box-shadow: 0 4px 0 #fbcfe8;
+        .dim-line { position: absolute; background: #be185d; }
+        .dim-text {
+            position: absolute; color: #be185d; font-weight: bold; font-size: 1.2rem;
+            background: rgba(255,255,255,0.8); padding: 2px 5px; border-radius: 4px;
+        }
+        .dim-height-line { width: 4px; height: 100%; right: 0; top: 0; background: linear-gradient(to bottom, #be185d 50%, transparent 0%); background-size: 4px 20px; }
+        .dim-height-text { right: 10px; top: 50%; transform: translateY(-50%); }
+        .dim-width-line { width: 100%; height: 4px; bottom: 0; left: 0; background: linear-gradient(to right, #be185d 50%, transparent 0%); background-size: 20px 4px; }
+        .dim-width-text { bottom: 10px; left: 50%; transform: translateX(-50%); }
+
+        .quiz-panel {
+            width: 320px; background: white; padding: 24px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(236, 72, 153, 0.2);
+            border: 4px solid #fbcfe8; z-index: 50;
+        }
+        .input-group { margin: 20px 0; }
+        input[type="number"] {
+            width: 100%; padding: 12px; border: 2px solid #e5e7eb;
+            border-radius: 12px; font-size: 16px; outline: none;
+            transition: border-color 0.3s; font-family: 'Quicksand', sans-serif;
+        }
+        input[type="number"]:focus { border-color: #ec4899; }
+        .btn-check {
+            width: 100%; padding: 12px; background: #ec4899; color: white;
+            border: none; border-radius: 12px; font-weight: bold; font-size: 16px;
+            cursor: pointer; transition: transform 0.2s, background 0.2s;
+        }
+        .btn-check:hover { background: #db2777; transform: scale(1.02); }
+        .result-msg { margin-top: 15px; font-weight: bold; text-align: center; min-height: 24px; }
+        .hidden-formula {
+            display: none; margin-top: 10px; padding: 10px;
+            background: #fff1f2; border-radius: 8px; font-size: 0.9rem; color: #be185d;
         }
 
+        @media (max-width: 800px) {
+            body { flex-direction: column; gap: 20px; height: auto; padding: 20px 0; overflow-y: auto; }
+            .scene { height: 450px; width: 100%; transform: scale(0.8); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="text-center mb-4 z-10">
-        <h1 class="font-['Pacifico'] text-5xl text-pink-600 drop-shadow-md" style="-webkit-text-stroke: 1px white;">Hello Kitty Box</h1>
+    <!-- Giao diện Bài tập -->
+    <div class="quiz-panel">
+        <h2 class="text-2xl font-bold text-pink-600 mb-2 font-['Pacifico']">Thử thách Toán học</h2>
+        <p class="text-gray-600 text-sm mb-4">
+            Tính <strong>Diện Tích Xung Quanh</strong> hộp quà để Hello Kitty xuất hiện nhé!
+        </p>
+        
+        <div class="bg-pink-50 p-3 rounded-xl mb-4 text-sm text-gray-700">
+            <p><strong>Dữ liệu:</strong></p>
+            <ul class="list-disc list-inside ml-2">
+                <li>Đáy là tam giác đều</li>
+                <li>Cạnh đáy: <span class="text-pink-600 font-bold">$a = 15 \text{ cm}$</span></li>
+                <li>Chiều cao: <span class="text-pink-600 font-bold">$h = 25 \text{ cm}$</span></li>
+            </ul>
+        </div>
+
+        <div class="input-group">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nhập $S_{xq}$ (cm²):</label>
+            <input type="number" id="volumeInput" placeholder="Nhập kết quả...">
+        </div>
+
+        <button class="btn-check" onclick="checkAnswer()">Kiểm tra kết quả</button>
+        
+        <div id="resultMessage" class="result-msg text-gray-500">
+            Hộp đang khóa...
+        </div>
+
+        <div id="formulaHint" class="hidden-formula">
+            <p>Gợi ý: $$S_{xq} = C_{đáy} \times h$$</p>
+            <p>Trong đó $C_{đáy}$ là chu vi đáy.</p>
+        </div>
     </div>
 
+    <!-- Sân khấu 3D -->
     <div class="scene">
-        <div class="prism-box">
+        <div class="prism-box" id="giftBox">
             
-            <!-- Mặt 1 -->
+            <!-- Hello Kitty 3D Construction -->
+            <!-- Wrapper bay lên -->
+            <div class="kitty-3d-wrapper">
+                <!-- Wrapper xoay ngược để luôn nhìn về phía trước -->
+                <div class="kitty-rotator">
+                    <!-- Wrapper nhún nhảy -->
+                    <div class="kitty-bouncer">
+                        
+                        <div class="kitty-body-group cube">
+                            <!-- Đầu (Head) -->
+                            <div class="k-head cube">
+                                <div class="cube-face f-front"></div>
+                                <div class="cube-face f-back"></div>
+                                <div class="cube-face f-right"></div>
+                                <div class="cube-face f-left"></div>
+                                <div class="cube-face f-top"></div>
+                                <div class="cube-face f-bottom"></div>
+                                
+                                <div class="k-ear ear-l"></div>
+                                <div class="k-ear ear-r"></div>
+                                <div class="k-bow"></div>
+                            </div>
+
+                            <!-- Thân (Body) -->
+                            <div class="k-body cube">
+                                <div class="cube-face f-front"></div>
+                                <div class="cube-face f-back"></div>
+                                <div class="cube-face f-right"></div>
+                                <div class="cube-face f-left"></div>
+                                <div class="cube-face f-top"></div>
+                                <div class="cube-face f-bottom"></div>
+                            </div>
+
+                            <!-- Tay Chân -->
+                            <div class="k-arm arm-l"></div>
+                            <div class="k-arm arm-r"></div>
+                            <div class="k-leg leg-l"></div>
+                            <div class="k-leg leg-r"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mặt 1 (Trước) -->
             <div class="face face-1 hello-kitty-skin hello-kitty-pattern">
                 <div class="ribbon-v"></div>
+                <div class="dim-height-line dim-line"></div>
+                <div class="dim-text dim-height-text">25cm</div>
+                <div class="dim-width-line dim-line"></div>
+                <div class="dim-text dim-width-text">15cm</div>
             </div>
             
-            <!-- Mặt 2 -->
+            <!-- Mặt 2 (Phải) -->
             <div class="face face-2 hello-kitty-skin hello-kitty-pattern">
                 <div class="ribbon-v"></div>
             </div>
             
-            <!-- Mặt 3 -->
+            <!-- Mặt 3 (Trái) -->
             <div class="face face-3 hello-kitty-skin hello-kitty-pattern">
                 <div class="ribbon-v"></div>
             </div>
 
-            <!-- Mặt đáy dưới -->
+            <!-- Đáy dưới -->
             <div class="cap bottom-cap hello-kitty-skin hello-kitty-pattern">
-                <div class="cap-ribbon ribbon-1" style="background: #be185d; z-index: 1;"></div>
-                <div class="cap-ribbon ribbon-2" style="background: #be185d; z-index: 1;"></div>
-                <div class="cap-ribbon ribbon-3" style="background: #be185d; z-index: 1;"></div>
+                <div class="cap-ribbon ribbon-1" style="background: #be185d;"></div>
+                <div class="cap-ribbon ribbon-2" style="background: #be185d;"></div>
+                <div class="cap-ribbon ribbon-3" style="background: #be185d;"></div>
             </div>
 
-            <!-- Mặt đáy trên (Nắp) - Cấu trúc mới -->
+            <!-- Đáy trên (Nắp) -->
             <div class="cap top-cap">
-                <!-- Lớp da bên ngoài (Họa tiết + Ruy băng) -->
                 <div class="top-cap-skin hello-kitty-pattern">
                     <div class="cap-ribbon ribbon-1"></div>
                     <div class="cap-ribbon ribbon-2"></div>
                     <div class="cap-ribbon ribbon-3"></div>
                 </div>
-                
-                <!-- Nơ đỏ to (Nằm ngoài lớp skin nhưng vẫn trong top-cap để xoay theo) -->
                 <div class="bow-container">
                     <div class="bow-wing wing-left"></div>
                     <div class="bow-wing wing-right"></div>
@@ -274,13 +445,56 @@
         </div>
     </div>
 
-    <div class="tag">
-        Hello Kitty &bull; V = S.h
-    </div>
-    
-    <div class="fixed bottom-4 text-pink-500 font-bold text-sm">
-        Di chuột vào để mở quà nha!
-    </div>
+    <script>
+        // Cấu hình bài toán
+        const side = 15;
+        const height = 25;
+        const perimeter = side * 3;
+        const lateralArea = perimeter * height; // 1125
+        
+        console.log("Đáp án đúng (S_xq):", lateralArea);
 
+        function checkAnswer() {
+            const userVal = parseFloat(document.getElementById('volumeInput').value);
+            const msg = document.getElementById('resultMessage');
+            const box = document.getElementById('giftBox');
+            const hint = document.getElementById('formulaHint');
+
+            if (isNaN(userVal)) {
+                msg.textContent = "Bạn chưa nhập số!";
+                msg.className = "result-msg text-red-500";
+                return;
+            }
+
+            if (Math.abs(userVal - lateralArea) < 1.0) {
+                // Đúng
+                msg.textContent = "Chính xác! Hello Kitty 3D xuất hiện!";
+                msg.className = "result-msg text-green-600";
+                box.classList.add('unlocked');
+                box.classList.add('open-now');
+                hint.style.display = "none";
+                
+                // Pháo hoa
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ec4899', '#fbbf24', '#ffffff']
+                });
+
+            } else {
+                // Sai
+                msg.textContent = "Sai rồi, thử lại nhé!";
+                msg.className = "result-msg text-red-500";
+                box.classList.remove('unlocked');
+                box.classList.remove('open-now');
+                hint.style.display = "block";
+                
+                if (window.MathJax) {
+                    MathJax.typesetPromise([hint]);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
