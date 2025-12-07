@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game 3D: Thợ Lái Máy Xúc Tài Ba - Luyện Tập</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #87CEEB;
+        }
+
+        /* UI Overlay */
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 3px solid #d35400;
+            transition: all 0.3s;
+        }
+
+        /* Header Styles */
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            background: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        .level-badge { font-weight: bold; color: #f1c40f; font-size: 1.1em; }
+        .timer-badge { font-family: monospace; font-size: 1.2em; font-weight: bold; }
+
+        /* Progress Bar Styles */
+        .progress-wrapper { margin-bottom: 15px; }
+        .progress-label { font-size: 0.85em; color: #666; margin-bottom: 3px; display: flex; justify-content: space-between; }
+        .progress-track { width: 100%; height: 10px; background-color: #e0e0e0; border-radius: 5px; overflow: hidden; border: 1px solid #ccc; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); width: 0%; transition: width 0.5s ease-in-out; }
+
+        h2 { margin: 0; color: #d35400; text-align: center; font-size: 1.6em; margin-bottom: 15px; }
+        
+        .info-box {
+            background: #fef5e7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px dashed #f39c12;
+        }
+        
+        .bucket-diagram {
+            width: 100%;
+            height: 140px;
+            margin: 15px 0;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 1em; color: #2c3e50; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #bdc3c7; 
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+        input:focus { border-color: #d35400; outline: none; background-color: #fffdf5; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 0 #219150;
+        }
+        button:hover { background: #2ecc71; transform: translateY(-2px); box-shadow: 0 6px 0 #219150; }
+        button:active { transform: translateY(0); box-shadow: 0 2px 0 #219150; }
+        button:disabled { background: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Nút chuyển màn */
+        .nav-btn { display: none; margin-top: 10px; }
+        #btn-next-order { background-color: #3498db; box-shadow: 0 4px 0 #2980b9; }
+        #btn-next-order:hover { background-color: #5dade2; }
+        #btn-next-level { background-color: #9b59b6; box-shadow: 0 4px 0 #8e44ad; animation: pulse 1.5s infinite; }
+        #btn-retry { background-color: #e67e22; box-shadow: 0 4px 0 #d35400; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
+        #feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 1.2em;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 1.1em;
+        }
+        .success { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; }
+
+        #instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            pointer-events: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #score-board {
+            position: absolute;
+            top: 80px; left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #f1c40f;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.4em;
+            border: 3px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .highlight-val { color: #d35400; font-weight: bold; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="score-board">🏆 Điểm: <span id="score-val">0</span></div>
+
+    <div id="instructions">
+        🖱️ <b>Chuột trái:</b> Xoay | 🖱️ <b>Chuột phải:</b> Di chuyển | 📜 <b>Lăn chuột:</b> Thu/Phóng
+    </div>
+
+    <div id="ui-container">
+        <div class="level-header">
+            <span class="level-badge" id="level-text">Level 1</span>
+            <span class="timer-badge" id="timer-text">∞</span>
+        </div>
+
+        <div class="progress-wrapper">
+            <div class="progress-label">
+                <span>Tiến độ:</span>
+                <span id="progress-text">0/2 Đơn</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <h2 id="material-name">Cát Vàng</h2>
+        
+        <div class="info-box">
+            <p style="margin:5px 0; font-size:1.1em;">📦 <b>Tổng cần xúc:</b> <span id="target-volume" class="highlight-val">0</span> m³</p>
+            <hr style="border:0; border-top:2px dashed #e67e22; margin: 10px 0;">
+            <p style="margin:5px 0; font-weight:bold; color:#2980b9;" id="dim-title">Kích thước gàu:</p>
+            <ul style="margin:5px 0 5px 25px; padding:0; font-size:1.05em; line-height: 1.6;" id="dim-list">
+                <!-- Thông số sẽ được điền bằng JS -->
+            </ul>
+        </div>
+
+        <div class="bucket-diagram" id="diagram-container">
+            <!-- SVG hình vẽ -->
+        </div>
+
+        <div class="input-group">
+            <label>1. Thể tích 1 gàu (m³):</label>
+            <input type="number" id="inp-bucket-vol" placeholder="Nhập kết quả...">
+        </div>
+        <div class="input-group">
+            <label>2. Số gàu cần xúc:</label>
+            <input type="number" id="inp-scoops" placeholder="Nhập số lần...">
+        </div>
+        
+        <button id="btn-start" onclick="checkAndRun()">▶ BẮT ĐẦU XÚC</button>
+        
+        <!-- Nút ẩn -->
+        <button id="btn-next-order" class="nav-btn" onclick="nextOrder()">🚚 ĐƠN HÀNG TIẾP THEO</button>
+        <button id="btn-next-level" class="nav-btn" onclick="nextLevel()">🚀 LÊN LEVEL MỚI</button>
+        <button id="btn-retry" class="nav-btn" onclick="retryCurrentLevel()">🔄 THỬ LẠI</button>
+        
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(18, 12, 22); 
+        camera.lookAt(0, 2, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 - 0.02;
+
+        // Ánh sáng
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        dirLight.position.set(15, 30, 15);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        // --- VẬT LIỆU ---
+        const matYellow = new THREE.MeshStandardMaterial({color: 0xf39c12, roughness: 0.6});
+        const matDark = new THREE.MeshStandardMaterial({color: 0x333333, roughness: 0.8});
+        const matSilver = new THREE.MeshStandardMaterial({color: 0xbdc3c7, metalness: 0.8});
+        const matGlass = new THREE.MeshStandardMaterial({color: 0x87CEEB, transparent: true, opacity: 0.6});
+        const matRed = new THREE.MeshStandardMaterial({color: 0xe74c3c});
+        const matDarkRed = new THREE.MeshStandardMaterial({color: 0xc0392b});
+        const matGreen = new THREE.MeshStandardMaterial({color: 0x27ae60});
+        const matFlowerCenter = new THREE.MeshStandardMaterial({color: 0xffd700});
+        
+        let currentMaterial = new THREE.MeshStandardMaterial({ color: 0xf1c40f, roughness: 1 });
+
+        // --- MÔI TRƯỜNG ---
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x7CFC00 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+        const road = new THREE.Mesh(new THREE.PlaneGeometry(15, 20), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
+        road.rotation.x = -Math.PI / 2; road.position.set(2, 0.01, 2.5); road.receiveShadow = true; scene.add(road);
+
+        const animals = [];
+
+        // HÀM TẠO CÂY THÔNG
+        function createPineTree(x, z, scale) {
+            const tree = new THREE.Group();
+            
+            // Thân cây
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.4, 1.5, 8), 
+                new THREE.MeshStandardMaterial({color: 0x3e2723})
+            );
+            trunk.position.y = 0.75; 
+            trunk.castShadow = true;
+            tree.add(trunk);
+
+            // Tán lá (3 tầng hình nón)
+            const matPine = new THREE.MeshStandardMaterial({color: 0x1b5e20});
+            
+            const l1 = new THREE.Mesh(new THREE.ConeGeometry(1.8, 2, 8), matPine); 
+            l1.position.y = 1.5; l1.castShadow = true;
+            
+            const l2 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 1.8, 8), matPine); 
+            l2.position.y = 2.5; l2.castShadow = true;
+            
+            const l3 = new THREE.Mesh(new THREE.ConeGeometry(1.0, 1.5, 8), matPine); 
+            l3.position.y = 3.5; l3.castShadow = true;
+
+            tree.add(l1, l2, l3);
+            
+            tree.position.set(x, 0, z);
+            tree.scale.set(scale, scale, scale);
+            scene.add(tree);
+        }
+
+        // HÀM TẠO THỎ
+        function createRabbit(x, z) {
+            const rabbit = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            body.scale.set(1, 0.8, 1.5); body.position.y = 0.3;
+            
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            head.position.set(0, 0.5, 0.4);
+            
+            const earGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8);
+            const earMat = new THREE.MeshStandardMaterial({color: 0xffffff});
+            const ear1 = new THREE.Mesh(earGeo, earMat); ear1.position.set(0.1, 0.75, 0.4); ear1.rotation.x = -0.2;
+            const ear2 = ear1.clone(); ear2.position.set(-0.1, 0.75, 0.4);
+            
+            rabbit.add(body, head, ear1, ear2);
+            rabbit.position.set(x, 0, z);
+            
+            // Dữ liệu cho animation
+            rabbit.userData = { 
+                type: 'rabbit', 
+                hopSpeed: 2 + Math.random(), 
+                hopHeight: 0.3,
+                baseY: 0,
+                angle: Math.random() * Math.PI * 2
+            };
+            scene.add(rabbit);
+            animals.push(rabbit);
+        }
+
+        // HÀM TẠO CHIM
+        function createBird() {
+            const bird = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 8), new THREE.MeshStandardMaterial({color: 0xff4500}));
+            body.rotation.x = Math.PI/2;
+            
+            const wingGeo = new THREE.BoxGeometry(0.6, 0.02, 0.2);
+            const wings = new THREE.Mesh(wingGeo, new THREE.MeshStandardMaterial({color: 0x333333}));
+            wings.position.y = 0.1;
+            
+            bird.add(body, wings);
+            
+            bird.userData = {
+                type: 'bird',
+                speed: 0.5 + Math.random() * 0.5,
+                radius: 10 + Math.random() * 15,
+                angle: Math.random() * Math.PI * 2,
+                height: 8 + Math.random() * 5
+            };
+            scene.add(bird);
+            animals.push(bird);
+        }
+
+        // HÀM TẠO GÀ CON
+        function createChick(x, z) {
+            const chick = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFD700})); 
+            body.position.y = 0.2;
+            
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), new THREE.MeshStandardMaterial({color: 0xFFD700})); 
+            head.position.set(0, 0.35, 0.15);
+            
+            const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 4), new THREE.MeshStandardMaterial({color: 0xFF4500})); 
+            beak.rotation.x = Math.PI/2; 
+            beak.position.set(0, 0.35, 0.3);
+            
+            chick.add(body, head, beak);
+            chick.position.set(x, 0, z);
+            
+            chick.userData = {
+                type: 'chick',
+                peckTimer: 0,
+                isPecking: false
+            };
+            scene.add(chick);
+            animals.push(chick);
+        }
+
+        // HÀM TẠO CỎ VÀ HOA
+        function createGrassAndFlowers() {
+            // Cỏ (Số lượng lớn nên dùng hình học đơn giản)
+            const grassGeo = new THREE.ConeGeometry(0.05, 0.3, 3);
+            const grassMat = new THREE.MeshStandardMaterial({color: 0x4caf50});
+            
+            for(let i=0; i<300; i++) {
+                const grass = new THREE.Mesh(grassGeo, grassMat);
+                // Phân bố ngẫu nhiên xung quanh, tránh khu vực xe
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 10 + Math.random() * 30; // Bán kính từ 10 đến 40
+                grass.position.set(Math.cos(angle)*radius, 0.15, Math.sin(angle)*radius);
+                grass.rotation.y = Math.random() * Math.PI;
+                scene.add(grass);
+            }
+
+            // Hoa
+            const flowerColors = [0xe91e63, 0x9c27b0, 0xffeb3b, 0xff5722];
+            for(let i=0; i<50; i++) {
+                const flowerGroup = new THREE.Group();
+                const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4, 4), matGreen);
+                stem.position.y = 0.2;
+                
+                const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+                const petal = new THREE.Mesh(new THREE.DodecahedronGeometry(0.1), new THREE.MeshStandardMaterial({color: color}));
+                petal.position.y = 0.4;
+                
+                flowerGroup.add(stem, petal);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 12 + Math.random() * 25;
+                flowerGroup.position.set(Math.cos(angle)*radius, 0, Math.sin(angle)*radius);
+                scene.add(flowerGroup);
+            }
+        }
+
+        // --- KHỞI TẠO MÔI TRƯỜNG ---
+        function initEnvironment() {
+            // Cây thông
+            for(let i=0; i<20; i++) {
+                const r = 20 + Math.random() * 25;
+                const theta = Math.random() * Math.PI * 2;
+                createPineTree(Math.cos(theta)*r, Math.sin(theta)*r, 0.8 + Math.random()*0.5);
+            }
+
+            // Động vật
+            for(let i=0; i<5; i++) {
+                const r = 15 + Math.random() * 10;
+                const theta = Math.random() * Math.PI * 2;
+                createRabbit(Math.cos(theta)*r, Math.sin(theta)*r);
+            }
+            
+            for(let i=0; i<8; i++) {
+                createBird();
+            }
+
+            for(let i=0; i<6; i++) {
+                const r = 12 + Math.random() * 8;
+                const theta = Math.random() * Math.PI * 2;
+                createChick(Math.cos(theta)*r, Math.sin(theta)*r);
+            }
+
+            createGrassAndFlowers();
+        }
+
+        initEnvironment();
+
+
+        // --- XE TẢI ---
+        const truckGroup = new THREE.Group(); truckGroup.position.set(8, 0, 0); scene.add(truckGroup);
+        const tChassis = new THREE.Mesh(new THREE.BoxGeometry(7, 0.5, 2.2), matDark); tChassis.position.y = 0.8; truckGroup.add(tChassis);
+        const tCabGroup = new THREE.Group(); tCabGroup.position.set(2.2, 1.8, 0); truckGroup.add(tCabGroup);
+        tCabGroup.add(new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.4), matDarkRed)); 
+        const tBedGroup = new THREE.Group(); tBedGroup.position.set(-1.8, 1.8, 0); truckGroup.add(tBedGroup);
+        tBedGroup.add(new THREE.Mesh(new THREE.BoxGeometry(4.8, 1.5, 2.4), matRed));
+        // Thùng chứa cát trong xe
+        const tLoad = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.1, 2.0), currentMaterial); tLoad.position.set(-1.8, 1.5, 0); truckGroup.add(tLoad);
+        
+        // Bánh xe tải (thêm cho đẹp)
+        const wheelGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.5, 24); 
+        const wheelMat = new THREE.MeshStandardMaterial({color: 0x222});
+        function createWheel(x, z) {
+            const w = new THREE.Mesh(wheelGeo, wheelMat);
+            w.rotation.x = Math.PI/2;
+            w.position.set(x, 0.6, z);
+            w.castShadow = true;
+            return w;
+        }
+        truckGroup.add(createWheel(1.8, 1.2), createWheel(1.8, -1.2));
+        truckGroup.add(createWheel(-2.5, 1.2), createWheel(-2.5, -1.2));
+        truckGroup.add(createWheel(-1.0, 1.2), createWheel(-1.0, -1.2));
+
+
+        // --- XE XÚC ---
+        const excavatorGroup = new THREE.Group(); scene.add(excavatorGroup);
+        const trackL = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.8, 0.8), matDark); trackL.position.set(0, 0.4, 1.2); excavatorGroup.add(trackL);
+        const trackR = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.8, 0.8), matDark); trackR.position.set(0, 0.4, -1.2); excavatorGroup.add(trackR);
+        
+        const excBody = new THREE.Group(); excBody.position.y = 1.0; excavatorGroup.add(excBody);
+        excBody.add(new THREE.Mesh(new THREE.BoxGeometry(3, 0.5, 2.5), matYellow)); // Sàn
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1.2), matYellow); cab.position.set(0.5, 1.5, 0.8); excBody.add(cab); // Cabin
+        
+        const boomGroup = new THREE.Group(); boomGroup.position.set(0.8, 1.0, -0.5); excBody.add(boomGroup);
+        const boom = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 0.6), matYellow); boom.position.set(1.5, 1.5, 0); boom.rotation.z = Math.PI / 6; boomGroup.add(boom);
+        
+        const stickGroup = new THREE.Group(); stickGroup.position.set(4.5, 1.2, 0); boomGroup.add(stickGroup);
+        const stick = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.0, 0.5), matYellow); stick.position.y = -1.2; stickGroup.add(stick);
+        
+        const bucketGroup = new THREE.Group(); bucketGroup.position.set(0, -2.8, 0); stickGroup.add(bucketGroup);
+        let bucketMesh = null;
+        let loadInBucket = null;
+        let materialPile = null;
+
+        // --- CẤU HÌNH GAME ---
+        let currentLevel = 1;
+        let totalScore = 0;
+        let levelProgress = 0;
+        let gameParams = {};
+        let isAnimating = false;
+        
+        // Cấu hình các level
+        const levels = {
+            1: { 
+                name: "Tập Sự (Hình Thang)", 
+                materialName: "Cát Vàng", 
+                color: 0xf1c40f, 
+                shape: 'trapezoid', 
+                reqOrders: 2,
+                params: { a: 4, b: 2, h: 2, L: 2, targetScoops: 5 } 
+            },
+            2: { 
+                name: "Chuyên Nghiệp (Hình Thang)", 
+                materialName: "Đá Dăm", 
+                color: 0x95a5a6, 
+                shape: 'trapezoid', 
+                reqOrders: 2,
+                params: { a: 3, b: 1, h: 3, L: 4, targetScoops: 4 } 
+            },
+            3: { 
+                name: "Chuyên Gia (Tam Giác)", 
+                materialName: "Đất Sét", 
+                color: 0x8d6e63, 
+                shape: 'triangle', 
+                reqOrders: 3,
+                params: { a: 4, h: 3, L: 5, targetScoops: 3 }
+            }
+        };
+
+        // --- CÁC HÀM HỖ TRỢ (ĐỊNH NGHĨA TRƯỚC KHI DÙNG) ---
+
+        function updateBucketGeometry(shapeType) {
+            if (bucketMesh) bucketGroup.remove(bucketMesh);
+            if (loadInBucket) bucketGroup.remove(loadInBucket);
+
+            let bucketGeo;
+            const matBucket = new THREE.MeshStandardMaterial({color: 0x2c3e50, side: THREE.DoubleSide});
+
+            if (shapeType === 'trapezoid') {
+                const bucketShape = new THREE.Shape();
+                bucketShape.moveTo(0,0); bucketShape.lineTo(0.8, 0.2); bucketShape.lineTo(0.7, 0.8); bucketShape.quadraticCurveTo(0, 1.0, -0.5, 0.5); bucketShape.lineTo(0,0);
+                bucketGeo = new THREE.ExtrudeGeometry(bucketShape, {depth: 0.8, bevelEnabled: false});
+                bucketMesh = new THREE.Mesh(bucketGeo, matBucket);
+                bucketMesh.position.set(-0.2, -0.5, -0.4);
+            } else {
+                const shape = new THREE.Shape();
+                shape.moveTo(0,0); shape.lineTo(0.8, 0.8); shape.lineTo(-0.5, 0.8); shape.lineTo(0,0);
+                bucketGeo = new THREE.ExtrudeGeometry(shape, {depth: 0.8, bevelEnabled: false});
+                bucketMesh = new THREE.Mesh(bucketGeo, matBucket);
+                bucketMesh.position.set(-0.1, -0.5, -0.4);
+                bucketMesh.rotation.z = -Math.PI/6;
+            }
+            bucketMesh.castShadow = true;
+            bucketGroup.add(bucketMesh);
+
+            loadInBucket = new THREE.Mesh(new THREE.SphereGeometry(0.35), currentMaterial);
+            loadInBucket.position.set(0.2, 0, 0);
+            loadInBucket.visible = false;
+            bucketGroup.add(loadInBucket);
+        }
+
+        function updateSVG(levelConfig, p) {
+            const container = document.getElementById('diagram-container');
+            let svgContent = '';
+            
+            if (levelConfig.shape === 'trapezoid') {
+                svgContent = `
+                <svg width="250" height="130" viewBox="0 0 250 130">
+                    <path d="M60,90 L180,90 L160,40 L80,40 Z" fill="${'#'+levelConfig.color.toString(16)}" stroke="#333" stroke-width="2" />
+                    <line x1="80" y1="40" x2="80" y2="90" stroke="#d35400" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="120" y="110" text-anchor="middle" font-weight="bold">a = ${p.a}m</text>
+                    <text x="120" y="30" text-anchor="middle" font-weight="bold">b = ${p.b}m</text>
+                    <text x="65" y="70" text-anchor="middle" font-weight="bold" fill="#d35400">h = ${p.h}m</text>
+                    <path d="M180,90 L210,60 L190,10 L160,40" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="2"/>
+                    <text x="210" y="80" font-weight="bold">L = ${p.L}m</text>
+                </svg>`;
+            } else {
+                svgContent = `
+                <svg width="250" height="130" viewBox="0 0 250 130">
+                    <path d="M60,90 L180,90 L120,30 Z" fill="${'#'+levelConfig.color.toString(16)}" stroke="#333" stroke-width="2" />
+                    <line x1="120" y1="30" x2="120" y2="90" stroke="#d35400" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="120" y="110" text-anchor="middle" font-weight="bold">a = ${p.a}m</text>
+                    <text x="135" y="60" font-weight="bold" fill="#d35400">h = ${p.h}m</text>
+                    <path d="M180,90 L210,60 L150,0 L120,30" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="2"/>
+                    <text x="210" y="80" font-weight="bold">L = ${p.L}m</text>
+                </svg>`;
+            }
+            container.innerHTML = svgContent;
+        }
+
+        function updateProgressBar() {
+            const config = levels[currentLevel];
+            const percent = (levelProgress / config.reqOrders) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').textContent = `${levelProgress}/${config.reqOrders} Đơn`;
+        }
+
+        function toggleButtons(state) {
+            const ids = ['btn-start', 'btn-next-order', 'btn-next-level', 'btn-retry'];
+            ids.forEach(id => document.getElementById(id).style.display = 'none');
+
+            if (state === 'start') document.getElementById('btn-start').style.display = 'block';
+            else if (state === 'nextOrder') document.getElementById('btn-next-order').style.display = 'block';
+            else if (state === 'nextLevel') document.getElementById('btn-next-level').style.display = 'block';
+            else if (state === 'retry') document.getElementById('btn-retry').style.display = 'block';
+        }
+
+        function resetExcavatorPose() {
+            new TWEEN.Tween(excBody.rotation).to({y: 0}, 800).start();
+            new TWEEN.Tween(boomGroup.rotation).to({z: 0}, 800).start();
+            new TWEEN.Tween(stickGroup.rotation).to({z: 0}, 800).start();
+        }
+
+        // --- KHỞI TẠO LEVEL ---
+        function initGame(level = 1, keepProgress = false) {
+            if (!keepProgress) {
+                currentLevel = level;
+                levelProgress = 0;
+            }
+            
+            const config = levels[currentLevel];
+            const p = config.params;
+
+            document.getElementById('level-text').textContent = `Level ${currentLevel}: ${config.name}`;
+            document.getElementById('material-name').textContent = config.materialName;
+            document.getElementById('material-name').style.color = '#' + config.color.toString(16);
+            updateProgressBar();
+
+            currentMaterial.color.setHex(config.color);
+            updateBucketGeometry(config.shape);
+            updateSVG(config, p);
+
+            // Tính toán Toán học
+            let areaBase = 0;
+            if (config.shape === 'trapezoid') {
+                areaBase = ((p.a + p.b) / 2) * p.h;
+                document.getElementById('dim-list').innerHTML = 
+                    `<li>Đáy lớn (a): <b>${p.a}</b> m</li>
+                     <li>Đáy bé (b): <b>${p.b}</b> m</li>
+                     <li>Chiều cao (h): <b>${p.h}</b> m</li>
+                     <li>Chiều rộng (L): <b>${p.L}</b> m</li>`;
+            } else {
+                areaBase = 0.5 * p.a * p.h;
+                document.getElementById('dim-list').innerHTML = 
+                    `<li>Cạnh đáy (a): <b>${p.a}</b> m</li>
+                     <li>Chiều cao (h): <b>${p.h}</b> m</li>
+                     <li>Chiều rộng (L): <b>${p.L}</b> m</li>`;
+            }
+
+            gameParams.vBucket = areaBase * p.L;
+            gameParams.nScoops = p.targetScoops;
+            gameParams.vTotal = gameParams.vBucket * p.targetScoops;
+
+            document.getElementById('target-volume').textContent = gameParams.vTotal;
+            
+            document.getElementById('inp-bucket-vol').value = '';
+            document.getElementById('inp-scoops').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = '';
+            
+            toggleButtons('start');
+            document.getElementById('btn-start').disabled = false;
+
+            if (materialPile) scene.remove(materialPile);
+            const r = 4; const hPile = 3; 
+            materialPile = new THREE.Mesh(new THREE.ConeGeometry(r, hPile, 32), currentMaterial);
+            materialPile.position.set(-6, hPile/2, 0); 
+            materialPile.castShadow = true; 
+            scene.add(materialPile);
+
+            tLoad.visible = false;
+            tLoad.scale.y = 0.1;
+            tLoad.position.y = 1.6;
+            resetExcavatorPose();
+        }
+
+        // --- XỬ LÝ GAMEPLAY ---
+        function checkAndRun() {
+            if (isAnimating) return;
+            
+            const userV = parseFloat(document.getElementById('inp-bucket-vol').value);
+            const userN = parseInt(document.getElementById('inp-scoops').value);
+            const feedback = document.getElementById('feedback');
+
+            if (!userV || !userN) {
+                feedback.textContent = "⚠️ Hãy nhập đầy đủ 2 ô!"; feedback.className = "error"; return;
+            }
+
+            if (Math.abs(userV - gameParams.vBucket) > 0.1) {
+                feedback.innerHTML = `Sai thể tích gàu!<br>Đáp án đúng: ${gameParams.vBucket} m³`; 
+                feedback.className = "error"; return;
+            }
+            if (userN !== gameParams.nScoops) {
+                feedback.innerHTML = `Sai số lần xúc!<br>Cần: ${gameParams.vTotal} / ${gameParams.vBucket} = ${gameParams.nScoops} lần`; 
+                feedback.className = "error"; return;
+            }
+
+            feedback.textContent = "CHÍNH XÁC! Đang thi công..."; 
+            feedback.className = "success";
+            document.getElementById('btn-start').style.display = 'none';
+            
+            totalScore += 100;
+            document.getElementById('score-val').textContent = totalScore;
+            levelProgress++;
+            updateProgressBar();
+
+            runDiggingAnimation(userN);
+        }
+
+        function runDiggingAnimation(totalScoops) {
+            isAnimating = true;
+            let currentScoop = 0;
+            tLoad.visible = true; 
+
+            function digLoop() {
+                if (currentScoop >= totalScoops) {
+                    finishJob();
+                    return;
+                }
+
+                new TWEEN.Tween(excBody.rotation).to({ y: 2.5 }, 800).easing(TWEEN.Easing.Quadratic.Out)
+                .onComplete(() => {
+                    new TWEEN.Tween(boomGroup.rotation).to({z: 0.5}, 500).start();
+                    new TWEEN.Tween(stickGroup.rotation).to({z: -1.0}, 500).start();
+                    new TWEEN.Tween(bucketGroup.rotation).to({z: -1.0}, 500).onComplete(() => {
+                        loadInBucket.visible = true;
+                        
+                        const scale = 1 - ((currentScoop+1)/totalScoops);
+                        if(scale > 0) new TWEEN.Tween(materialPile.scale).to({x:scale, y:scale, z:scale}, 500).start();
+                        else materialPile.visible = false;
+
+                        new TWEEN.Tween(bucketGroup.rotation).to({z: 0.5}, 400).start(); 
+                        new TWEEN.Tween(boomGroup.rotation).to({z: -0.2}, 800).delay(200).start();
+                        
+                        setTimeout(() => {
+                            new TWEEN.Tween(excBody.rotation).to({ y: 0 }, 1000).easing(TWEEN.Easing.Quadratic.Out).onComplete(() => {
+                                new TWEEN.Tween(stickGroup.rotation).to({z: -0.5}, 400).start();
+                                new TWEEN.Tween(bucketGroup.rotation).to({z: -1.5}, 400).onComplete(() => {
+                                    loadInBucket.visible = false; 
+                                    
+                                    const fillPercent = (currentScoop + 1) / totalScoops;
+                                    new TWEEN.Tween(tLoad.scale).to({y: Math.max(0.1, fillPercent * 8)}, 300).start();
+                                    new TWEEN.Tween(tLoad.position).to({y: 1.5 + fillPercent * 0.5}, 300).start();
+
+                                    currentScoop++;
+                                    new TWEEN.Tween(bucketGroup.rotation).to({z: 0}, 400).start();
+                                    setTimeout(digLoop, 500);
+                                }).start();
+                            }).start();
+                        }, 600);
+                    }).start();
+                }).start();
+            }
+            digLoop();
+        }
+
+        function finishJob() {
+            isAnimating = false;
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            resetExcavatorPose();
+            
+            const config = levels[currentLevel];
+            
+            if (levelProgress >= config.reqOrders) {
+                if (currentLevel < 3) {
+                    document.getElementById('feedback').textContent = "🎉 TUYỆT VỜI! Đã đủ chỉ tiêu lên cấp.";
+                    toggleButtons('nextLevel');
+                } else {
+                    document.getElementById('feedback').textContent = "🏆 PHÁ ĐẢO GAME! Bạn là kỹ sư tài ba!";
+                    alert("CHÚC MỪNG! BẠN ĐÃ HOÀN THÀNH TẤT CẢ LEVEL!");
+                }
+            } else {
+                document.getElementById('feedback').textContent = "✅ Xong đơn hàng! Tiếp tục nào.";
+                toggleButtons('nextOrder');
+            }
+        }
+
+        function nextOrder() { initGame(currentLevel, true); }
+        function nextLevel() { initGame(currentLevel + 1); }
+        function retryCurrentLevel() { initGame(currentLevel, false); }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+            
+            // Animation động vật
+            animals.forEach(animal => {
+                if (animal.userData.type === 'rabbit') {
+                    const hop = Math.abs(Math.sin(time * animal.userData.hopSpeed * 5)) * animal.userData.hopHeight;
+                    animal.position.y = animal.userData.baseY + hop;
+                } else if (animal.userData.type === 'bird') {
+                    const angle = time * animal.userData.speed + animal.userData.angle;
+                    animal.position.x = Math.cos(angle) * animal.userData.radius;
+                    animal.position.z = Math.sin(angle) * animal.userData.radius;
+                    animal.rotation.y = -angle;
+                } else if (animal.userData.type === 'chick') {
+                    animal.userData.peckTimer += 0.02;
+                    if (animal.userData.peckTimer > 5) { // Peck every few seconds
+                         animal.userData.isPecking = !animal.userData.isPecking;
+                         animal.userData.peckTimer = 0;
+                    }
+                    if (animal.userData.isPecking) {
+                         animal.children[1].rotation.x = Math.abs(Math.sin(time * 15)) * 0.5;
+                    }
+                }
+            });
+
+            TWEEN.update();
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start
+        initGame(1);
+        animate();
+
+    </script>
+</body>
+</html>
