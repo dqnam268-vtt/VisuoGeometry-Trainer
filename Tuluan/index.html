@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Tự Luận: Hình Lăng Trụ Đứng</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 22px; }
+        
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* BODY */
+        .main-content {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .question-box {
+            background: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .q-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .q-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* INPUT AREA */
+        .answer-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label { font-weight: 600; font-size: 14px; color: #555; }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* FILL IN BLANK STYLES */
+        .fill-in-box {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .fill-line {
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .calc-input {
+            width: 80px;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .unit {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .btn-submit { background: var(--success); color: white; }
+        .btn-submit:hover { background: #27ae60; transform: translateY(-2px); }
+
+        .btn-next { background: var(--primary); color: white; display: none; }
+        .btn-next:hover { background: var(--secondary); }
+
+        .btn-export { background: var(--warning); color: #333; }
+
+        /* FEEDBACK SECTION */
+        .feedback-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+            display: none; /* Ẩn mặc định */
+            animation: fadeIn 0.5s;
+        }
+
+        .feedback-title { font-weight: bold; margin-bottom: 10px; color: #333; }
+        
+        .model-answer {
+            background: #fff;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .keyword-check {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .tag.found { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .tag.missing { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* SVG Placeholder */
+        .svg-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #fafafa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Final Report */
+        .report-screen {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📝 Luyện Tập: Hình Lăng Trụ (Tam Giác & Tứ Giác)</h1>
+        <div class="progress-container">
+            Câu <span id="current-q">1</span> / <span id="total-q">4</span>
+        </div>
+    </header>
+
+    <!-- MÀN HÌNH CÂU HỎI -->
+    <div id="quiz-screen" class="main-content">
+        <div class="question-box">
+            <div class="q-title">
+                <span id="q-icon">🤔</span>
+                <span id="q-title-text">Câu hỏi 1</span>
+            </div>
+            <div class="q-content" id="q-text">
+                Đang tải câu hỏi...
+            </div>
+            <!-- Chỗ để hình ảnh minh họa -->
+            <div id="q-visual" class="svg-placeholder"></div>
+        </div>
+
+        <div class="answer-area" id="input-container">
+            <!-- Sẽ được điền bằng JS: Textarea hoặc Template -->
+        </div>
+
+        <div class="feedback-section" id="feedback-area">
+            <div class="feedback-title">🔍 Đánh giá tự động:</div>
+            <div class="keyword-check" id="keyword-list"></div>
+            
+            <div style="margin-top: 15px; font-weight: bold; color: #333;">Đáp án tham khảo:</div>
+            <div class="model-answer" id="model-answer"></div>
+            
+            <p style="font-size: 13px; color: #666; font-style: italic;">
+                *Hãy so sánh kết quả của em với đáp án mẫu.
+            </p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-submit" id="btn-submit" onclick="submitAnswer()">Kiểm Tra Kết Quả</button>
+            <button class="btn-next" id="btn-next" onclick="nextQuestion()">Câu Tiếp Theo ➜</button>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH KẾT THÚC -->
+    <div id="end-screen" class="report-screen">
+        <h2 style="color: var(--success); font-size: 32px;">🎉 Hoàn Thành!</h2>
+        <p>Em đã hoàn thành bài luyện tập.</p>
+        <div style="margin-top: 30px;">
+            <button class="btn-export" onclick="downloadReport()">📥 Tải Báo Cáo Kết Quả</button>
+            <button class="btn-next" style="display:inline-block; background:#6c757d;" onclick="location.reload()">Làm Lại</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DỮ LIỆU CÂU HỎI ---
+    // type: 'text' (tự luận thường) hoặc 'template' (điền số)
+    const questions = [
+        {
+            id: 1,
+            type: 'text',
+            title: "Nhận biết hình khối",
+            text: "Quan sát một hộp sữa tươi loại 1 lít (dạng hình hộp chữ nhật). Hãy mô tả các đặc điểm của nó: Số mặt, số đỉnh, số cạnh và hình dạng của các mặt.",
+            svg: `<svg viewBox="0 0 200 200" width="180" height="180"><rect x="60" y="60" width="80" height="120" fill="#e3f2fd" stroke="#2c3e50" stroke-width="2"/><polyline points="60,60 90,30 170,30 170,150 140,180" fill="none" stroke="#2c3e50" stroke-width="2"/><line x1="140" y1="60" x2="170" y2="30" stroke="#2c3e50" stroke-width="2"/><line x1="140" y1="180" x2="140" y2="60" stroke="#2c3e50" stroke-width="2"/></svg>`,
+            keywords: ["6 mặt", "8 đỉnh", "12 cạnh", "chữ nhật"],
+            modelAnswer: "- Hình hộp chữ nhật có 6 mặt, 8 đỉnh và 12 cạnh.<br>- Các mặt đều là hình chữ nhật.<br>- Các mặt đối diện song song và bằng nhau."
+        },
+        {
+            id: 2,
+            type: 'template',
+            title: "Lăng Trụ Tam Giác",
+            text: "Một lăng trụ đứng đáy tam giác vuông có hai cạnh góc vuông là 3cm, 4cm; cạnh huyền là 5cm. Chiều cao lăng trụ là 10cm. Hãy điền các số thích hợp để tính diện tích xung quanh.",
+            svg: `<svg viewBox="0 0 200 150" width="200" height="150"><polygon points="20,120 80,120 20,80" fill="#ffe0b2" stroke="#e67e22" stroke-width="2"/><line x1="20" y1="120" x2="120" y2="70" stroke="#e67e22" stroke-width="2"/><line x1="80" y1="120" x2="180" y2="70" stroke="#e67e22" stroke-width="2"/><line x1="20" y1="80" x2="120" y2="30" stroke="#e67e22" stroke-width="2"/><polygon points="120,70 180,70 120,30" fill="#fff3e0" stroke="#e67e22" stroke-width="2"/></svg>`,
+            // Template cho học sinh điền
+            templateHtml: `
+                <div class="fill-in-box">
+                    <div class="fill-line">
+                        1. Chu vi đáy = <input type="number" class="calc-input" data-idx="0"> cm
+                    </div>
+                    <div class="fill-line">
+                        2. Diện tích xung quanh = Chu vi đáy × <input type="number" class="calc-input" data-idx="1"> (chiều cao)
+                    </div>
+                    <div class="fill-line">
+                        = <input type="number" class="calc-input" data-idx="2"> cm²
+                    </div>
+                </div>
+            `,
+            // Logic check: Ghép input thành chuỗi để kiểm tra keyword
+            keywords: ["12", "10", "120"], 
+            modelAnswer: "Chu vi đáy = 3 + 4 + 5 = 12 (cm).<br>Diện tích xung quanh = 12 x 10 = 120 (cm²)."
+        },
+        {
+            id: 3,
+            type: 'template',
+            title: "Lăng Trụ Tứ Giác (Bể Bơi)",
+            text: "Một bể bơi hình hộp chữ nhật có chiều dài 4m, chiều rộng 2m và chiều sâu 1.5m. Hãy tính thể tích nước tối đa bể chứa được.",
+            svg: `<svg viewBox="0 0 200 150" width="200" height="150"><path d="M20,50 L120,50 L100,100 L0,100 Z" fill="#b3e5fc" stroke="#0288d1" stroke-width="2"/><line x1="0" y1="100" x2="0" y2="140" stroke="#0288d1" stroke-width="2"/><line x1="100" y1="100" x2="100" y2="140" stroke="#0288d1" stroke-width="2"/><line x1="120" y1="50" x2="120" y2="90" stroke="#0288d1" stroke-width="2"/><path d="M0,140 L100,140 L120,90" fill="none" stroke="#0288d1" stroke-width="2"/></svg>`,
+            templateHtml: `
+                <div class="fill-in-box">
+                    <div class="fill-line">
+                        Công thức thể tích V = Dài × Rộng × Cao
+                    </div>
+                    <div class="fill-line">
+                        V = <input type="number" class="calc-input" data-idx="0"> × <input type="number" class="calc-input" data-idx="1"> × <input type="number" class="calc-input" data-idx="2">
+                    </div>
+                    <div class="fill-line">
+                        Kết quả = <input type="number" class="calc-input" data-idx="3"> m³
+                    </div>
+                </div>
+            `,
+            keywords: ["4", "2", "1.5", "12"],
+            modelAnswer: "Thể tích V = 4 x 2 x 1.5 = 12 (m³)."
+        },
+        {
+            id: 4,
+            type: 'template',
+            title: "Diện Tích Toàn Phần (Lăng Trụ Tứ Giác)",
+            text: "Một khối gỗ hình hộp chữ nhật có đáy là hình vuông cạnh 2cm, chiều cao lăng trụ là 1cm. Hãy tính diện tích toàn phần của khối gỗ này. (Gợi ý: Tính S_xq rồi cộng với 2 lần S_đáy).",
+            svg: `<svg viewBox="0 0 200 200" width="150" height="150">
+                <!-- Hình hộp chữ nhật thấp -->
+                <rect x="50" y="80" width="100" height="40" fill="#a1887f" stroke="#5d4037" stroke-width="2"/>
+                <polygon points="50,80 80,50 180,50 150,80" fill="#d7ccc8" stroke="#5d4037" stroke-width="2"/>
+                <line x1="180" y1="50" x2="180" y2="90" stroke="#5d4037" stroke-width="2"/>
+                <line x1="150" y1="120" x2="180" y2="90" stroke="#5d4037" stroke-width="2"/>
+                <line x1="80" y1="50" x2="80" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
+                <line x1="50" y1="120" x2="80" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
+                <line x1="80" y1="90" x2="180" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
+            </svg>`,
+            templateHtml: `
+                <div class="fill-in-box">
+                    <div class="fill-line">
+                        1. Chu vi đáy = 2 x 4 = <input type="number" class="calc-input" data-idx="0"> cm
+                    </div>
+                    <div class="fill-line">
+                        2. Diện tích xung quanh = <input type="number" class="calc-input" data-idx="1"> cm²
+                    </div>
+                    <div class="fill-line">
+                        3. Diện tích 1 mặt đáy = 2 x 2 = <input type="number" class="calc-input" data-idx="2"> cm²
+                    </div>
+                    <div class="fill-line">
+                        4. <strong>Diện tích toàn phần :</strong> <input type="number" class="calc-input" data-idx="3"> cm^2
+                    </div>
+                </div>
+            `,
+            // Ở đây ta sử dụng keyword đặc biệt để khớp cả câu như yêu cầu
+            keywords: ["diện tích toàn phần : 16cm^2"],
+            modelAnswer: "Chu vi đáy = 8cm.<br>S_xq = 8 x 1 = 8cm².<br>S_đáy = 4cm².<br>Diện tích toàn phần = 8 + 2x4 = 16cm²."
+        }
+    ];
+
+    let currentIdx = 0;
+    let userAnswers = []; 
+
+    // --- KHỞI TẠO ---
+    function loadQuestion() {
+        const q = questions[currentIdx];
+        
+        document.getElementById('current-q').innerText = currentIdx + 1;
+        document.getElementById('total-q').innerText = questions.length;
+        
+        document.getElementById('q-title-text').innerText = `Câu ${currentIdx + 1}: ${q.title}`;
+        document.getElementById('q-text').innerText = q.text;
+        document.getElementById('q-visual').innerHTML = q.svg;
+        
+        // Render vùng nhập liệu
+        const inputContainer = document.getElementById('input-container');
+        inputContainer.innerHTML = ''; // Clear cũ
+
+        if (q.type === 'template') {
+            // Render template điền số
+            const div = document.createElement('div');
+            div.innerHTML = `<label>Điền số thích hợp vào ô trống:</label>` + q.templateHtml;
+            inputContainer.appendChild(div);
+        } else {
+            // Render textarea thường
+            inputContainer.innerHTML = `
+                <label for="user-answer">Bài làm của em:</label>
+                <textarea id="user-answer" placeholder="Nhập câu trả lời chi tiết..."></textarea>
+            `;
+        }
+
+        // Reset UI Feedback
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('btn-submit').style.display = 'block';
+        document.getElementById('btn-next').style.display = 'none';
+    }
+
+    // --- XỬ LÝ NỘP BÀI ---
+    function submitAnswer() {
+        const q = questions[currentIdx];
+        let userAnswerContent = "";
+        let rawCheckString = ""; // Chuỗi dùng để so khớp từ khóa
+
+        // Lấy dữ liệu từ User
+        if (q.type === 'template') {
+            // Thu thập tất cả inputs
+            const inputs = document.querySelectorAll('.calc-input');
+            let allFilled = true;
+            let values = [];
+            
+            inputs.forEach(inp => {
+                if(!inp.value) allFilled = false;
+                values.push(inp.value.trim());
+            });
+
+            if(!allFilled) {
+                alert("Em hãy điền đầy đủ các ô trống nhé!");
+                return;
+            }
+            
+            // Xử lý riêng cho Câu 4 để tạo chuỗi "Diện tích toàn phần : 16cm^2"
+            if (q.id === 4) {
+                 // Format câu trả lời để hiển thị trong báo cáo
+                userAnswerContent = `Chu vi: ${values[0]}, S_xq: ${values[1]}, S_đáy: ${values[2]} \n=> Diện tích toàn phần : ${values[3]}cm^2`;
+                // Chuỗi dùng để check keyword (đúng format yêu cầu)
+                rawCheckString = `diện tích toàn phần : ${values[3]}cm^2`; 
+            } else {
+                // Các câu khác chỉ cần check sự xuất hiện của số
+                userAnswerContent = values.join(" | ");
+                rawCheckString = values.join(" ");
+            }
+
+        } else {
+            // Lấy từ Textarea
+            const val = document.getElementById('user-answer').value.trim();
+            if(!val) {
+                alert("Em hãy nhập câu trả lời nhé!");
+                return;
+            }
+            userAnswerContent = val;
+            rawCheckString = val;
+        }
+
+        // Lưu bài làm
+        userAnswers[currentIdx] = userAnswerContent;
+
+        // --- LOGIC CHẤM ---
+        const feedbackArea = document.getElementById('feedback-area');
+        const keywordList = document.getElementById('keyword-list');
+        const modelAns = document.getElementById('model-answer');
+
+        let htmlTags = "";
+        q.keywords.forEach(kw => {
+            // So khớp không phân biệt hoa thường
+            // Với câu 4, rawCheckString là "diện tích toàn phần : 16cm^2"
+            // Keyword cũng là "diện tích toàn phần : 16cm^2" -> sẽ khớp cả câu
+            if(rawCheckString.toLowerCase().includes(kw.toLowerCase())) {
+                htmlTags += `<span class="tag found">✅ Chính xác: "${kw}"</span>`;
+            } else {
+                htmlTags += `<span class="tag missing">❌ Chưa khớp: "${kw}"</span>`;
+            }
+        });
+
+        keywordList.innerHTML = htmlTags;
+        modelAns.innerHTML = q.modelAnswer;
+
+        // Hiển thị kết quả
+        feedbackArea.style.display = 'block';
+        document.getElementById('btn-submit').style.display = 'none';
+        
+        const btnNext = document.getElementById('btn-next');
+        btnNext.style.display = 'block';
+        if(currentIdx === questions.length - 1) {
+            btnNext.innerText = "Xem Kết Quả Tổng Hợp 🏁";
+        } else {
+            btnNext.innerText = "Câu Tiếp Theo ➜";
+        }
+    }
+
+    // --- CHUYỂN CÂU ---
+    function nextQuestion() {
+        if(currentIdx < questions.length - 1) {
+            currentIdx++;
+            loadQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'block';
+    }
+
+    function downloadReport() {
+        let content = "BÁO CÁO KẾT QUẢ LUYỆN TẬP\n";
+        content += "Môn: Hình học 7 - Lăng Trụ Đứng\n";
+        content += "Thời gian: " + new Date().toLocaleString() + "\n\n";
+        content += "----------------------------------------\n";
+
+        questions.forEach((q, i) => {
+            content += `CÂU ${i+1}: ${q.title}\n`;
+            content += `[Bài làm của em]: ${userAnswers[i] || "Chưa làm"}\n`;
+            content += "----------------------------------------\n";
+        });
+
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Ket_Qua_Hinh_Hoc_${Date.now()}.txt`;
+        link.click();
+    }
+
+    // Start App
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
