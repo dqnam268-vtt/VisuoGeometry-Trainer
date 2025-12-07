@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hộp Quà Hello Kitty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #fce7f3; /* Pink-100 */
+            /* Nền chấm bi hồng nhạt */
+            background-image: radial-gradient(#f9a8d4 20%, transparent 20%), radial-gradient(#f9a8d4 20%, transparent 20%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        /* --- Sân khấu 3D --- */
+        .scene {
+            width: 400px;
+            height: 500px;
+            perspective: 1200px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .prism-box {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            transform-style: preserve-3d;
+            /* Góc nhìn từ dưới lên một chút để thấy đáy */
+            transform: rotateX(-30deg) rotateY(30deg);
+            animation: spin 15s infinite linear;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+
+        .scene:hover .prism-box {
+            animation-play-state: paused;
+        }
+
+        @keyframes spin {
+            from { transform: rotateX(-30deg) rotateY(0deg); }
+            to { transform: rotateX(-30deg) rotateY(360deg); }
+        }
+
+        /* --- Họa tiết Hello Kitty (SVG Pattern) --- */
+        .hello-kitty-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M10 25 Q10 15 20 15 L22 10 L28 15 L32 15 L38 10 L40 15 Q50 15 50 25 Q50 35 30 35 Q10 35 10 25 Z' fill='white' stroke='%23be185d' stroke-width='1'/%3E%3Cpath d='M40 15 Q45 10 45 15 Q45 20 40 15 Z' fill='%23ef4444'/%3E%3Ccircle cx='18' cy='25' r='1.5' fill='%23374151'/%3E%3Ccircle cx='42' cy='25' r='1.5' fill='%23374151'/%3E%3Cellipse cx='30' cy='28' rx='2' ry='1.5' fill='%23fbbf24'/%3E%3Cline x1='8' y1='26' x2='14' y2='25' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='8' y1='28' x2='14' y2='29' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='46' y1='26' x2='52' y2='25' stroke='%23374151' stroke-width='1'/%3E%3Cline x1='46' y1='28' x2='52' y2='29' stroke='%23374151' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+        }
+
+        .hello-kitty-skin {
+            background-color: #fbcfe8; /* Pink-200 base */
+            border: 2px solid #f9a8d4;
+        }
+
+        /* --- Các mặt bên --- */
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Ẩn mặt sau để tránh lộn xộn khi nhìn xuyên thấu, 
+               nhưng với vật thể kín thì không quá quan trọng nếu khớp khít */
+            backface-visibility: hidden; 
+        }
+
+        /* Mặt 1 (Trước) */
+        .face-1 { transform: rotateY(0deg) translateZ(57.735px); }
+        /* Mặt 2 (Phải) */
+        .face-2 { transform: rotateY(120deg) translateZ(57.735px); filter: brightness(0.95); }
+        /* Mặt 3 (Trái) */
+        .face-3 { transform: rotateY(240deg) translateZ(57.735px); filter: brightness(0.9); }
+
+        /* --- Mặt đáy (Caps) --- */
+        .cap {
+            position: absolute;
+            width: 200px;
+            height: 173.205px;
+            /* Tạo hình tam giác cho container chính */
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            display: flex;
+            justify-content: center;
+            /* Tâm xoay tại trọng tâm tam giác (100, 115.47) */
+            transform-origin: 100px 115.47px;
+            backface-visibility: visible; /* Để nhìn thấy mặt trong khi mở */
+        }
+
+        /* Nắp trên (Top) - Container chính chịu trách nhiệm xoay */
+        .top-cap {
+            /* Dịch trọng tâm về gốc -> Xoay nằm ngang */
+            transform: translateY(-115.47px) rotateX(90deg);
+            z-index: 10;
+            background-color: #f472b6; /* Màu mặt trong nắp */
+            transform-style: preserve-3d; /* Quan trọng để các phần tử con 3D (nơ) hoạt động */
+        }
+
+        /* Lớp da bên ngoài của nắp (Chứa họa tiết và ruy-băng) */
+        .top-cap-skin {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            /* Kế thừa clip-path để cắt theo hình tam giác */
+            clip-path: inherit;
+            z-index: 2; /* Nằm trên nền của .top-cap */
+            background-color: #fbcfe8; /* Pink-200 base */
+            border: 2px solid #f9a8d4;
+            /* Nâng nhẹ lên một chút để tránh lẹm màu (Z-fighting) */
+            transform: translateZ(0.1px); 
+        }
+
+        /* Hiệu ứng mở nắp */
+        .prism-box:hover .top-cap {
+             transform: translateY(-115.47px) rotateX(90deg) rotateX(-45deg) translateY(-40px);
+             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Đáy dưới (Bottom) */
+        .bottom-cap {
+            /* 1. Dịch xuống đáy hộp (Y=300)
+               2. Dịch trọng tâm về trục (Y=-115.47)
+               => Tổng Y = 184.53px
+               3. Xoay -90 độ để úp mặt ra ngoài (xuống dưới)
+            */
+            transform: translateY(184.53px) rotateX(-90deg);
+            /* Màu đậm hơn chút vì ở dưới đáy */
+            filter: brightness(0.8);
+            backface-visibility: hidden;
+        }
+
+        /* Ruy băng dọc (Màu hồng đậm) */
+        .ribbon-v {
+            position: absolute;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg, #ec4899, #db2777, #ec4899);
+            border-left: 1px dashed white;
+            border-right: 1px dashed white;
+            z-index: 2;
+        }
+
+        /* Ruy băng trên nắp */
+        .cap-ribbon {
+            position: absolute;
+            top: 115.47px;
+            left: 100px;
+            width: 30px;
+            height: 130px;
+            background: #db2777;
+            transform-origin: 50% 0;
+            border-left: 1px dashed white;
+            border-right: 1px dashed white;
+            z-index: 3; /* Nằm trên lớp skin */
+        }
+        .ribbon-1 { transform: translate(-50%, 0) rotate(30deg); }
+        .ribbon-2 { transform: translate(-50%, 0) rotate(-30deg); }
+        .ribbon-3 { transform: translate(-50%, 0) rotate(180deg); }
+
+        /* --- Cái Nơ Hello Kitty (Bow) --- */
+        .bow-container {
+            position: absolute;
+            top: 115.47px; 
+            left: 100px;
+            /* Nổi lên trên bề mặt nắp (Z=10px so với nắp) */
+            transform: translateX(-50%) translateZ(10px) rotateX(-90deg); 
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .bow-wing {
+            position: absolute;
+            width: 70px;
+            height: 50px;
+            background: #ef4444; /* Đỏ tươi đặc trưng */
+            border: 3px solid #991b1b;
+            border-radius: 20px;
+            top: -25px;
+        }
+        .wing-left { left: -65px; transform: rotate(-10deg); }
+        .wing-right { left: -5px; transform: rotate(10deg); }
+        
+        .bow-center {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #ef4444;
+            border: 3px solid #991b1b;
+            border-radius: 50%;
+            top: -12.5px;
+            left: -12.5px;
+            z-index: 101;
+        }
+
+        .tag {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 3px solid #f9a8d4;
+            font-family: 'Pacifico', cursive;
+            color: #db2777;
+            font-size: 1.2rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 0 #fbcfe8;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="text-center mb-4 z-10">
+        <h1 class="font-['Pacifico'] text-5xl text-pink-600 drop-shadow-md" style="-webkit-text-stroke: 1px white;">Hello Kitty Box</h1>
+    </div>
+
+    <div class="scene">
+        <div class="prism-box">
+            
+            <!-- Mặt 1 -->
+            <div class="face face-1 hello-kitty-skin hello-kitty-pattern">
+                <div class="ribbon-v"></div>
+            </div>
+            
+            <!-- Mặt 2 -->
+            <div class="face face-2 hello-kitty-skin hello-kitty-pattern">
+                <div class="ribbon-v"></div>
+            </div>
+            
+            <!-- Mặt 3 -->
+            <div class="face face-3 hello-kitty-skin hello-kitty-pattern">
+                <div class="ribbon-v"></div>
+            </div>
+
+            <!-- Mặt đáy dưới -->
+            <div class="cap bottom-cap hello-kitty-skin hello-kitty-pattern">
+                <div class="cap-ribbon ribbon-1" style="background: #be185d; z-index: 1;"></div>
+                <div class="cap-ribbon ribbon-2" style="background: #be185d; z-index: 1;"></div>
+                <div class="cap-ribbon ribbon-3" style="background: #be185d; z-index: 1;"></div>
+            </div>
+
+            <!-- Mặt đáy trên (Nắp) - Cấu trúc mới -->
+            <div class="cap top-cap">
+                <!-- Lớp da bên ngoài (Họa tiết + Ruy băng) -->
+                <div class="top-cap-skin hello-kitty-pattern">
+                    <div class="cap-ribbon ribbon-1"></div>
+                    <div class="cap-ribbon ribbon-2"></div>
+                    <div class="cap-ribbon ribbon-3"></div>
+                </div>
+                
+                <!-- Nơ đỏ to (Nằm ngoài lớp skin nhưng vẫn trong top-cap để xoay theo) -->
+                <div class="bow-container">
+                    <div class="bow-wing wing-left"></div>
+                    <div class="bow-wing wing-right"></div>
+                    <div class="bow-center"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="tag">
+        Hello Kitty &bull; V = S.h
+    </div>
+    
+    <div class="fixed bottom-4 text-pink-500 font-bold text-sm">
+        Di chuột vào để mở quà nha!
+    </div>
+
+</body>
+</html>
