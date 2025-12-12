@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện Tập Tự Luận: Hình Lăng Trụ Đứng</title>
+    <title>Luyện Tập Tự Luận: Hình Lăng Trụ Đứng (3D)</title>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -217,16 +220,29 @@
         .tag.found { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .tag.missing { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* SVG Placeholder */
-        .svg-placeholder {
+        /* 3D Container */
+        #q-visual {
             width: 100%;
-            height: 200px;
+            height: 300px; /* Tăng chiều cao cho 3D dễ nhìn */
             background: #fafafa;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        
+        .interaction-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10;
         }
 
         @keyframes fadeIn {
@@ -246,7 +262,7 @@
 
 <div class="container">
     <header>
-        <h1>📝 Luyện Tập: Hình Lăng Trụ (Tam Giác & Tứ Giác)</h1>
+        <h1>📝 Luyện Tập: Hình Lăng Trụ Đứng (3D)</h1>
         <div class="progress-container">
             Câu <span id="current-q">1</span> / <span id="total-q">4</span>
         </div>
@@ -262,8 +278,10 @@
             <div class="q-content" id="q-text">
                 Đang tải câu hỏi...
             </div>
-            <!-- Chỗ để hình ảnh minh họa -->
-            <div id="q-visual" class="svg-placeholder"></div>
+            <!-- Chỗ để hình 3D -->
+            <div id="q-visual">
+                <div class="interaction-hint">🖱️ Kéo chuột để xoay hình</div>
+            </div>
         </div>
 
         <div class="answer-area" id="input-container">
@@ -291,7 +309,7 @@
     <!-- MÀN HÌNH KẾT THÚC -->
     <div id="end-screen" class="report-screen">
         <h2 style="color: var(--success); font-size: 32px;">🎉 Hoàn Thành!</h2>
-        <p>Em đã hoàn thành bài luyện tập.</p>
+        <p>Em đã hoàn thành bài luyện tập về Hình Lăng Trụ Đứng.</p>
         <div style="margin-top: 30px;">
             <button class="btn-export" onclick="downloadReport()">📥 Tải Báo Cáo Kết Quả</button>
             <button class="btn-next" style="display:inline-block; background:#6c757d;" onclick="location.reload()">Làm Lại</button>
@@ -300,25 +318,179 @@
 </div>
 
 <script>
+    // --- CẤU HÌNH THREE.JS ---
+    let scene, camera, renderer, controls, animationId;
+
+    function init3D(containerId, geometryType) {
+        // 1. Dọn dẹp scene cũ
+        const container = document.getElementById(containerId);
+        // Giữ lại cái hint text
+        const hint = container.querySelector('.interaction-hint');
+        container.innerHTML = '';
+        if(hint) container.appendChild(hint);
+
+        if (renderer) {
+            renderer.dispose();
+            cancelAnimationFrame(animationId);
+        }
+
+        // 2. Setup cơ bản
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xfafafa);
+
+        camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+        camera.position.set(20, 20, 25);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // 3. Ánh sáng
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // 4. Grid và Trục (Optional - để dễ nhìn hơn)
+        // const gridHelper = new THREE.GridHelper(50, 50, 0xdddddd, 0xeeeeee);
+        // scene.add(gridHelper);
+
+        // 5. Tạo hình khối dựa trên Type
+        addGeometry(geometryType);
+
+        // 6. Animation Loop
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            if(!container) return;
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+    }
+
+    function addGeometry(type) {
+        let shape = new THREE.Shape();
+        let extrudeSettings = { depth: 10, bevelEnabled: false };
+        let color = 0x4361ee;
+        let geometry;
+
+        if (type === 'tent') {
+            // Câu 1: Lều (Lăng trụ tam giác cân nằm ngang)
+            // Đáy là tam giác cân
+            shape.moveTo(-3, 0);
+            shape.lineTo(3, 0);
+            shape.lineTo(0, 4);
+            shape.lineTo(-3, 0);
+            
+            extrudeSettings.depth = 12;
+            color = 0xFF9800; // Màu cam lều
+            
+            geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            // Xoay để nó nằm ngang như cái lều
+            geometry.rotateX(Math.PI / 2); 
+            geometry.rotateY(Math.PI / 4); // Xoay nhẹ cho đẹp
+            geometry.center(); // Căn giữa
+
+        } else if (type === 'tri_prism_1') {
+            // Câu 2: Lăng trụ tam giác vuông (3, 4, 5), cao 10
+            // Đáy tam giác vuông
+            shape.moveTo(0, 0);
+            shape.lineTo(4, 0);
+            shape.lineTo(0, 3);
+            shape.lineTo(0, 0);
+            
+            extrudeSettings.depth = 10;
+            color = 0x2ecc71; // Xanh lá
+            
+            geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.center();
+
+        } else if (type === 'quad_prism') {
+            // Câu 3: Máng nước (Hình thang vuông), dài 10
+            // Đáy hình thang
+            shape.moveTo(0, 0);
+            shape.lineTo(4, 0);   // Đáy lớn
+            shape.lineTo(3, 3);   // Đỉnh phải
+            shape.lineTo(0, 3);   // Đỉnh trái (vuông góc)
+            shape.lineTo(0, 0);
+            
+            extrudeSettings.depth = 10;
+            color = 0x039BE5; // Xanh dương nước
+            
+            geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            // Xoay nằm ngang để giống máng nước
+            geometry.rotateZ(Math.PI); 
+            geometry.rotateX(Math.PI / 2);
+            geometry.center();
+
+        } else if (type === 'tri_prism_2') {
+            // Câu 4: Đồ chơi gỗ (Tam giác vuông 6, 8, 10), cao 5
+            shape.moveTo(0, 0);
+            shape.lineTo(8, 0);
+            shape.lineTo(0, 6);
+            shape.lineTo(0, 0);
+            
+            extrudeSettings.depth = 5;
+            color = 0x8D6E63; // Màu gỗ
+            
+            geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.center();
+        }
+
+        // Tạo Mesh
+        const material = new THREE.MeshPhongMaterial({ 
+            color: color, 
+            flatShading: false,
+            shininess: 50,
+            transparent: true,
+            opacity: 0.9
+        });
+        
+        // Tạo đường viền (Edges) để nhìn rõ cạnh
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 }));
+        
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.add(line); // Thêm viền đen vào khối
+        
+        scene.add(mesh);
+    }
+
     // --- DỮ LIỆU CÂU HỎI ---
-    // type: 'text' (tự luận thường) hoặc 'template' (điền số)
+    // geometryType tương ứng với logic trong addGeometry
     const questions = [
         {
             id: 1,
             type: 'text',
-            title: "Nhận biết hình khối",
-            text: "Quan sát một hộp sữa tươi loại 1 lít (dạng hình hộp chữ nhật). Hãy mô tả các đặc điểm của nó: Số mặt, số đỉnh, số cạnh và hình dạng của các mặt.",
-            svg: `<svg viewBox="0 0 200 200" width="180" height="180"><rect x="60" y="60" width="80" height="120" fill="#e3f2fd" stroke="#2c3e50" stroke-width="2"/><polyline points="60,60 90,30 170,30 170,150 140,180" fill="none" stroke="#2c3e50" stroke-width="2"/><line x1="140" y1="60" x2="170" y2="30" stroke="#2c3e50" stroke-width="2"/><line x1="140" y1="180" x2="140" y2="60" stroke="#2c3e50" stroke-width="2"/></svg>`,
-            keywords: ["6 mặt", "8 đỉnh", "12 cạnh", "chữ nhật"],
-            modelAnswer: "- Hình hộp chữ nhật có 6 mặt, 8 đỉnh và 12 cạnh.<br>- Các mặt đều là hình chữ nhật.<br>- Các mặt đối diện song song và bằng nhau."
+            title: "Nhận biết Lăng Trụ Đứng Tam Giác",
+            text: "Quan sát mô hình lều trại (lăng trụ đứng tam giác). Hãy mô tả các đặc điểm hình học của nó: Số mặt, số đỉnh, số cạnh và hình dạng của các mặt bên.",
+            geometryType: 'tent',
+            keywords: ["5 mặt", "6 đỉnh", "9 cạnh", "chữ nhật"],
+            modelAnswer: "- Hình lăng trụ đứng tam giác có 5 mặt, 6 đỉnh và 9 cạnh.<br>- Hai mặt đáy là hình tam giác.<br>- Các mặt bên là hình chữ nhật."
         },
         {
             id: 2,
             type: 'template',
-            title: "Lăng Trụ Tam Giác",
+            title: "Lăng Trụ Tam Giác Vuông",
             text: "Một lăng trụ đứng đáy tam giác vuông có hai cạnh góc vuông là 3cm, 4cm; cạnh huyền là 5cm. Chiều cao lăng trụ là 10cm. Hãy điền các số thích hợp để tính diện tích xung quanh.",
-            svg: `<svg viewBox="0 0 200 150" width="200" height="150"><polygon points="20,120 80,120 20,80" fill="#ffe0b2" stroke="#e67e22" stroke-width="2"/><line x1="20" y1="120" x2="120" y2="70" stroke="#e67e22" stroke-width="2"/><line x1="80" y1="120" x2="180" y2="70" stroke="#e67e22" stroke-width="2"/><line x1="20" y1="80" x2="120" y2="30" stroke="#e67e22" stroke-width="2"/><polygon points="120,70 180,70 120,30" fill="#fff3e0" stroke="#e67e22" stroke-width="2"/></svg>`,
-            // Template cho học sinh điền
+            geometryType: 'tri_prism_1',
             templateHtml: `
                 <div class="fill-in-box">
                     <div class="fill-line">
@@ -332,66 +504,55 @@
                     </div>
                 </div>
             `,
-            // Logic check: Ghép input thành chuỗi để kiểm tra keyword
             keywords: ["12", "10", "120"], 
             modelAnswer: "Chu vi đáy = 3 + 4 + 5 = 12 (cm).<br>Diện tích xung quanh = 12 x 10 = 120 (cm²)."
         },
         {
             id: 3,
             type: 'template',
-            title: "Lăng Trụ Tứ Giác (Bể Bơi)",
-            text: "Một bể bơi hình hộp chữ nhật có chiều dài 4m, chiều rộng 2m và chiều sâu 1.5m. Hãy tính thể tích nước tối đa bể chứa được.",
-            svg: `<svg viewBox="0 0 200 150" width="200" height="150"><path d="M20,50 L120,50 L100,100 L0,100 Z" fill="#b3e5fc" stroke="#0288d1" stroke-width="2"/><line x1="0" y1="100" x2="0" y2="140" stroke="#0288d1" stroke-width="2"/><line x1="100" y1="100" x2="100" y2="140" stroke="#0288d1" stroke-width="2"/><line x1="120" y1="50" x2="120" y2="90" stroke="#0288d1" stroke-width="2"/><path d="M0,140 L100,140 L120,90" fill="none" stroke="#0288d1" stroke-width="2"/></svg>`,
+            title: "Lăng Trụ Tứ Giác (Máng Nước)",
+            text: "Một máng nước có dạng lăng trụ đứng tứ giác, đáy là hình thang vuông. Diện tích mặt đáy hình thang là 0.5 m². Chiều dài của máng (chiều cao lăng trụ) là 10m. Hãy tính thể tích nước tối đa máng chứa được.",
+            geometryType: 'quad_prism',
             templateHtml: `
                 <div class="fill-in-box">
                     <div class="fill-line">
-                        Công thức thể tích V = Dài × Rộng × Cao
+                        Công thức thể tích V = Diện tích đáy × Chiều cao lăng trụ
                     </div>
                     <div class="fill-line">
-                        V = <input type="number" class="calc-input" data-idx="0"> × <input type="number" class="calc-input" data-idx="1"> × <input type="number" class="calc-input" data-idx="2">
+                        V = <input type="number" class="calc-input" data-idx="0"> × <input type="number" class="calc-input" data-idx="1">
                     </div>
                     <div class="fill-line">
-                        Kết quả = <input type="number" class="calc-input" data-idx="3"> m³
+                        Kết quả = <input type="number" class="calc-input" data-idx="2"> m³
                     </div>
                 </div>
             `,
-            keywords: ["4", "2", "1.5", "12"],
-            modelAnswer: "Thể tích V = 4 x 2 x 1.5 = 12 (m³)."
+            keywords: ["0.5", "10", "5"],
+            modelAnswer: "Thể tích V = S_đáy x h = 0.5 x 10 = 5 (m³)."
         },
         {
             id: 4,
             type: 'template',
-            title: "Diện Tích Toàn Phần (Lăng Trụ Tứ Giác)",
-            text: "Một khối gỗ hình hộp chữ nhật có đáy là hình vuông cạnh 2cm, chiều cao lăng trụ là 1cm. Hãy tính diện tích toàn phần của khối gỗ này. (Gợi ý: Tính S_xq rồi cộng với 2 lần S_đáy).",
-            svg: `<svg viewBox="0 0 200 200" width="150" height="150">
-                <!-- Hình hộp chữ nhật thấp -->
-                <rect x="50" y="80" width="100" height="40" fill="#a1887f" stroke="#5d4037" stroke-width="2"/>
-                <polygon points="50,80 80,50 180,50 150,80" fill="#d7ccc8" stroke="#5d4037" stroke-width="2"/>
-                <line x1="180" y1="50" x2="180" y2="90" stroke="#5d4037" stroke-width="2"/>
-                <line x1="150" y1="120" x2="180" y2="90" stroke="#5d4037" stroke-width="2"/>
-                <line x1="80" y1="50" x2="80" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
-                <line x1="50" y1="120" x2="80" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
-                <line x1="80" y1="90" x2="180" y2="90" stroke="#5d4037" stroke-width="2" stroke-dasharray="4"/>
-            </svg>`,
+            title: "Diện Tích Toàn Phần (Khối Gỗ)",
+            text: "Một đồ chơi bằng gỗ dạng lăng trụ đứng tam giác. Đáy là tam giác vuông có hai cạnh góc vuông là 6cm và 8cm (cạnh huyền 10cm). Chiều cao lăng trụ là 5cm. Hãy tính diện tích toàn phần.",
+            geometryType: 'tri_prism_2',
             templateHtml: `
                 <div class="fill-in-box">
                     <div class="fill-line">
-                        1. Chu vi đáy = 2 x 4 = <input type="number" class="calc-input" data-idx="0"> cm
+                        1. Chu vi đáy = 6 + 8 + 10 = <input type="number" class="calc-input" data-idx="0"> cm
                     </div>
                     <div class="fill-line">
-                        2. Diện tích xung quanh = <input type="number" class="calc-input" data-idx="1"> cm²
+                        2. S_xq = Chu vi đáy x 5 = <input type="number" class="calc-input" data-idx="1"> cm²
                     </div>
                     <div class="fill-line">
-                        3. Diện tích 1 mặt đáy = 2 x 2 = <input type="number" class="calc-input" data-idx="2"> cm²
+                        3. Diện tích 1 mặt đáy = (6 x 8) : 2 = <input type="number" class="calc-input" data-idx="2"> cm²
                     </div>
                     <div class="fill-line">
-                        4. <strong>Diện tích toàn phần :</strong> <input type="number" class="calc-input" data-idx="3"> cm^2
+                        4. <strong>S_tp = S_xq + 2.S_đáy :</strong> <input type="number" class="calc-input" data-idx="3"> cm^2
                     </div>
                 </div>
             `,
-            // Ở đây ta sử dụng keyword đặc biệt để khớp cả câu như yêu cầu
-            keywords: ["diện tích toàn phần : 16cm^2"],
-            modelAnswer: "Chu vi đáy = 8cm.<br>S_xq = 8 x 1 = 8cm².<br>S_đáy = 4cm².<br>Diện tích toàn phần = 8 + 2x4 = 16cm²."
+            keywords: ["s_tp = s_xq + 2.s_đáy : 168cm^2"], 
+            modelAnswer: "Chu vi đáy = 24cm.<br>S_xq = 24 x 5 = 120cm².<br>S_đáy = 24cm².<br>S_tp = 120 + 2x24 = 168cm²."
         }
     ];
 
@@ -407,19 +568,21 @@
         
         document.getElementById('q-title-text').innerText = `Câu ${currentIdx + 1}: ${q.title}`;
         document.getElementById('q-text').innerText = q.text;
-        document.getElementById('q-visual').innerHTML = q.svg;
+        
+        // Render 3D Scene thay vì SVG
+        setTimeout(() => {
+            init3D('q-visual', q.geometryType);
+        }, 100); // Delay nhẹ để DOM sẵn sàng
         
         // Render vùng nhập liệu
         const inputContainer = document.getElementById('input-container');
-        inputContainer.innerHTML = ''; // Clear cũ
+        inputContainer.innerHTML = ''; 
 
         if (q.type === 'template') {
-            // Render template điền số
             const div = document.createElement('div');
             div.innerHTML = `<label>Điền số thích hợp vào ô trống:</label>` + q.templateHtml;
             inputContainer.appendChild(div);
         } else {
-            // Render textarea thường
             inputContainer.innerHTML = `
                 <label for="user-answer">Bài làm của em:</label>
                 <textarea id="user-answer" placeholder="Nhập câu trả lời chi tiết..."></textarea>
@@ -436,11 +599,9 @@
     function submitAnswer() {
         const q = questions[currentIdx];
         let userAnswerContent = "";
-        let rawCheckString = ""; // Chuỗi dùng để so khớp từ khóa
+        let rawCheckString = ""; 
 
-        // Lấy dữ liệu từ User
         if (q.type === 'template') {
-            // Thu thập tất cả inputs
             const inputs = document.querySelectorAll('.calc-input');
             let allFilled = true;
             let values = [];
@@ -455,20 +616,15 @@
                 return;
             }
             
-            // Xử lý riêng cho Câu 4 để tạo chuỗi "Diện tích toàn phần : 16cm^2"
             if (q.id === 4) {
-                 // Format câu trả lời để hiển thị trong báo cáo
-                userAnswerContent = `Chu vi: ${values[0]}, S_xq: ${values[1]}, S_đáy: ${values[2]} \n=> Diện tích toàn phần : ${values[3]}cm^2`;
-                // Chuỗi dùng để check keyword (đúng format yêu cầu)
-                rawCheckString = `diện tích toàn phần : ${values[3]}cm^2`; 
+                userAnswerContent = `Chu vi: ${values[0]}, S_xq: ${values[1]}, S_đáy: ${values[2]} \n=> S_tp = S_xq + 2.S_đáy : ${values[3]}cm^2`;
+                rawCheckString = `S_tp = S_xq + 2.S_đáy : ${values[3]}cm^2`; 
             } else {
-                // Các câu khác chỉ cần check sự xuất hiện của số
                 userAnswerContent = values.join(" | ");
                 rawCheckString = values.join(" ");
             }
 
         } else {
-            // Lấy từ Textarea
             const val = document.getElementById('user-answer').value.trim();
             if(!val) {
                 alert("Em hãy nhập câu trả lời nhé!");
@@ -478,7 +634,6 @@
             rawCheckString = val;
         }
 
-        // Lưu bài làm
         userAnswers[currentIdx] = userAnswerContent;
 
         // --- LOGIC CHẤM ---
@@ -488,9 +643,6 @@
 
         let htmlTags = "";
         q.keywords.forEach(kw => {
-            // So khớp không phân biệt hoa thường
-            // Với câu 4, rawCheckString là "diện tích toàn phần : 16cm^2"
-            // Keyword cũng là "diện tích toàn phần : 16cm^2" -> sẽ khớp cả câu
             if(rawCheckString.toLowerCase().includes(kw.toLowerCase())) {
                 htmlTags += `<span class="tag found">✅ Chính xác: "${kw}"</span>`;
             } else {
@@ -501,7 +653,6 @@
         keywordList.innerHTML = htmlTags;
         modelAns.innerHTML = q.modelAnswer;
 
-        // Hiển thị kết quả
         feedbackArea.style.display = 'block';
         document.getElementById('btn-submit').style.display = 'none';
         
@@ -549,7 +700,7 @@
     }
 
     // Start App
-    loadQuestion();
+    window.onload = loadQuestion;
 
 </script>
 
