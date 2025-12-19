@@ -3,47 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Neon AR Shooter - Final Fix</title>
+    <title>AR Shooter - Click to Start</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-
     <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/drawing_utils@0.3/drawing_utils.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background-color: #111; font-family: monospace; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: monospace; }
+        /* Video ẩn đi nhưng vẫn render để AI đọc */
         #input-video {
-            transform: scaleX(-1);
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 0;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; transform: scaleX(-1); z-index: 0;
+            opacity: 0.5; /* Để mờ để thấy video nền */
         }
         #output-canvas {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
-        }
-        #ui-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;
         }
-        .error-box {
-            background: rgba(255, 0, 0, 0.9); color: white; padding: 20px; border-radius: 8px;
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;
-            max-width: 90%; text-align: center;
+        #ui-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;
         }
     </style>
 </head>
 <body>
-    <video id="input-video" playsinline muted></video>
-    
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- AUDIO SYSTEM ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // --- AUDIO ---
         const playSound = (type) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -56,240 +50,233 @@
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
                 gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.start(now); osc.stop(now + 0.15);
-            } else if (type === 'hit') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(2000, now + 0.1);
-                gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
             }
         };
 
         function App() {
-            const [gameState, setGameState] = useState('LOADING');
-            const [score, setScore] = useState(0);
+            // UI States
+            const [hasStarted, setHasStarted] = useState(false); // Quan trọng: Chờ người dùng bấm
+            const [status, setStatus] = useState("WAITING"); // WAITING -> LOADING -> READY
             const [errorMsg, setErrorMsg] = useState(null);
 
+            const videoRef = useRef(null);
             const containerRef = useRef(null);
             const handsRef = useRef(null);
             
+            // Game Loop Refs
             const gameLogic = useRef({
                 scene: null, camera: null, renderer: null,
-                crosshair: null, laserLine: null, enemies: [], particles: [],
-                lastTime: 0, handDetected: false, isPinching: false, wasPinching: false,
-                rawFingerPos: new THREE.Vector3(),
+                crosshair: null, laser: null,
+                particles: [],
+                rawFinger: new THREE.Vector3(),
+                isPinching: false, wasPinching: false,
+                handDetected: false
             });
 
-            // 1. SETUP THREE.JS
+            // 1. SETUP THREEJS (Chạy 1 lần)
             useEffect(() => {
-                try {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    const scene = new THREE.Scene();
-                    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
-                    camera.position.z = 5;
-                    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                    renderer.setSize(width, height);
-                    renderer.domElement.id = "output-canvas";
-                    containerRef.current.appendChild(renderer.domElement);
+                if(!containerRef.current) return;
+                
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 100);
+                camera.position.z = 5;
 
-                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-                    scene.add(ambientLight);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(width, height);
+                renderer.domElement.id = "output-canvas";
+                containerRef.current.appendChild(renderer.domElement);
 
-                    // Crosshair
-                    const ringGeo = new THREE.RingGeometry(0.15, 0.18, 32);
-                    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.8 });
-                    const crosshair = new THREE.Mesh(ringGeo, ringMat);
-                    scene.add(crosshair);
+                // Add Objects
+                const ring = new THREE.Mesh(
+                    new THREE.RingGeometry(0.15, 0.2, 32),
+                    new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.8 })
+                );
+                scene.add(ring);
 
-                    // Laser
-                    const lineMat = new THREE.LineBasicMaterial({ color: 0xff00ff, linewidth: 2 });
-                    const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-10)]);
-                    const laserLine = new THREE.Line(lineGeo, lineMat);
-                    scene.add(laserLine);
+                const laser = new THREE.Line(
+                    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0,0,-10)]),
+                    new THREE.LineBasicMaterial({ color: 0xff00ff })
+                );
+                scene.add(laser);
 
-                    gameLogic.current.scene = scene;
-                    gameLogic.current.camera = camera;
-                    gameLogic.current.renderer = renderer;
-                    gameLogic.current.crosshair = crosshair;
-                    gameLogic.current.laserLine = laserLine;
+                gameLogic.current.scene = scene;
+                gameLogic.current.camera = camera;
+                gameLogic.current.renderer = renderer;
+                gameLogic.current.crosshair = ring;
+                gameLogic.current.laser = laser;
 
-                    requestAnimationFrame(renderLoop);
-                    
-                    // Gọi hàm init
-                    initMediaPipe();
+                // Render Loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    updateGame();
+                    renderer.render(scene, camera);
+                };
+                animate();
 
-                } catch (e) {
-                    setErrorMsg("ThreeJS Error: " + e.message);
-                }
             }, []);
 
-            // 2. INIT MEDIAPIPE & CAMERA (FIXED LOGIC)
-            const initMediaPipe = async () => {
+            // 2. KÍCH HOẠT CAMERA (Chỉ chạy khi bấm nút)
+            const startGame = async () => {
                 try {
-                    // --- SỬA LỖI: Dùng getElementById thay vì useRef vì video nằm ngoài React ---
-                    const video = document.getElementById('input-video');
+                    setHasStarted(true);
+                    setStatus("LOADING CAMERA...");
+                    
+                    if (!videoRef.current) throw new Error("Lỗi Video Element bị Null");
+                    if (!window.Hands) throw new Error("Chưa tải xong thư viện AI");
 
-                    if (!video) throw new Error("Không tìm thấy thẻ Video trong HTML!");
+                    const video = videoRef.current;
 
-                    // --- CHECK THƯ VIỆN ---
-                    if (!window.Hands) {
-                        throw new Error("Thư viện MediaPipe chưa tải xong. Kiểm tra mạng!");
-                    }
-
-                    // --- CHECK CAMERA ---
-                    console.log("Requesting Camera...");
+                    // Xin quyền Camera
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        video: true // Chỉ yêu cầu video, không kén chọn cam trước/sau
+                        audio: false,
+                        video: true // Tự động chọn cam phù hợp
                     });
-                    
+
                     video.srcObject = stream;
-                    
-                    // Chờ video sẵn sàng
-                    await new Promise((resolve) => {
-                        video.onloadedmetadata = () => {
-                            video.play().then(resolve);
-                        };
+                    await video.play();
+
+                    setStatus("AI STARTING...");
+
+                    // Setup MediaPipe
+                    const hands = new window.Hands({locateFile: (file) => 
+                        `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${file}`
                     });
-                    console.log("Camera OK");
-
-                    // --- INIT HANDS ---
-                    console.log("Init Hands...");
-                    const hands = new window.Hands({locateFile: (file) => {
-                        return `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${file}`;
-                    }});
-
+                    
                     hands.setOptions({
                         maxNumHands: 1,
-                        modelComplexity: 0, 
+                        modelComplexity: 0,
                         minDetectionConfidence: 0.5,
                         minTrackingConfidence: 0.5
                     });
 
-                    hands.onResults(onHandResults);
-                    handsRef.current = hands;
+                    hands.onResults((results) => {
+                        const game = gameLogic.current;
+                        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                            game.handDetected = true;
+                            const lm = results.multiHandLandmarks[0];
+                            
+                            // Map coordinates
+                            // Index Tip (8)
+                            const x = (1 - lm[8].x) * 10 - 5;
+                            const y = (1 - lm[8].y) * 8 - 4;
+                            game.rawFinger.set(x, y, 0);
 
-                    // Start Detection Loop
-                    const detectionLoop = async () => {
-                        if (video.readyState >= 2) {
-                            try {
-                                await hands.send({image: video});
-                            } catch (e) {
-                                console.warn("Frame drop:", e);
-                            }
+                            // Pinch (4 & 8)
+                            const dist = Math.sqrt(Math.pow(lm[4].x - lm[8].x, 2) + Math.pow(lm[4].y - lm[8].y, 2));
+                            game.isPinching = dist < 0.06;
+                        } else {
+                            game.handDetected = false;
                         }
-                        setTimeout(detectionLoop, 100); 
+                    });
+
+                    // Loop AI
+                    const detect = async () => {
+                        if (video.readyState >= 2) await hands.send({image: video});
+                        setTimeout(detect, 60); // ~15FPS
                     };
-                    detectionLoop();
+                    detect();
 
-                    setGameState('CALIBRATING');
+                    setStatus("READY");
 
-                } catch (err) {
-                    console.error(err);
-                    setErrorMsg(`LỖI: ${err.name} - ${err.message}`);
+                } catch (e) {
+                    setErrorMsg(e.message);
                 }
             };
 
-            const onHandResults = (results) => {
+            const updateGame = () => {
                 const game = gameLogic.current;
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    game.handDetected = true;
-                    const lm = results.multiHandLandmarks[0];
-                    
-                    // Map hand to screen
-                    const x = (1 - lm[8].x) * 10 - 5; 
-                    const y = (1 - lm[8].y) * 8 - 4;
-                    
-                    game.rawFingerPos.set(x, y, 0);
-
-                    const dist = Math.sqrt(Math.pow(lm[4].x - lm[8].x, 2) + Math.pow(lm[4].y - lm[8].y, 2));
-                    game.isPinching = dist < 0.08;
-                } else {
-                    game.handDetected = false;
-                }
-            };
-
-            // 3. RENDER LOOP
-            const renderLoop = (time) => {
-                requestAnimationFrame(renderLoop);
-                const game = gameLogic.current;
-                const dt = 0.016; 
-
-                if (!game.scene || !game.camera) return;
+                if (!game.scene) return;
 
                 if (game.handDetected) {
-                    if (gameState === 'LOADING') setGameState('CALIBRATING');
-                    if (gameState === 'CALIBRATING') {
-                        game.lastTime += dt;
-                        if(game.lastTime > 50) setGameState('PLAYING');
-                    }
+                    // Smooth move
+                    game.crosshair.position.lerp(game.rawFinger, 0.2);
                     
-                    game.crosshair.position.lerp(game.rawFingerPos, 0.2);
-                    
-                    const pos = game.laserLine.geometry.attributes.position.array;
+                    // Laser
+                    const pos = game.laser.geometry.attributes.position.array;
                     pos[3] = game.crosshair.position.x;
                     pos[4] = game.crosshair.position.y;
-                    game.laserLine.geometry.attributes.position.needsUpdate = true;
+                    game.laser.geometry.attributes.position.needsUpdate = true;
 
+                    // Shoot
                     if (game.isPinching) {
                         game.crosshair.material.color.setHex(0xff0000);
+                        game.crosshair.scale.setScalar(0.8);
                         if (!game.wasPinching) {
-                             playSound('shoot');
-                             spawnParticles(game.crosshair.position);
+                            playSound('shoot');
+                            // Add particle effect logic here if needed
                         }
                     } else {
                         game.crosshair.material.color.setHex(0x00ffcc);
+                        game.crosshair.scale.setScalar(1);
                     }
                     game.wasPinching = game.isPinching;
-                }
-                
-                updateParticles();
-                game.renderer.render(game.scene, game.camera);
-            };
-
-            const spawnParticles = (pos) => {
-                const game = gameLogic.current;
-                const mesh = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.2, 0.2, 0.2),
-                    new THREE.MeshBasicMaterial({color: 0xffff00})
-                );
-                mesh.position.copy(pos);
-                game.scene.add(mesh);
-                game.particles.push({mesh, life: 1.0});
-            };
-
-            const updateParticles = () => {
-                const game = gameLogic.current;
-                for (let i = game.particles.length - 1; i >= 0; i--) {
-                    const p = game.particles[i];
-                    p.life -= 0.05;
-                    p.mesh.rotation.x += 0.1;
-                    if(p.life <= 0) {
-                        game.scene.remove(p.mesh);
-                        game.particles.splice(i, 1);
-                    }
                 }
             };
 
             return (
-                <div ref={containerRef} className="w-full h-full">
-                    <div id="ui-layer" className="p-4 text-white font-bold">
-                        <div className="flex justify-between">
-                            <span className="text-cyan-400">AR SHOOTER - FIXED</span>
-                            <span>STATUS: {gameState}</span>
-                        </div>
-                        <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-500">
-                             Dùng ngón trỏ để ngắm. Chạm ngón cái vào ngón trỏ để bắn.
-                        </div>
-                    </div>
+                <div className="w-full h-full bg-black relative">
+                    {/* VIDEO NẰM TRONG REACT ĐỂ TRÁNH NULL */}
+                    <video 
+                        ref={videoRef} 
+                        playsInline 
+                        muted 
+                        id="input-video"
+                    ></video>
+                    
+                    {/* CANVAS CONTAINER */}
+                    <div ref={containerRef} className="absolute inset-0 pointer-events-none z-10"></div>
 
-                    {errorMsg && (
-                        <div className="error-box">
-                            <h3 className="text-xl font-bold mb-2">⚠️ LỖI</h3>
-                            <p className="mb-4">{errorMsg}</p>
-                            <button onClick={() => window.location.reload()} className="bg-white text-red-600 px-4 py-2 rounded font-bold">
-                                Tải lại trang
-                            </button>
-                        </div>
-                    )}
+                    {/* UI LỚP TRÊN CÙNG */}
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none">
+                        
+                        {/* MÀN HÌNH CHỜ (QUAN TRỌNG) */}
+                        {!hasStarted && !errorMsg && (
+                            <div className="bg-black/80 p-8 rounded-2xl border-2 border-cyan-500 text-center pointer-events-auto shadow-[0_0_50px_#0ff]">
+                                <h1 className="text-4xl font-black text-cyan-400 mb-4 drop-shadow-lg">AR SHOOTER</h1>
+                                <p className="text-white mb-6">Yêu cầu quyền Camera</p>
+                                <button 
+                                    onClick={startGame}
+                                    className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xl rounded-full transition-all active:scale-95"
+                                >
+                                    BẤM ĐỂ CHƠI 
+                                </button>
+                                <p className="text-gray-500 text-xs mt-4">Vui lòng cho phép Camera khi được hỏi</p>
+                            </div>
+                        )}
+
+                        {/* TRẠNG THÁI LOADING */}
+                        {hasStarted && status !== "READY" && !errorMsg && (
+                            <div className="text-cyan-400 font-mono text-xl animate-pulse">
+                                {status}
+                            </div>
+                        )}
+
+                        {/* HỘP THÔNG BÁO LỖI */}
+                        {errorMsg && (
+                            <div className="bg-red-900/90 p-6 rounded-lg text-white text-center max-w-sm pointer-events-auto border border-red-500">
+                                <div className="text-3xl mb-2">⚠️</div>
+                                <h3 className="font-bold text-lg mb-2">LỖI HỆ THỐNG</h3>
+                                <p className="font-mono text-sm mb-4 break-words">{errorMsg}</p>
+                                <button 
+                                    onClick={() => window.location.reload()}
+                                    className="bg-white text-red-900 px-4 py-2 rounded font-bold hover:bg-gray-200"
+                                >
+                                    TẢI LẠI TRANG
+                                </button>
+                            </div>
+                        )}
+                        
+                        {/* HUD KHI CHƠI */}
+                        {status === "READY" && (
+                            <div className="absolute top-4 left-4 text-cyan-400 font-mono font-bold pointer-events-none">
+                                SYSTEM: ONLINE<br/>
+                                HAND: {gameLogic.current.handDetected ? "DETECTED" : "SEARCHING..."}
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         }
