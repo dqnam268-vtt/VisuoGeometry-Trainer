@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Neon AR Shooter - AI Insight</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+    <script src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+    <script src="https://unpkg.com/@mediapipe/drawing_utils@0.3/drawing_utils.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', Courier, monospace; }
+        
+        /* Mirror the video for natural interaction */
+        #input-video {
+            transform: scaleX(-1);
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* Canvas overlays video */
+        #output-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1; /* Above video */
+            pointer-events: none; /* Let clicks pass through if needed, though we use gestures */
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+        }
+        .combat-text {
+            animation: floatUp 1s ease-out forwards;
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de;
+        }
+        .neon-border {
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0ff, 0 0 30px #0ff;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="input-video" playsinline muted></video>
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ==========================================
+        // AUDIO SYSTEM (Web Audio API - No Files)
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'shoot') {
+                // Laser Pew
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'hit') {
+                // High pitch ping
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(2000, now + 0.1);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'mystery') {
+                // Power up sound
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+                osc.frequency.linearRampToValueAtTime(1200, now + 0.2);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'miss') {
+                // Low thud
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        };
+
+        // ==========================================
+        // MAIN APPLICATION
+        // ==========================================
+        function App() {
+            // UI State
+            const [gameState, setGameState] = useState('LOADING'); // LOADING, CALIBRATING, PLAYING
+            const [score, setScore] = useState(0);
+            const [combo, setCombo] = useState(0);
+            const [floatingTexts, setFloatingTexts] = useState([]); // {id, x, y, text, color}
+
+            // Refs for Game Loop / Non-React State
+            const videoRef = useRef(null);
+            const containerRef = useRef(null);
+            const handsRef = useRef(null);
+            
+            // Mutable Game Logic State (Decoupled from React Render)
+            const gameLogic = useRef({
+                scene: null, camera: null, renderer: null,
+                crosshair: null, laserLine: null,
+                enemies: [], // { mesh, type, velocity, wobbleOffset }
+                particles: [],
+                aimRay: new THREE.Vector3(0, 0, -1),
+                rawFingerPos: new THREE.Vector3(0,0,0),
+                rawPalmPos: new THREE.Vector3(0,0,0),
+                isPinching: false,
+                wasPinching: false,
+                calibrationTimer: 0,
+                comboTimer: 0,
+                lastTime: 0,
+                handDetected: false
+            });
+
+            // ==========================================
+            // 1. THREE.JS & SCENE SETUP
+            // ==========================================
+            useEffect(() => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+
+                // Scene
+                const scene = new THREE.Scene();
+                // No background, transparent for AR
+                
+                // Camera
+                const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
+                camera.position.z = 5; // Move back to see the play area
+                
+                // Renderer
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.domElement.id = "output-canvas";
+                containerRef.current.appendChild(renderer.domElement);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                scene.add(ambientLight);
+                const pointLight = new THREE.PointLight(0xffffff, 1);
+                pointLight.position.set(0, 5, 5);
+                scene.add(pointLight);
+
+                // --- Game Objects ---
+
+                // 1. Crosshair (Ring)
+                const ringGeo = new THREE.RingGeometry(0.15, 0.18, 32);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+                const crosshair = new THREE.Mesh(ringGeo, ringMat);
+                scene.add(crosshair);
+
+                // 2. Laser Line
+                const lineMat = new THREE.LineBasicMaterial({ color: 0xff00ff, linewidth: 2 });
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-10)]);
+                const laserLine = new THREE.Line(lineGeo, lineMat);
+                scene.add(laserLine);
+
+                // Store in Ref
+                gameLogic.current.scene = scene;
+                gameLogic.current.camera = camera;
+                gameLogic.current.renderer = renderer;
+                gameLogic.current.crosshair = crosshair;
+                gameLogic.current.laserLine = laserLine;
+
+                // Handle Resize
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+
+                // Start loops
+                requestAnimationFrame(renderLoop);
+                initMediaPipe();
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    // Cleanup usually needed, but this is a single page app lifecycle
+                };
+            }, []);
+
+            // ==========================================
+            // 2. MEDIAPIPE INITIALIZATION (CRITICAL)
+            // ==========================================
+            const initMediaPipe = async () => {
+                try {
+                    const video = videoRef.current;
+                    
+                    // Request Camera
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    });
+                    video.srcObject = stream;
+                    await video.play();
+
+                    console.log("Loading MediaPipe...");
+                    
+                    // Initialize Hands
+                    const hands = new window.Hands({locateFile: (file) => {
+                        return `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${file}`;
+                    }});
+
+                    hands.setOptions({
+                        maxNumHands: 1,
+                        modelComplexity: 1,
+                        minDetectionConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
+
+                    hands.onResults(onHandResults);
+                    handsRef.current = hands;
+
+                    // Start Detection Loop (Decoupled)
+                    // We use setTimeout loop to control FPS (~15 FPS)
+                    const detectionLoop = async () => {
+                        if (video.readyState >= 2) {
+                            try {
+                                await hands.send({image: video});
+                            } catch (e) {
+                                console.error("Detection Error (Survivable):", e);
+                            }
+                        }
+                        // 66ms ~= 15fps
+                        setTimeout(detectionLoop, 66);
+                    };
+                    detectionLoop();
+
+                    setGameState('CALIBRATING');
+
+                } catch (err) {
+                    console.error("Camera/MediaPipe Init Failed:", err);
+                    alert("Camera access denied or initialization failed. Please allow camera access.");
+                }
+            };
+
+            // ==========================================
+            // 3. GESTURE PROCESSING & AIM SMOOTHING
+            // ==========================================
+            const onHandResults = (results) => {
+                const game = gameLogic.current;
+                
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    game.handDetected = true;
+                    const landmarks = results.multiHandLandmarks[0];
+
+                    // --- 1. Calculate Raw Aim (Index Finger Direction) ---
+                    // Index MCP (5) to Index TIP (8)
+                    const idxBase = landmarks[5];
+                    const idxTip = landmarks[8];
+                    const thumbTip = landmarks[4];
+                    const thumbBase = landmarks[2]; // Using MCP for thumb base approximation
+                    const palmBase = landmarks[0];
+
+                    // Convert to vector structure (Invert X because we mirrored video visually but MediaPipe coords are raw)
+                    // Actually, if we scaled -1 in CSS, visual is mirrored. MediaPipe gives 0-1.
+                    // We map 0-1 to Screen Coordinates -> 3D World Coordinates.
+                    
+                    // We want the vector from base to tip
+                    // Note: MediaPipe Y is down. Three.js Y is up.
+                    
+                    // Map normalized (0..1) to 3D Plane at Z=0 (Camera is at Z=5)
+                    // Viewport width at Z=0 roughly:
+                    const vFOV = THREE.MathUtils.degToRad(75);
+                    const height = 2 * Math.tan(vFOV / 2) * 5; // dist to camera
+                    const width = height * (window.innerWidth / window.innerHeight);
+
+                    const mapToWorld = (lm) => {
+                        return new THREE.Vector3(
+                            (1 - lm.x) * width - width / 2, // 1-x to mirror interaction
+                            (1 - lm.y) * height - height / 2, // 1-y because MP y is down
+                            0 // Project to Z=0 plane initially
+                        );
+                    };
+
+                    const pBase = mapToWorld(idxBase);
+                    const pTip = mapToWorld(idxTip);
+                    const pPalm = mapToWorld(palmBase);
+
+                    // Update Raw data for render loop to smooth
+                    game.rawFingerPos.copy(pTip);
+                    game.rawPalmPos.copy(pPalm);
+
+                    // --- 2. Detect Firing Gesture (Pinch/Trigger) ---
+                    // Distance between Thumb Tip and Index Base (or Palm Center)
+                    // Simple Euclidean distance in normalized space for robustness
+                    const dist = Math.sqrt(
+                        Math.pow(thumbTip.x - idxBase.x, 2) + 
+                        Math.pow(thumbTip.y - idxBase.y, 2)
+                    );
+
+                    // Threshold usually around 0.05 - 0.1 depending on hand size
+                    // If thumb is close to index base, it's a "fist/trigger pull"
+                    const isPinched = dist < 0.06;
+                    
+                    game.isPinching = isPinched;
+
+                } else {
+                    game.handDetected = false;
+                }
+            };
+
+            // ==========================================
+            // 4. RENDER LOOP & GAME LOGIC (60 FPS)
+            // ==========================================
+            const renderLoop = (time) => {
+                requestAnimationFrame(renderLoop);
+                const game = gameLogic.current;
+                const dt = (time - game.lastTime) / 1000;
+                game.lastTime = time;
+
+                if (!game.scene || !game.camera) return;
+
+                // --- A. State Management ---
+                if (game.handDetected && gameState === 'CALIBRATING') {
+                    game.calibrationTimer += dt;
+                    if (game.calibrationTimer > 1.5) {
+                        setGameState('PLAYING');
+                        game.calibrationTimer = 0;
+                        spawnEnemy(true); // Fill initial pool
+                    }
+                } else if (!game.handDetected) {
+                    game.calibrationTimer = 0;
+                }
+
+                if (gameState !== 'PLAYING') {
+                    game.renderer.render(game.scene, game.camera);
+                    return;
+                }
+
+                // --- B. Aim Smoothing & Adaptive Damping ---
+                // Logic: Aim Ray is vector from Palm(or Eye) through IndexTip.
+                // We project this ray to Z=0 (where enemies are).
+                
+                // Adaptive Alpha: Lower alpha (more smoothing) when firing to prevent recoil shake
+                const smoothingAlpha = game.isPinching ? 0.08 : 0.25;
+
+                // Current Crosshair Position
+                const currentPos = game.crosshair.position;
+                const targetPos = game.rawFingerPos;
+
+                // Lerp X and Y
+                currentPos.x += (targetPos.x - currentPos.x) * smoothingAlpha;
+                currentPos.y += (targetPos.y - currentPos.y) * smoothingAlpha;
+
+                // Update Laser: From screen bottom/corner to crosshair? 
+                // Better: From mapped "Hand Position" to Crosshair.
+                // Let's approximate hand position in 3D slightly in front of camera
+                const handWorldPos = new THREE.Vector3(currentPos.x * 0.5, currentPos.y * 0.5 - 2, 4); 
+                
+                const positions = game.laserLine.geometry.attributes.position.array;
+                positions[0] = handWorldPos.x;
+                positions[1] = handWorldPos.y;
+                positions[2] = handWorldPos.z;
+                positions[3] = currentPos.x;
+                positions[4] = currentPos.y;
+                positions[5] = currentPos.z;
+                game.laserLine.geometry.attributes.position.needsUpdate = true;
+
+                // Magnetic Aim Assist (Subtle)
+                let magnetStrength = 0;
+                game.enemies.forEach(enemy => {
+                    const dist = currentPos.distanceTo(enemy.mesh.position);
+                    if (dist < 1.0) {
+                        // Pull crosshair slightly towards enemy
+                        currentPos.lerp(enemy.mesh.position, 0.05);
+                        magnetStrength = 1;
+                    }
+                });
+                
+                // Visual feedback on crosshair
+                if (game.isPinching) {
+                    game.crosshair.scale.setScalar(0.8);
+                    game.crosshair.material.color.setHex(0xff0000); // Red when trigger pulled
+                } else {
+                    game.crosshair.scale.setScalar(magnetStrength ? 1.2 : 1.0);
+                    game.crosshair.material.color.setHex(magnetStrength ? 0xff00ff : 0x00ffcc);
+                }
+
+                // --- C. Shooting Logic ---
+                if (game.isPinching && !game.wasPinching) {
+                    // FIRE EVENT
+                    playSound('shoot');
+                    checkHit(currentPos);
+                    
+                    // Recoil effect (Visual kick)
+                    game.camera.position.y += 0.05; 
+                }
+                // Damping camera recoil back
+                game.camera.position.y += (0 - game.camera.position.y) * 0.1;
+
+                game.wasPinching = game.isPinching;
+
+                // --- D. Enemy Management ---
+                updateEnemies(dt);
+
+                // --- E. Particles ---
+                updateParticles(dt);
+
+                // --- F. Combo Logic ---
+                if (game.comboTimer > 0) {
+                    game.comboTimer -= dt;
+                    if (game.comboTimer <= 0) {
+                        setCombo(0); // Reset combo
+                    }
+                }
+
+                game.renderer.render(game.scene, game.camera);
+            };
+
+            // ==========================================
+            // 5. GAME ENTITY LOGIC
+            // ==========================================
+            
+            const spawnEnemy = (fill = false) => {
+                const game = gameLogic.current;
+                const needed = 4 - game.enemies.length;
+                const count = fill ? 4 : (needed > 0 ? 1 : 0);
+
+                for(let i=0; i<count; i++) {
+                    // 15% chance mystery
+                    const isMystery = Math.random() < 0.15;
+                    
+                    const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32);
+                    geo.rotateX(Math.PI / 2); // Face camera
+                    
+                    const color = isMystery ? 0xffd700 : 0xff3366; // Gold or Neon Pink
+                    const mat = new THREE.MeshPhongMaterial({ 
+                        color: color, 
+                        emissive: isMystery ? 0xffaa00 : 0xaa0033,
+                        emissiveIntensity: 0.8,
+                        shininess: 100
+                    });
+
+                    const mesh = new THREE.Mesh(geo, mat);
+
+                    // Spawn at edges
+                    const edge = Math.floor(Math.random() * 4); // 0:top, 1:right, 2:bottom, 3:left
+                    const spread = 8;
+                    let x, y;
+                    
+                    if(edge === 0) { x = (Math.random()-0.5)*spread; y = 5; }
+                    else if(edge === 1) { x = 6; y = (Math.random()-0.5)*spread; }
+                    else if(edge === 2) { x = (Math.random()-0.5)*spread; y = -5; }
+                    else { x = -6; y = (Math.random()-0.5)*spread; }
+
+                    mesh.position.set(x, y, 0); // Z=0 plane
+                    game.scene.add(mesh);
+
+                    game.enemies.push({
+                        mesh: mesh,
+                        type: isMystery ? 'mystery' : 'normal',
+                        velocity: new THREE.Vector3(-x*0.1, -y*0.1, 0).normalize().multiplyScalar(isMystery ? 3 : 1.5), // Fly to center
+                        wobbleOffset: Math.random() * 100,
+                        active: true
+                    });
+                }
+            };
+
+            const updateEnemies = (dt) => {
+                const game = gameLogic.current;
+                const time = performance.now() / 1000;
+
+                game.enemies.forEach(enemy => {
+                    if (!enemy.active) return;
+
+                    // Movement
+                    enemy.mesh.position.add(enemy.velocity.clone().multiplyScalar(dt));
+
+                    // Wobble
+                    const wobble = Math.sin(time * 5 + enemy.wobbleOffset) * dt * (enemy.type === 'mystery' ? 2 : 0.5);
+                    // Add noise perpendicular to velocity? Simplified: just add to x/y based on simple logic
+                    enemy.mesh.position.x += wobble;
+
+                    // Mystery erratic behavior
+                    if (enemy.type === 'mystery' && Math.random() < 0.02) {
+                        enemy.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), (Math.random()-0.5));
+                    }
+
+                    // Check boundaries/Center (Game Over or Respawn logic)
+                    // If reaches center (distance < 0.5), respawn (player missed opportunity)
+                    if (enemy.mesh.position.length() < 0.5) {
+                        respawnEnemy(enemy);
+                    }
+                    
+                    // Rotate mesh
+                    enemy.mesh.rotation.z += dt * 2;
+                });
+            };
+
+            const checkHit = (aimPos) => {
+                const game = gameLogic.current;
+                let hitFound = false;
+
+                // Simple sphere collision for gameplay feel
+                game.enemies.forEach(enemy => {
+                    if (!enemy.active || hitFound) return; // Only hit one at a time
+
+                    const dist = aimPos.distanceTo(enemy.mesh.position);
+                    if (dist < 0.8) { // Hit radius
+                        hitFound = true;
+                        
+                        // Scoring
+                        const isMystery = enemy.type === 'mystery';
+                        const points = isMystery ? 500 : 100;
+                        
+                        // React State update (wrapped to avoid flicker, though setState is batched)
+                        setScore(s => s + points);
+                        setCombo(c => {
+                            const newC = c + 1;
+                            game.comboTimer = 1.5; // Reset combo window
+                            return newC;
+                        });
+
+                        // Effects
+                        playSound(isMystery ? 'mystery' : 'hit');
+                        spawnParticles(enemy.mesh.position, isMystery);
+                        spawnFloatingText(enemy.mesh.position, isMystery ? "+500" : "+100", isMystery);
+                        
+                        if (isMystery) {
+                            // Camera Shake
+                            game.camera.position.x = (Math.random()-0.5) * 0.5;
+                        }
+
+                        respawnEnemy(enemy);
+                    }
+                });
+
+                if (!hitFound) {
+                    playSound('miss');
+                    setCombo(0); // Break combo
+                    spawnFloatingText(aimPos, "MISS", false, true);
+                }
+            };
+
+            const respawnEnemy = (enemyObj) => {
+                const game = gameLogic.current;
+                
+                // Remove old mesh
+                game.scene.remove(enemyObj.mesh);
+                enemyObj.mesh.geometry.dispose();
+                enemyObj.mesh.material.dispose();
+
+                // Remove from array
+                game.enemies = game.enemies.filter(e => e !== enemyObj);
+
+                // Spawn new
+                spawnEnemy();
+            };
+
+            // ==========================================
+            // 6. PARTICLE SYSTEM
+            // ==========================================
+            const spawnParticles = (pos, isGold) => {
+                const game = gameLogic.current;
+                const count = isGold ? 30 : 10;
+                const color = isGold ? 0xffd700 : 0x00ffff;
+
+                for(let i=0; i<count; i++) {
+                    const mesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.1, 0.1, 0.1),
+                        new THREE.MeshBasicMaterial({ color: color })
+                    );
+                    mesh.position.copy(pos);
+                    
+                    // Random velocity explosion
+                    const vel = new THREE.Vector3(
+                        (Math.random()-0.5) * 5,
+                        (Math.random()-0.5) * 5,
+                        (Math.random()-0.5) * 5
+                    );
+
+                    game.scene.add(mesh);
+                    game.particles.push({ mesh, vel, life: 1.0 });
+                }
+            };
+
+            const updateParticles = (dt) => {
+                const game = gameLogic.current;
+                for (let i = game.particles.length - 1; i >= 0; i--) {
+                    const p = game.particles[i];
+                    p.life -= dt;
+                    p.mesh.position.add(p.vel.clone().multiplyScalar(dt));
+                    p.mesh.rotation.x += dt * 5;
+                    p.mesh.scale.setScalar(p.life);
+
+                    if (p.life <= 0) {
+                        game.scene.remove(p.mesh);
+                        p.mesh.geometry.dispose();
+                        p.mesh.material.dispose();
+                        game.particles.splice(i, 1);
+                    }
+                }
+            };
+
+            const spawnFloatingText = (pos, text, isSpecial, isBad=false) => {
+                // Project 3D pos to Screen 2D
+                // Note: We are using a React Overlay for text to make it crisp CSS
+                
+                // Simplified: Just randomize slightly around screen center if tracking is complex, 
+                // BUT we have the projection logic.
+                const vector = pos.clone();
+                vector.project(gameLogic.current.camera);
+
+                const x = (vector.x * .5 + .5) * window.innerWidth;
+                const y = (-(vector.y * .5) + .5) * window.innerHeight;
+
+                const color = isSpecial ? '#ffd700' : (isBad ? '#ff3333' : '#00ffcc');
+
+                const newText = {
+                    id: Date.now() + Math.random(),
+                    x, y,
+                    text,
+                    color
+                };
+
+                setFloatingTexts(prev => [...prev, newText]);
+
+                // Cleanup after animation
+                setTimeout(() => {
+                    setFloatingTexts(prev => prev.filter(t => t.id !== newText.id));
+                }, 1000);
+            };
+
+
+            // ==========================================
+            // 7. UI RENDER (REACT)
+            // ==========================================
+            return (
+                <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+                    {/* UI Overlay */}
+                    <div id="ui-layer" className="flex flex-col justify-between p-6">
+                        
+                        {/* Header HUD */}
+                        <div className="flex justify-between items-start">
+                            <div className="bg-black/50 p-4 border border-cyan-400 neon-border rounded-lg backdrop-blur-sm">
+                                <h1 className="text-cyan-400 text-xl font-bold tracking-widest neon-text">SCORE</h1>
+                                <p className="text-white text-3xl font-mono">{score.toString().padStart(6, '0')}</p>
+                            </div>
+                            
+                            {/* Combo */}
+                            {combo > 1 && (
+                                <div className="text-center">
+                                    <h2 className="text-pink-500 text-4xl font-black italic neon-text animate-pulse">
+                                        {combo}x COMBO
+                                    </h2>
+                                </div>
+                            )}
+
+                            <div className="bg-black/50 p-2 border border-pink-500 rounded text-right">
+                                <p className="text-xs text-pink-500">SYSTEM STATUS</p>
+                                <p className={`font-bold ${gameState === 'PLAYING' ? 'text-green-400' : 'text-yellow-400'}`}>
+                                    {gameState}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Central Messages */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                            {gameState === 'LOADING' && (
+                                <div className="text-cyan-400 text-2xl neon-text blink">
+                                    INITIALIZING NEURAL LINK...
+                                </div>
+                            )}
+                            {gameState === 'CALIBRATING' && (
+                                <div className="bg-black/70 p-6 border-2 border-yellow-400 rounded-xl">
+                                    <p className="text-yellow-400 text-xl mb-2">CALIBRATION REQUIRED</p>
+                                    <p className="text-white text-sm">Raise hand. Make a pistol gesture.</p>
+                                    <p className="text-white text-xs mt-2 opacity-70">Detecting Hand...</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Floating Combat Text */}
+                        {floatingTexts.map(ft => (
+                            <div key={ft.id} 
+                                 className="absolute combat-text font-black text-2xl pointer-events-none"
+                                 style={{ left: ft.x, top: ft.y, color: ft.color, textShadow: `0 0 10px ${ft.color}` }}>
+                                {ft.text}
+                            </div>
+                        ))}
+
+                        {/* Footer / Branding */}
+                        <div className="absolute bottom-4 w-full text-center pointer-events-auto">
+                            <a href="https://aiinsight.vn" target="_blank" className="text-white/30 text-xs tracking-[0.3em] hover:text-cyan-400 transition-colors cursor-pointer uppercase no-underline">
+                                aiinsight.vn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    </body>
+</html>
