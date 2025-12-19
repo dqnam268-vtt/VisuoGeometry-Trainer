@@ -228,16 +228,17 @@
             }, []);
 
             // ==========================================
-            // 2. MEDIAPIPE INITIALIZATION (CRITICAL)
+            // 2. MEDIAPIPE INITIALIZATION (FIXED)
             // ==========================================
             const initMediaPipe = async () => {
                 try {
                     const video = videoRef.current;
                     
-                    // Request Camera
+                    // --- SỬA LỖI: Bỏ facingMode: 'environment' để chạy được trên Laptop ---
+                    // Chúng ta chỉ yêu cầu video kích thước chuẩn HD
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: {
-                            facingMode: 'environment',
+                            // facingMode: 'environment', // <--- ĐÃ BỎ DÒNG NÀY
                             width: { ideal: 1280 },
                             height: { ideal: 720 }
                         }
@@ -281,7 +282,8 @@
 
                 } catch (err) {
                     console.error("Camera/MediaPipe Init Failed:", err);
-                    alert("Camera access denied or initialization failed. Please allow camera access.");
+                    // Hiển thị lỗi chi tiết hơn cho người dùng
+                    alert(`Lỗi Camera: ${err.name} - ${err.message}. Hãy đảm bảo bạn đã bấm "Allow/Cho phép" sử dụng Camera.`);
                 }
             };
 
@@ -745,5 +747,5 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
-    </body>
+</body>
 </html>
