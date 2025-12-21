@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Student Picker - Fairy Tale Edition</title>
+    <title>AR Student Picker - Ultimate Edition</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,83 +13,78 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
     
-    <!-- Custom Fonts: Elegant & Handwritten -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Dancing+Script:wght@700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Pacifico&family=Quicksand:wght@400;700&family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #0a0510; 
-            font-family: 'Quicksand', sans-serif; 
-            color: #fff;
-        }
+        /* Base */
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Quicksand', sans-serif; transition: background 1s; }
         
         #input-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; transform: scaleX(-1); z-index: 0;
-            opacity: 0.8;
-            filter: contrast(1.1) brightness(1.1) saturate(1.2);
-            /* Overlay màu mộng mơ */
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.8)); 
+            transition: all 0.5s;
         }
 
-        /* Lớp phủ mờ ảo (Dreamy Overlay) */
-        .fairy-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(20, 0, 30, 0.4) 100%);
-            box-shadow: inset 0 0 100px rgba(255, 215, 0, 0.1);
-            pointer-events: none; z-index: 1;
+        #output-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+
+        /* --- THEMES CSS --- */
+        /* 1. Fairy Tale */
+        .theme-fairy body { background-color: #0a0510; }
+        .theme-fairy #input-video { filter: contrast(1.1) brightness(1.1) saturate(1.2); opacity: 0.8; }
+        .theme-fairy .overlay-bg { background: radial-gradient(circle, transparent 0%, rgba(20,0,30,0.5) 100%); }
+        .theme-fairy .ui-panel { 
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 16px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); color: #fff;
+        }
+        .theme-fairy .accent-text { font-family: 'Playfair Display', serif; color: #ffd700; }
+        .theme-fairy .btn-primary { 
+            background: linear-gradient(to right, #d4af37, #f0e68c); color: #4a044e; 
+            border: 1px solid #fff; 
         }
 
-        #output-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 10; pointer-events: none;
+        /* 2. Cyberpunk */
+        .theme-cyber body { background-color: #000510; }
+        .theme-cyber #input-video { filter: grayscale(80%) contrast(1.5) brightness(0.8); opacity: 0.6; }
+        .theme-cyber .overlay-bg { 
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.05) 3px);
+            pointer-events: none;
+        }
+        .theme-cyber .ui-panel {
+            background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(5px);
+            border: 1px solid #00ffff; border-radius: 4px;
+            box-shadow: 0 0 10px #00ffff; color: #00ffff; font-family: 'Orbitron', sans-serif;
+        }
+        .theme-cyber .accent-text { font-family: 'Orbitron', sans-serif; color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+        .theme-cyber .btn-primary {
+            background: rgba(0,255,255,0.2); border: 1px solid #00ffff; color: #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        .theme-cyber .btn-primary:hover { background: #00ffff; color: #000; }
+
+        /* 3. Galaxy */
+        .theme-galaxy body { background-color: #000; }
+        .theme-galaxy #input-video { filter: brightness(0.6) hue-rotate(240deg); opacity: 0.5; }
+        .theme-galaxy .ui-panel {
+            background: rgba(10, 10, 40, 0.6); backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 100, 255, 0.3); border-radius: 20px;
+            color: #e0e0ff; font-family: 'Roboto Mono', monospace;
+        }
+        .theme-galaxy .accent-text { color: #a0a0ff; font-weight: bold; letter-spacing: 2px; }
+        .theme-galaxy .btn-primary {
+            background: linear-gradient(135deg, #4b0082, #0000ff); color: white;
+            border: none; box-shadow: 0 0 20px rgba(0,0,255,0.5);
         }
 
-        /* Styles cho UI Tiên Cảnh */
-        .fairy-border {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 223, 128, 0.4); /* Gold border */
-            box-shadow: 0 0 20px rgba(255, 223, 128, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-        }
-
-        .fairy-text-title {
-            font-family: 'Cinzel', serif;
-            background: linear-gradient(to right, #fff, #ffd700, #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        .fairy-script {
-            font-family: 'Dancing Script', cursive;
-        }
-
-        /* Card Animation */
-        .winner-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 240, 245, 0.95));
-            border: 2px solid #ffd700;
-            color: #4a044e;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(255, 215, 0, 0.6);
-            animation: floatUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        @keyframes floatUp {
-            from { opacity: 0; transform: translateY(50px) scale(0.8) rotate(-5deg); }
-            to { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-        }
-
-        /* Progress Circle - Magical Style */
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.1s linear;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-            filter: drop-shadow(0 0 5px #ffd700);
-        }
+        /* Common Utils */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); rounded: 3px; }
+        .spin-slow { animation: spin 10s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -98,584 +93,512 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- UTILS: MAGICAL SOUNDS ---
+        // --- THEME CONFIGS ---
+        const THEMES = {
+            FAIRY: { id: 'theme-fairy', name: 'Tiên Cảnh', color: '#ffd700', font: 'Playfair Display' },
+            CYBER: { id: 'theme-cyber', name: 'Cyberpunk', color: '#00ffff', font: 'Orbitron' },
+            GALAXY: { id: 'theme-galaxy', name: 'Vũ Trụ', color: '#a0a0ff', font: 'Roboto Mono' }
+        };
+
+        // --- UTILS: SOUNDS ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const playSound = (type) => {
+        const playSound = (type, theme) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
             if (type === 'tick') {
-                // Tiếng chuông gió nhẹ
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800 + Math.random() * 200, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'lock') {
-                // Tiếng tích tụ năng lượng (Magical charge)
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.linearRampToValueAtTime(600, now + 1.0);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0.2, now + 1.0);
-                gain.gain.linearRampToValueAtTime(0, now + 1.5);
-                osc.start(now); osc.stop(now + 1.5);
+                if(theme === 'CYBER') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now);
+                    gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.01, now+0.05);
+                    osc.start(now); osc.stop(now+0.05);
+                } else {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(1000 + Math.random()*200, now);
+                    gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+                    osc.start(now); osc.stop(now+0.1);
+                }
             } else if (type === 'win') {
-                // Hợp âm chiến thắng (Major Chord Arpeggio)
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C Major
-                notes.forEach((freq, i) => {
+                // Simple chord
+                [0, 4, 7].forEach((step, i) => {
                     const o = audioCtx.createOscillator();
                     const g = audioCtx.createGain();
-                    o.type = 'sine';
-                    o.connect(g);
-                    g.connect(audioCtx.destination);
-                    o.frequency.value = freq;
-                    const time = now + i * 0.1;
-                    g.gain.setValueAtTime(0, time);
-                    g.gain.linearRampToValueAtTime(0.1, time + 0.05);
-                    g.gain.exponentialRampToValueAtTime(0.001, time + 2.0);
-                    o.start(time);
-                    o.stop(time + 2.0);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = theme === 'CYBER' ? 'square' : 'triangle';
+                    o.frequency.value = 440 * Math.pow(2, step/12);
+                    g.gain.setValueAtTime(0, now);
+                    g.gain.linearRampToValueAtTime(0.1, now + 0.1 + i*0.1);
+                    g.gain.linearRampToValueAtTime(0, now + 2.0);
+                    o.start(now); o.stop(now + 2.0);
                 });
             }
         };
 
-        // --- UTILS: FAIRY DUST PARTICLES ---
-        class FairyDustSystem {
-            constructor(scene) {
-                this.scene = scene;
-                this.particles = [];
-                // Create a soft glowing circle texture
-                const canvas = document.createElement('canvas');
-                canvas.width = 32; canvas.height = 32;
-                const ctx = canvas.getContext('2d');
-                const grad = ctx.createRadialGradient(16,16,0, 16,16,16);
-                grad.addColorStop(0, 'rgba(255, 255, 200, 1)');
-                grad.addColorStop(0.5, 'rgba(255, 215, 0, 0.5)');
-                grad.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0,0,32,32);
-                
-                const texture = new THREE.CanvasTexture(canvas);
-                this.material = new THREE.SpriteMaterial({ 
-                    map: texture, 
-                    transparent: true,
-                    blending: THREE.AdditiveBlending 
-                });
-            }
-
-            spawn(count = 50, center = new THREE.Vector3(0,0,0)) {
-                for(let i=0; i<count; i++) {
-                    const sprite = new THREE.Sprite(this.material);
-                    // Random position around center
-                    const r = 2 + Math.random() * 3;
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.random() * Math.PI * 2;
-                    
-                    sprite.position.set(
-                        center.x + r * Math.sin(theta) * Math.cos(phi),
-                        center.y + r * Math.sin(theta) * Math.sin(phi),
-                        center.z + r * Math.cos(theta) - 5 // Push back a bit
-                    );
-
-                    sprite.scale.setScalar(0.1 + Math.random() * 0.2);
-                    
-                    // Velocity: Float upwards gently
-                    sprite.userData.velocity = new THREE.Vector3(
-                        (Math.random() - 0.5) * 0.02,
-                        Math.random() * 0.05 + 0.01,
-                        (Math.random() - 0.5) * 0.02
-                    );
-                    
-                    this.scene.add(sprite);
-                    this.particles.push(sprite);
-                }
-            }
-
-            update() {
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    const p = this.particles[i];
-                    p.position.add(p.userData.velocity);
-                    // Twinkle
-                    p.material.opacity = 0.5 + Math.sin(Date.now() * 0.005 + p.id) * 0.5;
-                    
-                    if (p.position.y > 5 || p.material.opacity < 0.01) {
-                        this.scene.remove(p);
-                        this.particles.splice(i, 1);
-                    }
-                }
-            }
-        }
-
-        // --- UTILS: TEXT SPRITE MAKER ---
-        const createTextSprite = (text, color = '#FFD700') => {
+        // --- THREE.JS HELPERS ---
+        const createTextSprite = (text, theme) => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 512;
-            canvas.height = 128;
+            canvas.width = 1024; canvas.height = 256;
             
-            ctx.font = 'bold 60px "Cinzel"'; // Use Cinzel font
-            ctx.fillStyle = color;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Glow effect
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-            ctx.shadowBlur = 15;
-            ctx.fillText(text, 256, 64);
-            
+            let font = 'bold 70px "Quicksand"';
+            let color = '#ffffff';
+            let shadow = 'rgba(0,0,0,0.5)';
+
+            if(theme === 'FAIRY') {
+                font = 'bold 80px "Playfair Display"'; color = '#ffd700'; shadow = 'rgba(255,215,0,0.8)';
+            } else if (theme === 'CYBER') {
+                font = 'bold 70px "Orbitron"'; color = '#00ffff'; shadow = 'rgba(0,255,255,0.8)';
+            } else {
+                font = 'bold 70px "Roboto Mono"'; color = '#a0a0ff'; shadow = 'rgba(100,100,255,0.8)';
+            }
+
+            ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.shadowColor = shadow; ctx.shadowBlur = 15;
+            ctx.fillText(text, 512, 128);
+
             const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(4, 1, 1); // Aspect ratio fix
+            const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(mat);
+            sprite.scale.set(8, 2, 1);
             return sprite;
         };
 
-        // --- COMPONENT: WINNER CARD ---
-        const WinnerCard = ({ name, isSpinning, index }) => (
-            <div className="winner-card relative p-4 md:p-6 mb-4 rounded-xl flex items-center gap-4 transform transition-all hover:scale-105" 
-                 style={{ animationDelay: `${index * 0.2}s` }}>
-                
-                {/* Decorative Icon */}
-                <div className="flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center border-2 border-yellow-400">
-                    <span className="text-2xl">✨</span>
-                </div>
-
-                <div className="flex-1">
-                    <div className="text-xs text-purple-800 font-bold uppercase tracking-widest mb-1 font-sans opacity-70">
-                        Người được chọn #{index + 1}
-                    </div>
-                    <div className="text-2xl md:text-3xl text-purple-900 font-bold font-serif fairy-text-title" style={{textShadow: 'none', background: 'none', WebkitTextFillColor: '#4a044e'}}>
-                        {name}
-                    </div>
-                </div>
-
-                {/* Sparkles CSS */}
-                <div className="absolute -top-2 -right-2 text-yellow-400 text-xl animate-pulse">✦</div>
-                <div className="absolute bottom-2 right-4 text-pink-300 text-sm animate-bounce">★</div>
-            </div>
-        );
-
         function App() {
             // --- STATE ---
+            const [currentTheme, setCurrentTheme] = useState('FAIRY');
             const [appState, setAppState] = useState("INIT");
             const [fingerCount, setFingerCount] = useState(0);
             const [lockProgress, setLockProgress] = useState(0);
             const [isSpinning, setIsSpinning] = useState(false);
             const [winners, setWinners] = useState([]);
             
-            // --- DATA: 30 STUDENTS ---
-            const fixedStudents = [
-                "Nguyễn Vũ Thu An", "Trần Phúc An", "Nguyễn Ngọc Thụy Anh", 
-                "Nguyễn Việt Anh", "Phạm Diệu Anh", "Phan Nhật Ân", 
-                "Vũ Yến Chi", "Hùng Công Danh", "Đào Minh Dũng", 
-                "Nguyễn Lê Trạch Đông", "Phan Ngọc Khoa", "Nguyễn Lê Minh Khôi", 
-                "Tạ Tuấn Kiệt", "Đinh Phan Thiên Kim", "Ngô Bảo Tú Linh", 
-                "Nguyễn Trần Linh Ngân", "Vũ Bảo Ngân", "Nguyễn Phúc Khôi Nguyên", 
-                "Đỗ Khắc Minh Nhật", "Lê Ngọc An Nhiên", "Trần Quang Ninh", 
-                "Nguyễn Hà Minh Phát", "Đỗ Hoàng Quân", "Nguyễn Thị Minh Tâm", 
-                "Trần Phạm Quốc Thắng", "Phan Tiến Thịnh", "Tô Vĩnh Thụy", 
-                "Trần Lê Gia Tuệ", "Trần Hữu Việt", "Phí Ngọc Khánh Vy"
+            // Features Logic State
+            const [removeSelected, setRemoveSelected] = useState(false);
+            const [showGroupModal, setShowGroupModal] = useState(false);
+            const [groupCount, setGroupCount] = useState(4);
+            const [groupsResult, setGroupsResult] = useState(null);
+
+            // Data
+            const initialList = [
+                "Nguyễn Vũ Thu An", "Trần Phúc An", "Nguyễn Ngọc Thụy Anh", "Nguyễn Việt Anh", 
+                "Phạm Diệu Anh", "Phan Nhật Ân", "Vũ Yến Chi", "Hùng Công Danh", "Đào Minh Dũng", 
+                "Nguyễn Lê Trạch Đông", "Phan Ngọc Khoa", "Nguyễn Lê Minh Khôi", "Tạ Tuấn Kiệt", 
+                "Đinh Phan Thiên Kim", "Ngô Bảo Tú Linh", "Nguyễn Trần Linh Ngân", "Vũ Bảo Ngân", 
+                "Nguyễn Phúc Khôi Nguyên", "Đỗ Khắc Minh Nhật", "Lê Ngọc An Nhiên", "Trần Quang Ninh", 
+                "Nguyễn Hà Minh Phát", "Đỗ Hoàng Quân", "Nguyễn Thị Minh Tâm", "Trần Phạm Quốc Thắng", 
+                "Phan Tiến Thịnh", "Tô Vĩnh Thụy", "Trần Lê Gia Tuệ", "Trần Hữu Việt", "Phí Ngọc Khánh Vy"
             ];
             
-            const [studentList, setStudentList] = useState(fixedStudents);
+            const [activeList, setActiveList] = useState(initialList);
+            const [tempListText, setTempListText] = useState(initialList.join("\n"));
             const [isEditingList, setIsEditingList] = useState(false);
-            const [tempListText, setTempListText] = useState(fixedStudents.join("\n"));
 
             // Refs
             const videoRef = useRef(null);
             const containerRef = useRef(null);
-            
             const engine = useRef({
                 scene: null, camera: null, renderer: null,
-                dust: null,
-                nameRing: null, // Group containing all name sprites
-                ringRotationSpeed: 0.002,
-                lastFingerCount: 0,
+                objects: [], // Track 3D objects to clear
                 lockStartTime: 0,
-                isLocked: false
+                isLocked: false,
+                lastFingerCount: 0
             });
 
-            // --- THREE.JS INIT ---
+            // --- THEME SWITCHER EFFECT ---
             useEffect(() => {
+                document.body.className = THEMES[currentTheme].id;
+                // Re-init 3D World when theme or list changes
+                init3DWorld();
+            }, [currentTheme, activeList]);
+
+            // --- 3D SETUP ---
+            const init3DWorld = () => {
                 if(!containerRef.current) return;
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-                
-                const scene = new THREE.Scene();
-                // Add ambient light for general brightness if we used meshes, but sprites are self-illuminated
-                
-                const camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 100);
-                camera.position.z = 6;
-                camera.position.y = 1; // Look slightly down or up
+                let { scene, camera, renderer } = engine.current;
 
-                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                renderer.setSize(width, height);
-                renderer.domElement.id = "output-canvas";
-                containerRef.current.appendChild(renderer.domElement);
+                // Init basics if not exists
+                if(!renderer) {
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    scene = new THREE.Scene();
+                    camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 100);
+                    camera.position.z = 6; camera.position.y = 0.5;
+                    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                    renderer.setSize(width, height);
+                    renderer.domElement.id = "output-canvas";
+                    containerRef.current.innerHTML = '';
+                    containerRef.current.appendChild(renderer.domElement);
+                    engine.current.scene = scene;
+                    engine.current.camera = camera;
+                    engine.current.renderer = renderer;
+                    
+                    // Start Loop
+                    const animate = () => {
+                        requestAnimationFrame(animate);
+                        update3D();
+                        renderer.render(scene, camera);
+                    };
+                    animate();
+                }
 
-                // --- 1. FAIRY DUST ---
-                const dust = new FairyDustSystem(scene);
-                dust.spawn(100); // Initial spawn
+                // CLEAR OLD OBJECTS
+                while(scene.children.length > 0){ 
+                    scene.remove(scene.children[0]); 
+                }
+                engine.current.objects = [];
 
-                // --- 2. 3D NAME RING (THE "VÒNG TRÒN" INTERFACE) ---
-                const nameRing = new THREE.Group();
-                scene.add(nameRing);
-                
-                // Create sprites for all 30 students arranged in a large circle
-                const radius = 8;
-                const total = fixedStudents.length;
-                
-                fixedStudents.forEach((name, i) => {
-                    const sprite = createTextSprite(name, '#FFFDD0'); // Cream color
+                // BUILD SCENE BASED ON THEME
+                const nameGroup = new THREE.Group();
+                scene.add(nameGroup);
+                engine.current.nameGroup = nameGroup;
+
+                const radius = currentTheme === 'CYBER' ? 10 : 8;
+                const total = activeList.length;
+
+                activeList.forEach((name, i) => {
+                    const sprite = createTextSprite(name, currentTheme);
                     const angle = (i / total) * Math.PI * 2;
                     
-                    // Arrange in a circle on XZ plane
-                    sprite.position.x = Math.cos(angle) * radius;
-                    sprite.position.z = Math.sin(angle) * radius - 5; // Offset Z to be around/behind
-                    sprite.position.y = Math.sin(angle * 2) * 1; // Wave effect in height
-                    
-                    nameRing.add(sprite);
+                    if (currentTheme === 'GALAXY') {
+                        // Spiral
+                        const r = 4 + (i/total) * 10;
+                        const spiralAngle = angle * 3;
+                        sprite.position.set(Math.cos(spiralAngle)*r, (Math.random()-0.5)*2, Math.sin(spiralAngle)*r - 10);
+                    } else if (currentTheme === 'CYBER') {
+                        // Cylinder Grid
+                        sprite.position.set(Math.cos(angle)*radius, Math.sin(angle)*2 + (i%2)*1.5, Math.sin(angle)*radius - 5);
+                    } else {
+                        // Fairy Ring
+                        sprite.position.set(Math.cos(angle)*radius, Math.sin(angle * 3)*1.5, Math.sin(angle)*radius - 5);
+                    }
+                    nameGroup.add(sprite);
                 });
 
-                engine.current.scene = scene;
-                engine.current.camera = camera;
-                engine.current.renderer = renderer;
-                engine.current.dust = dust;
-                engine.current.nameRing = nameRing;
-
-                const animate = () => {
-                    requestAnimationFrame(animate);
-                    
-                    // Update Dust
-                    dust.update();
-                    if(Math.random() < 0.1) dust.spawn(1); // Continuous gentle spawn
-                    
-                    // Rotate Ring
-                    if (engine.current.nameRing) {
-                        engine.current.nameRing.rotation.y += engine.current.ringRotationSpeed;
+                // Add Theme Specific Extras
+                if (currentTheme === 'FAIRY') {
+                    // Dust handled by separate logic or simple particles here
+                } else if (currentTheme === 'CYBER') {
+                    const grid = new THREE.GridHelper(50, 50, 0x00ffff, 0x003333);
+                    grid.position.y = -5;
+                    scene.add(grid);
+                } else if (currentTheme === 'GALAXY') {
+                    // Stars
+                    const starsGeo = new THREE.BufferGeometry();
+                    const starsPos = [];
+                    for(let i=0; i<1000; i++) {
+                        starsPos.push((Math.random()-0.5)*100, (Math.random()-0.5)*100, (Math.random()-0.5)*100);
                     }
-
-                    renderer.render(scene, camera);
-                };
-                animate();
-            }, []);
-
-            // --- HAND TRACKING & LOGIC ---
-            const countFingers = (lm) => {
-                let count = 0;
-                // Check finger extension (Tip Y < PIP Y)
-                if (lm[8].y < lm[6].y) count++;
-                if (lm[12].y < lm[10].y) count++;
-                if (lm[16].y < lm[14].y) count++;
-                if (lm[20].y < lm[18].y) count++;
-                // Simple Thumb Check
-                if (lm[4].y < lm[2].y - 0.05) count++; 
-                return Math.min(count, 5);
+                    starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsPos, 3));
+                    const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.1});
+                    scene.add(new THREE.Points(starsGeo, starsMat));
+                }
             };
 
+            const update3D = () => {
+                const { nameGroup } = engine.current;
+                if(nameGroup) {
+                    nameGroup.rotation.y += isSpinning ? 0.2 : 0.002;
+                    if(currentTheme === 'GALAXY') nameGroup.rotation.z += 0.001;
+                }
+            };
+
+            // --- HAND TRACKING LOGIC ---
             const startSystem = async () => {
                 try {
                     setAppState("LOADING");
                     const video = videoRef.current;
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: false, video: { facingMode: "environment" }
-                    });
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "environment" } });
                     video.srcObject = stream;
                     await video.play();
 
-                    const hands = new window.Hands({locateFile: (file) => 
-                        `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${file}`
-                    });
-                    hands.setOptions({
-                        maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6
-                    });
-
+                    const hands = new window.Hands({locateFile: (file) => `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${file}`});
+                    hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+                    
                     hands.onResults((results) => {
+                        if(isSpinning || groupsResult) return; 
+                        
                         const eng = engine.current;
-                        if (isSpinning) return; 
-
                         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                             const lm = results.multiHandLandmarks[0];
-                            const currentCount = countFingers(lm);
-                            setFingerCount(currentCount);
+                            let count = 0;
+                            // Basic finger count
+                            if (lm[8].y < lm[6].y) count++;
+                            if (lm[12].y < lm[10].y) count++;
+                            if (lm[16].y < lm[14].y) count++;
+                            if (lm[20].y < lm[18].y) count++;
+                            if (lm[4].y < lm[2].y - 0.05) count++;
+                            count = Math.min(count, 5);
 
-                            if (currentCount > 0 && currentCount === eng.lastFingerCount) {
+                            setFingerCount(count);
+
+                            if (count > 0 && count === eng.lastFingerCount) {
                                 if (!eng.lockStartTime) eng.lockStartTime = Date.now();
-                                const elapsed = Date.now() - eng.lockStartTime;
-                                const progress = Math.min((elapsed / 2000) * 100, 100); // 2s lock for smoother feel
+                                const progress = Math.min(((Date.now() - eng.lockStartTime) / 1500) * 100, 100);
                                 setLockProgress(progress);
-
                                 if (progress >= 100 && !eng.isLocked) {
                                     eng.isLocked = true;
-                                    playSound('lock');
-                                    triggerSpin(currentCount);
+                                    triggerSpin(count);
                                 }
                             } else {
-                                eng.lastFingerCount = currentCount;
+                                eng.lastFingerCount = count;
                                 eng.lockStartTime = 0;
                                 setLockProgress(0);
                                 eng.isLocked = false;
                             }
                         } else {
-                            setFingerCount(0);
-                            setLockProgress(0);
-                            eng.lockStartTime = 0;
+                            setFingerCount(0); setLockProgress(0); eng.lockStartTime = 0;
                         }
                     });
 
-                    const detectLoop = async () => {
-                        if (video.readyState >= 2) await hands.send({image: video});
-                        requestAnimationFrame(detectLoop);
-                    };
-                    detectLoop();
+                    const detect = async () => { if(video.readyState>=2) await hands.send({image: video}); requestAnimationFrame(detect); };
+                    detect();
                     setAppState("READY");
-                } catch (e) {
-                    console.error(e);
-                    setAppState("ERROR");
-                }
+                } catch (e) { console.error(e); setAppState("ERROR"); }
             };
 
-            // --- SPIN LOGIC ---
+            // --- GAME LOGIC ---
             const triggerSpin = (count) => {
-                const eng = engine.current;
+                if(activeList.length < count) {
+                    alert("Số lượng học sinh còn lại không đủ!");
+                    engine.current.isLocked = false;
+                    return;
+                }
                 setIsSpinning(true);
                 setWinners([]);
                 
-                // 1. Tăng tốc độ quay của vòng tròn 3D
-                // Ease in speed
-                let speed = 0.002;
-                const targetSpeed = 0.5; // Very fast
-                
-                const accelerate = setInterval(() => {
-                    speed = Math.min(speed * 1.2, targetSpeed);
-                    eng.ringRotationSpeed = speed;
-                    playSound('tick'); // Sound effect
-                    
-                    // Spawn more fairy dust while spinning
-                    eng.dust.spawn(2, new THREE.Vector3(0,0,0));
-                }, 100);
-
-                // 2. Stop after random time
                 setTimeout(() => {
-                    clearInterval(accelerate);
-                    // Decelerate
-                    const decelerate = setInterval(() => {
-                        speed = speed * 0.9;
-                        eng.ringRotationSpeed = speed;
-                        
-                        if (speed < 0.005) {
-                            clearInterval(decelerate);
-                            eng.ringRotationSpeed = 0.002; // Back to idle
-                            finalizeWinners(count);
-                        }
-                    }, 50);
-                }, 3000); // Spin for 3 seconds
+                    // Logic pick random
+                    let pool = [...activeList];
+                    let selected = [];
+                    for(let i=0; i<count; i++){
+                        const idx = Math.floor(Math.random() * pool.length);
+                        selected.push(pool[idx]);
+                        pool.splice(idx, 1);
+                    }
+                    
+                    setWinners(selected);
+                    setIsSpinning(false);
+                    playSound('win', currentTheme);
+                    engine.current.isLocked = false;
+
+                    // Remove if toggled
+                    if(removeSelected) {
+                        setActiveList(pool);
+                    }
+                }, 3000);
             };
 
-            const finalizeWinners = (count) => {
-                let available = [...studentList];
-                let final = [];
-                for(let i=0; i<count; i++) {
-                    if(available.length === 0) break;
-                    const idx = Math.floor(Math.random() * available.length);
-                    final.push(available[idx]);
-                    available.splice(idx, 1);
-                }
-                setWinners(final);
-                setIsSpinning(false);
-                engine.current.isLocked = false;
-                playSound('win');
+            const divideGroups = () => {
+                if(groupCount < 2) return;
+                // Shuffle
+                let shuffled = [...activeList].sort(() => 0.5 - Math.random());
+                const result = Array.from({length: groupCount}, () => []);
                 
-                // Huge Dust Explosion
-                engine.current.dust.spawn(200, new THREE.Vector3(0,0,2));
+                shuffled.forEach((student, i) => {
+                    result[i % groupCount].push(student);
+                });
+                
+                setGroupsResult(result);
+                setShowGroupModal(false);
             };
 
-            const saveList = () => {
-                const arr = tempListText.split('\n').filter(line => line.trim() !== "");
-                if (arr.length > 0) {
-                    setStudentList(arr);
-                    setIsEditingList(false);
-                    // Update 3D Ring
-                    // Note: In a full app we would regenerate sprites here, 
-                    // but for simplicity we assume list is static mostly or reload required for 3D update
-                    alert("Đã cập nhật dữ liệu. Vui lòng tải lại trang để làm mới Vòng Xoay 3D.");
-                    window.location.reload();
+            const resetList = () => {
+                if(confirm("Khôi phục danh sách gốc đầy đủ?")) {
+                    setActiveList(initialList);
+                    setWinners([]);
+                    setGroupsResult(null);
                 }
             };
 
-            // Helpers
+            // --- RENDER HELPERS ---
             const radius = 60;
             const circumference = 2 * Math.PI * radius;
             const strokeDashoffset = circumference - (lockProgress / 100) * circumference;
 
             return (
-                <div className="w-full h-full relative font-sans">
-                    {/* Background Layers */}
+                <div className="w-full h-full relative text-white overflow-hidden">
+                    <div className="overlay-bg fixed inset-0"></div>
                     <video ref={videoRef} playsInline muted id="input-video"></video>
-                    <div className="fairy-overlay"></div>
-                    <div ref={containerRef} className="absolute inset-0 pointer-events-none z-10"></div>
+                    <div ref={containerRef} className="absolute inset-0 z-0"></div>
 
-                    {/* --- UI LAYER --- */}
-                    <div className="absolute inset-0 z-50 flex flex-col p-4 pointer-events-none">
-                        
-                        {/* Header */}
-                        <div className="flex justify-between items-start pointer-events-auto">
-                            <div className="fairy-border px-6 py-3">
-                                <h1 className="fairy-text-title text-2xl md:text-3xl font-bold tracking-wider">
-                                    LỚP HỌC KỲ DIỆU
-                                </h1>
-                                <div className="text-xs text-yellow-100 font-serif italic mt-1">
-                                    Sĩ số: {studentList.length} Học Sinh
-                                </div>
+                    {/* --- HEADER --- */}
+                    <div className="absolute top-0 left-0 w-full p-4 z-50 flex justify-between items-start pointer-events-none">
+                        <div className="ui-panel px-4 py-2 pointer-events-auto flex flex-col gap-2">
+                            <h1 className="text-xl md:text-2xl font-bold accent-text">AR PICKER <span className="text-xs opacity-70">ULTIMATE</span></h1>
+                            <div className="flex gap-2 text-xs">
+                                <span className="opacity-70">Sĩ số: {activeList.length}</span>
+                                {removeSelected && <span className="text-red-400 font-bold">[Đang lọc]</span>}
                             </div>
-                            
-                            <button 
-                                onClick={() => {setIsEditingList(true); setTempListText(studentList.join("\n"));}}
-                                className="bg-white/10 hover:bg-white/20 text-yellow-100 px-4 py-2 rounded-full border border-yellow-200/50 backdrop-blur-md transition-all font-serif text-sm"
-                            >
-                                📜 Danh Sách
-                            </button>
                         </div>
 
-                        {/* --- MAIN CENTER --- */}
-                        <div className="flex-1 flex flex-col items-center justify-center relative">
-                            
-                            {/* FINGER COUNT / LOCK INDICATOR */}
-                            {appState === "READY" && !isSpinning && winners.length === 0 && (
-                                <div className="flex flex-col items-center transition-all duration-500" 
-                                     style={{
-                                         opacity: fingerCount > 0 ? 1 : 0.6,
-                                         transform: fingerCount > 0 ? 'scale(1)' : 'scale(0.9)'
-                                     }}>
-                                    
-                                    {/* Magical Circle */}
-                                    <div className="relative w-40 h-40 mb-4">
-                                        {/* Glow effect behind */}
-                                        <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-xl animate-pulse"></div>
-                                        
-                                        <svg className="w-full h-full relative z-10 drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]" viewBox="0 0 140 140">
-                                            {/* Track */}
-                                            <circle cx="70" cy="70" r={radius} stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none"/>
-                                            {/* Progress */}
-                                            <circle 
-                                                className="progress-ring__circle"
-                                                stroke="#FFD700" strokeWidth="6" strokeLinecap="round" fill="none"
-                                                cx="70" cy="70" r={radius}
-                                                style={{ strokeDasharray: circumference, strokeDashoffset }}
-                                            />
-                                        </svg>
-                                        
-                                        <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                            <span className="text-5xl font-serif text-yellow-100 drop-shadow-md">
-                                                {fingerCount}
-                                            </span>
-                                            <span className="text-[10px] text-white/80 uppercase tracking-widest mt-1">Người</span>
-                                        </div>
-                                    </div>
-                                    
-                                    {fingerCount > 0 ? (
-                                        <div className="text-center bg-black/30 backdrop-blur px-6 py-2 rounded-full border border-white/20">
-                                            <p className="text-yellow-100 font-serif italic">Giữ yên tay để triệu hồi...</p>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center opacity-70 animate-bounce">
-                                            <p className="text-white text-sm font-serif">☝️ Giơ ngón tay để chọn số lượng</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                        <div className="flex flex-col gap-2 pointer-events-auto items-end">
+                            {/* Theme Selector */}
+                            <select 
+                                value={currentTheme}
+                                onChange={(e) => setCurrentTheme(e.target.value)}
+                                className="ui-panel px-3 py-1 text-sm outline-none cursor-pointer hover:brightness-110"
+                            >
+                                {Object.values(THEMES).map(t => <option key={t.id} value={t.id.split('-')[1].toUpperCase()}>{t.name}</option>)}
+                            </select>
 
-                            {/* --- WINNERS DISPLAY --- */}
-                            {(winners.length > 0) && (
-                                <div className="w-full max-w-3xl flex flex-col items-center z-50">
-                                    <h2 className="text-white text-xl font-serif mb-6 animate__animated animate__fadeInDown drop-shadow-lg">
-                                        ✨ Chúc Mừng Các Bạn ✨
-                                    </h2>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-                                        {winners.map((name, idx) => (
-                                            <WinnerCard 
-                                                key={idx} 
-                                                index={idx} 
-                                                name={name} 
-                                                isSpinning={isSpinning}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    <button 
-                                        onClick={() => {setWinners([]); engine.current.isLocked = false;}}
-                                        className="mt-10 px-10 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full shadow-[0_0_30px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform pointer-events-auto border-2 border-white/50 font-serif"
-                                    >
-                                        Tiếp Tục
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* --- SPINNING TEXT (While spinning) --- */}
-                            {isSpinning && (
-                                <div className="text-center animate-pulse z-50">
-                                    <div className="text-4xl md:text-6xl mb-2">✨</div>
-                                    <div className="text-2xl text-yellow-100 font-serif fairy-text-title tracking-[0.5em]">
-                                        ĐANG CHỌN...
-                                    </div>
-                                </div>
-                            )}
-
+                            <button onClick={() => setIsEditingList(true)} className="ui-panel px-3 py-1 text-sm hover:brightness-125">
+                                <i className="fas fa-list mr-2"></i>Danh sách
+                            </button>
                         </div>
                     </div>
 
-                    {/* --- INIT SCREEN --- */}
+                    {/* --- BOTTOM CONTROLS --- */}
+                    {appState === "READY" && !isSpinning && !groupsResult && (
+                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex gap-4 pointer-events-auto">
+                            
+                            {/* Toggle Remove */}
+                            <button 
+                                onClick={() => setRemoveSelected(!removeSelected)}
+                                className={`ui-panel px-4 py-3 rounded-full flex items-center gap-2 transition-all ${removeSelected ? 'bg-red-900/50 border-red-500' : ''}`}
+                            >
+                                <div className={`w-4 h-4 rounded-full ${removeSelected ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-gray-500'}`}></div>
+                                <span className="text-sm font-bold">Loại bỏ khi chọn</span>
+                            </button>
+
+                            {/* Group Button */}
+                            <button 
+                                onClick={() => setShowGroupModal(true)}
+                                className="btn-primary px-6 py-3 rounded-full font-bold shadow-lg transform hover:scale-105 transition-transform"
+                            >
+                                <i className="fas fa-users mr-2"></i>Chia Nhóm
+                            </button>
+
+                            {/* Reset */}
+                            {activeList.length < initialList.length && (
+                                <button onClick={resetList} className="ui-panel px-4 py-3 rounded-full hover:bg-white/10" title="Khôi phục danh sách">
+                                    <i className="fas fa-undo"></i>
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* --- MAIN CENTER DISPLAY --- */}
+                    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none">
+                        
+                        {/* FINGER LOCK UI */}
+                        {appState === "READY" && !isSpinning && winners.length === 0 && !groupsResult && (
+                            <div className="relative pointer-events-auto transition-all duration-300" style={{ opacity: fingerCount > 0 ? 1 : 0.5, transform: fingerCount > 0 ? 'scale(1.1)' : 'scale(1)' }}>
+                                <svg className="w-40 h-40 drop-shadow-lg" viewBox="0 0 140 140">
+                                    <circle cx="70" cy="70" r={radius} stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none"/>
+                                    <circle className="progress-ring__circle" stroke={THEMES[currentTheme].color} strokeWidth="6" strokeLinecap="round" fill="none" cx="70" cy="70" r={radius} style={{ strokeDasharray: circumference, strokeDashoffset }} />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-6xl font-bold accent-text">{fingerCount}</span>
+                                    {fingerCount === 0 && <span className="text-xs opacity-70 mt-2 animate-bounce">Giơ ngón tay</span>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* WINNERS */}
+                        {winners.length > 0 && (
+                            <div className="w-full max-w-4xl px-4 flex flex-col items-center animate__animated animate__zoomIn">
+                                <h2 className="text-3xl font-bold accent-text mb-6 drop-shadow-lg">✨ NGƯỜI ĐƯỢC CHỌN ✨</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                                    {winners.map((w, i) => (
+                                        <div key={i} className="ui-panel p-4 flex items-center gap-3 transform hover:scale-105 transition-transform">
+                                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/20 font-bold">{i+1}</div>
+                                            <span className="text-xl font-bold truncate">{w}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setWinners([])} className="mt-8 btn-primary px-8 py-3 rounded-full font-bold pointer-events-auto">Tiếp Tục</button>
+                            </div>
+                        )}
+
+                        {/* SPINNING STATE */}
+                        {isSpinning && (
+                            <div className="text-4xl accent-text animate-pulse font-bold tracking-widest drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                                ĐANG QUAY...
+                            </div>
+                        )}
+                    </div>
+
+                    {/* --- GROUP RESULT MODAL --- */}
+                    {groupsResult && (
+                        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md overflow-y-auto p-4 md:p-10 flex flex-col items-center">
+                            <h2 className="text-3xl font-bold accent-text mb-8 text-center sticky top-0 bg-black/50 p-4 rounded-xl backdrop-blur">KẾT QUẢ CHIA NHÓM</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-7xl">
+                                {groupsResult.map((group, i) => (
+                                    <div key={i} className="ui-panel p-6 flex flex-col gap-2 min-h-[200px]">
+                                        <div className="text-xl font-bold border-b border-white/20 pb-2 mb-2 text-center" style={{color: THEMES[currentTheme].color}}>
+                                            NHÓM {i+1}
+                                        </div>
+                                        <ul className="space-y-2">
+                                            {group.map((mem, idx) => (
+                                                <li key={idx} className="flex items-center gap-2 text-sm">
+                                                    <i className="fas fa-user text-xs opacity-50"></i> {mem}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={() => setGroupsResult(null)} className="mt-8 mb-8 btn-primary px-10 py-3 rounded-full font-bold sticky bottom-4 shadow-xl">Đóng Lại</button>
+                        </div>
+                    )}
+
+                    {/* --- MODALS (INIT, EDIT, GROUP INPUT) --- */}
+                    
+                    {/* 1. INIT SCREEN */}
                     {appState === "INIT" && (
                         <div className="absolute inset-0 z-[60] bg-black/90 flex items-center justify-center p-4">
-                            <div className="fairy-border p-10 max-w-lg w-full text-center relative overflow-hidden bg-gradient-to-b from-purple-900/50 to-black/50">
-                                <h1 className="text-4xl md:text-5xl font-serif text-yellow-400 mb-4 drop-shadow-[0_0_15px_rgba(255,215,0,0.6)]">
-                                    Lớp Học Kỳ Diệu
-                                </h1>
-                                <p className="text-gray-300 mb-8 font-sans font-light italic text-lg">
-                                    "Nơi phép màu gọi tên những học sinh may mắn"
-                                </p>
-                                
-                                <div className="grid grid-cols-2 gap-4 mb-8 text-left text-sm text-gray-300">
-                                    <div className="bg-white/5 p-3 rounded border border-white/10">
-                                        <div className="text-yellow-300 font-bold mb-1">👆 Bước 1</div>
-                                        Giơ ngón tay (1-5) để chọn số lượng người.
-                                    </div>
-                                    <div className="bg-white/5 p-3 rounded border border-white/10">
-                                        <div className="text-yellow-300 font-bold mb-1">✨ Bước 2</div>
-                                        Giữ yên tay trong 2 giây để phép thuật bắt đầu.
-                                    </div>
-                                </div>
-
-                                <button onClick={startSystem} className="w-full py-4 bg-gradient-to-r from-yellow-600 to-yellow-400 hover:from-yellow-500 hover:to-yellow-300 text-black font-bold text-lg rounded-xl pointer-events-auto shadow-[0_0_20px_rgba(255,215,0,0.4)] transition-all transform hover:-translate-y-1">
-                                    MỞ CÁNH CỔNG
+                            <div className="ui-panel max-w-md w-full p-8 text-center relative overflow-hidden theme-fairy">
+                                <h1 className="text-4xl font-bold accent-text mb-2">AR CLASSROOM</h1>
+                                <p className="opacity-70 mb-8 italic">Công cụ hỗ trợ lớp học thực tế ảo</p>
+                                <button onClick={startSystem} className="btn-primary w-full py-4 text-xl font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">
+                                    KHỞI ĐỘNG CAMERA
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {/* --- LIST EDIT MODAL --- */}
+                    {/* 2. GROUP INPUT MODAL */}
+                    {showGroupModal && (
+                        <div className="absolute inset-0 z-[70] bg-black/80 flex items-center justify-center p-4">
+                            <div className="ui-panel w-full max-w-sm p-6 pointer-events-auto">
+                                <h3 className="text-xl font-bold mb-4 text-center">Chia Nhóm Ngẫu Nhiên</h3>
+                                <div className="mb-6">
+                                    <label className="block text-sm opacity-70 mb-2">Số lượng nhóm muốn chia:</label>
+                                    <div className="flex items-center justify-center gap-4">
+                                        <button onClick={() => setGroupCount(Math.max(2, groupCount-1))} className="w-10 h-10 rounded bg-white/10 hover:bg-white/20 font-bold">-</button>
+                                        <span className="text-3xl font-bold w-12 text-center">{groupCount}</span>
+                                        <button onClick={() => setGroupCount(Math.min(10, groupCount+1))} className="w-10 h-10 rounded bg-white/10 hover:bg-white/20 font-bold">+</button>
+                                    </div>
+                                </div>
+                                <button onClick={divideGroups} className="btn-primary w-full py-3 rounded font-bold mb-2">Bắt Đầu Chia</button>
+                                <button onClick={() => setShowGroupModal(false)} className="w-full py-2 text-sm opacity-60 hover:opacity-100">Hủy bỏ</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 3. LIST EDITOR */}
                     {isEditingList && (
-                        <div className="absolute inset-0 z-[70] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-                            <div className="bg-[#1a1025] border border-purple-500 w-full max-w-lg rounded-2xl p-6 pointer-events-auto shadow-2xl">
-                                <h3 className="text-yellow-400 font-serif text-xl mb-4 text-center">Cuộn Giấy Danh Sách</h3>
+                        <div className="absolute inset-0 z-[70] bg-black/90 flex items-center justify-center p-4">
+                            <div className="ui-panel w-full max-w-lg p-6 pointer-events-auto flex flex-col h-[80vh]">
+                                <h3 className="text-xl font-bold mb-4">Chỉnh Sửa Danh Sách</h3>
                                 <textarea 
-                                    className="w-full h-64 bg-black/30 border border-purple-700 rounded-lg p-4 text-purple-100 text-sm focus:border-yellow-400 outline-none resize-none font-mono custom-scrollbar"
+                                    className="flex-1 bg-black/30 border border-white/20 rounded p-4 text-sm font-mono focus:outline-none focus:border-white custom-scrollbar resize-none"
                                     value={tempListText}
                                     onChange={(e) => setTempListText(e.target.value)}
                                 ></textarea>
-                                <div className="flex justify-center gap-4 mt-6">
-                                    <button onClick={() => setIsEditingList(false)} className="text-gray-400 hover:text-white px-6 py-2 font-serif">Đóng lại</button>
-                                    <button onClick={saveList} className="bg-purple-600 text-white px-8 py-2 rounded-full hover:bg-purple-500 font-serif border border-purple-400 shadow-lg">Lưu Thay Đổi</button>
+                                <div className="flex justify-end gap-3 mt-4">
+                                    <button onClick={() => setIsEditingList(false)} className="px-4 py-2 opacity-70 hover:opacity-100">Hủy</button>
+                                    <button onClick={() => {
+                                        const arr = tempListText.split('\n').filter(line => line.trim() !== "");
+                                        setActiveList(arr);
+                                        setIsEditingList(false);
+                                    }} className="btn-primary px-6 py-2 rounded font-bold">Lưu lại</button>
                                 </div>
                             </div>
                         </div>
                     )}
+
                 </div>
             );
         }
