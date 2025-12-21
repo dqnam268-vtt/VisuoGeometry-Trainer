@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Gift Picker - Stable Edition</title>
+    <title>AR Gift Picker - Virtual Touch</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     
-    <!-- Updated MediaPipe Hands Version -->
+    <!-- MediaPipe Hands -->
     <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1675469240/hands.js"></script>
     
     <!-- Fonts & Icons -->
@@ -26,7 +26,7 @@
         #input-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; transform: scaleX(-1); z-index: 0;
-            opacity: 0.6; mix-blend-mode: overlay;
+            opacity: 0.5; mix-blend-mode: overlay;
         }
 
         #output-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
@@ -49,10 +49,34 @@
         .gift-card { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Virtual Cursor */
+        .virtual-cursor {
+            position: fixed; pointer-events: none; z-index: 100;
+            width: 30px; height: 30px;
+            border: 3px solid #00ffea; border-radius: 50%;
+            box-shadow: 0 0 15px #00ffea, inset 0 0 10px #00ffea;
+            background: rgba(0, 255, 234, 0.2);
+            transition: transform 0.1s;
+        }
         
-        /* Loading Ring */
-        .progress-ring__circle { transition: stroke-dashoffset 0.1s linear; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        
+        /* Interactive Buttons */
+        .ar-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .ar-btn.hovered {
+            transform: scale(1.2);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px #ff00ff;
+            border-color: #ff00ff;
+            color: #d63384;
+        }
+        .ar-btn .fill-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 0, 255, 0.3);
+            transition: height 0.1s linear;
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); border-radius: 3px; }
     </style>
@@ -63,28 +87,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- 1. ROBUST FINGER COUNTING ALGORITHM ---
-        const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-
-        const countFingersRobust = (lm) => {
-            let count = 0;
-            const wrist = lm[0];
-
-            // 1. Thumb
-            const thumbTipDist = dist(lm[4], lm[17]);
-            const thumbIpDist = dist(lm[2], lm[17]);
-            if (thumbTipDist > thumbIpDist) count++; 
-
-            // 2. Fingers
-            if (dist(lm[8], wrist) > dist(lm[6], wrist)) count++;   // Index
-            if (dist(lm[12], wrist) > dist(lm[10], wrist)) count++; // Middle
-            if (dist(lm[16], wrist) > dist(lm[14], wrist)) count++; // Ring
-            if (dist(lm[20], wrist) > dist(lm[18], wrist)) count++; // Pinky
-
-            return Math.min(count, 5);
-        };
-
-        // --- 2. THREE.JS HELPERS ---
+        // --- THREE.JS HELPERS ---
         class ConfettiParticle {
             constructor(scene) {
                 this.scene = scene;
@@ -100,80 +103,59 @@
             }
             reset() {
                 this.mesh.position.set(0, 0, 0);
-                this.velocity = new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.5,
-                    Math.random() * 0.5 + 0.2,
-                    (Math.random() - 0.5) * 0.5
-                );
+                this.velocity = new THREE.Vector3((Math.random()-0.5)*0.5, Math.random()*0.5+0.2, (Math.random()-0.5)*0.5);
                 this.rotSpeed = Math.random() * 0.2;
                 this.mesh.visible = false;
             }
             explode(pos) {
-                this.mesh.position.copy(pos);
-                this.mesh.visible = true;
-                this.velocity.set(
-                    (Math.random() - 0.5) * 0.5,
-                    Math.random() * 0.5, 
-                    (Math.random() - 0.5) * 0.5
-                );
+                this.mesh.position.copy(pos); this.mesh.visible = true;
+                this.velocity.set((Math.random()-0.5)*0.5, Math.random()*0.5, (Math.random()-0.5)*0.5);
             }
             update() {
                 if(!this.mesh.visible) return;
                 this.mesh.position.add(this.velocity);
-                this.mesh.rotation.x += this.rotSpeed;
-                this.mesh.rotation.y += this.rotSpeed;
-                this.velocity.y -= 0.015; // Gravity
+                this.mesh.rotation.x += this.rotSpeed; this.mesh.rotation.y += this.rotSpeed;
+                this.velocity.y -= 0.015;
                 if(this.mesh.position.y < -5) this.mesh.visible = false;
             }
         }
 
         const createGiftSprite = (text) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.width = 1024; canvas.height = 256;
-            
-            ctx.font = 'bold 80px "Quicksand"';
-            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 80px "Quicksand"'; ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            
-            ctx.shadowColor = '#d63384'; ctx.shadowBlur = 20; ctx.lineWidth = 5;
-            ctx.strokeStyle = '#d63384';
-            ctx.strokeText("🎁 " + text, 512, 128);
-            ctx.fillText("🎁 " + text, 512, 128);
-
+            ctx.shadowColor = '#d63384'; ctx.shadowBlur = 20; ctx.lineWidth = 5; ctx.strokeStyle = '#d63384';
+            ctx.strokeText("🎁 " + text, 512, 128); ctx.fillText("🎁 " + text, 512, 128);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
             sprite.scale.set(8, 2, 1);
             return sprite;
         };
 
-        // --- AUDIO ---
         const playSound = (type) => {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            
             const now = audioCtx.currentTime;
-            if(type === 'lock') {
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
+            if(type === 'hover') {
+                osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(300, now+0.1);
+                gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now+0.1);
+                osc.start(now); osc.stop(now+0.1);
+            } else if (type === 'select') {
+                osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now+0.1);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now+0.2);
+                osc.start(now); osc.stop(now+0.2);
             } else if (type === 'win') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.setValueAtTime(659.25, now + 0.1);
-                osc.frequency.setValueAtTime(783.99, now + 0.2);
-                osc.frequency.setValueAtTime(1046.50, now + 0.3);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-                osc.start(now); osc.stop(now + 1.5);
+                osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now+0.1);
+                osc.frequency.setValueAtTime(783.99, now+0.2); osc.frequency.setValueAtTime(1046.50, now+0.3);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now+1.5);
+                osc.start(now); osc.stop(now+1.5);
             }
         };
 
         function App() {
-            // Data
+            // Data & State
             const [studentList, setStudentList] = useState([
                 "Nguyễn Vũ Thu An", "Trần Phúc An", "Nguyễn Ngọc Thụy Anh", "Nguyễn Việt Anh", 
                 "Phạm Diệu Anh", "Phan Nhật Ân", "Vũ Yến Chi", "Hùng Công Danh", "Đào Minh Dũng", 
@@ -183,37 +165,32 @@
                 "Nguyễn Hà Minh Phát", "Đỗ Hoàng Quân", "Nguyễn Thị Minh Tâm", "Trần Phạm Quốc Thắng", 
                 "Phan Tiến Thịnh", "Tô Vĩnh Thụy", "Trần Lê Gia Tuệ", "Trần Hữu Việt", "Phí Ngọc Khánh Vy"
             ]);
-
-            // States
             const [appState, setAppState] = useState("INIT");
-            const [displayFinger, setDisplayFinger] = useState(0); 
-            const [lockProgress, setLockProgress] = useState(0);
             const [isSpinning, setIsSpinning] = useState(false);
             const [winners, setWinners] = useState([]);
             const [isEditing, setIsEditing] = useState(false);
             const [tempList, setTempList] = useState("");
+            
+            // Cursor State
+            const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
+            const [hoverTarget, setHoverTarget] = useState(null); // ID of button being hovered
+            const [hoverProgress, setHoverProgress] = useState(0); // 0-100%
 
-            // Refs for Logic
+            // Refs
             const videoRef = useRef(null);
             const containerRef = useRef(null);
             const logic = useRef({
-                rawFingerCount: 0,
-                stableFingerCount: 0,
-                lastChangeTime: 0,
-                lockStartTime: 0,
-                isLocked: false,
-                isProcessing: false, // NEW: Prevent crash
-                scene: null, camera: null, renderer: null,
-                confetti: [], nameGroup: null,
-                isMounted: true
+                scene: null, camera: null, renderer: null, confetti: [], nameGroup: null,
+                isMounted: true, isProcessing: false,
+                hoverStartTime: 0
             });
+            const btnRefs = useRef({}); // Store button DOM refs
 
             // 3D Init
             useEffect(() => {
                 logic.current.isMounted = true;
                 if(!containerRef.current) return;
                 const w = window.innerWidth, h = window.innerHeight;
-                
                 const scene = new THREE.Scene();
                 const camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 100);
                 camera.position.z = 6; camera.position.y = 0.5;
@@ -221,37 +198,24 @@
                 renderer.setSize(w, h);
                 containerRef.current.appendChild(renderer.domElement);
                 
-                // Confetti System
                 const confetti = [];
                 for(let i=0; i<100; i++) confetti.push(new ConfettiParticle(scene));
 
-                logic.current.scene = scene;
-                logic.current.camera = camera;
-                logic.current.renderer = renderer;
-                logic.current.confetti = confetti;
+                logic.current.scene = scene; logic.current.camera = camera;
+                logic.current.renderer = renderer; logic.current.confetti = confetti;
 
                 const animate = () => {
                     if(!logic.current.isMounted) return;
                     requestAnimationFrame(animate);
-                    // Update Confetti
                     confetti.forEach(p => p.update());
-                    // Rotate Names
-                    if(logic.current.nameGroup) {
-                        logic.current.nameGroup.rotation.y += isSpinning ? 0.3 : 0.002;
-                    }
+                    if(logic.current.nameGroup) logic.current.nameGroup.rotation.y += isSpinning ? 0.3 : 0.002;
                     renderer.render(scene, camera);
                 };
                 animate();
-
-                // Update Name Ring
                 updateNameRing(scene, studentList);
-
-                return () => {
-                    logic.current.isMounted = false;
-                }
+                return () => { logic.current.isMounted = false; }
             }, []);
 
-            // Update 3D Text when list changes
             const updateNameRing = (scene, list) => {
                 if(logic.current.nameGroup) scene.remove(logic.current.nameGroup);
                 const group = new THREE.Group();
@@ -266,110 +230,102 @@
                 logic.current.nameGroup = group;
             };
 
-            useEffect(() => {
-                if(logic.current.scene) updateNameRing(logic.current.scene, studentList);
-            }, [studentList]);
+            useEffect(() => { if(logic.current.scene) updateNameRing(logic.current.scene, studentList); }, [studentList]);
 
-            // Hand Tracking Start
+            // Camera & Hands
             const startCamera = async () => {
                 try {
                     setAppState("LOADING");
                     const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
-                    if(videoRef.current) {
-                        videoRef.current.srcObject = stream;
-                        await videoRef.current.play();
-                    }
+                    if(videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play(); }
 
-                    // Use updated version URL
                     const hands = new window.Hands({locateFile: (f) => `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${f}`});
-                    hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6});
-                    
-                    hands.onResults(handleHandResults);
+                    hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
+                    hands.onResults(onHandResults);
 
-                    // Safer loop to prevent "Aborted" error
                     const process = async () => {
                         if (!logic.current.isMounted) return;
-                        
                         if(videoRef.current && videoRef.current.readyState >= 2 && !logic.current.isProcessing) {
-                            try {
-                                logic.current.isProcessing = true;
-                                await hands.send({image: videoRef.current});
-                                logic.current.isProcessing = false;
-                            } catch (err) {
-                                console.error("MediaPipe Error:", err);
-                                logic.current.isProcessing = false;
-                            }
+                            logic.current.isProcessing = true;
+                            await hands.send({image: videoRef.current});
+                            logic.current.isProcessing = false;
                         }
-                        if (logic.current.isMounted) {
-                            requestAnimationFrame(process);
-                        }
+                        requestAnimationFrame(process);
                     };
                     process();
                     setAppState("READY");
+                } catch(e) { console.error(e); alert("Lỗi Camera: " + e.message); setAppState("INIT"); }
+            };
 
-                } catch(e) {
-                    console.error(e);
-                    alert("Không thể mở camera: " + e.message);
-                    setAppState("INIT");
+            // LOGIC CHÍNH: CẬP NHẬT CON TRỎ & CHECK VA CHẠM
+            const onHandResults = (results) => {
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+                    setCursorPos({x: -100, y: -100}); // Hide cursor
+                    return;
+                }
+
+                // 1. Lấy vị trí đầu ngón trỏ (Landmark 8)
+                const lm = results.multiHandLandmarks[0];
+                const indexTip = lm[8];
+                
+                // 2. Chuyển đổi sang tọa độ màn hình (Lật ngược trục X vì video bị mirror)
+                const x = (1 - indexTip.x) * window.innerWidth;
+                const y = indexTip.y * window.innerHeight;
+                setCursorPos({x, y});
+
+                // 3. Kiểm tra va chạm với các nút (Chỉ khi đang ở màn hình chọn)
+                if (appState === "READY" && !isSpinning && winners.length === 0) {
+                    checkCollision(x, y);
                 }
             };
 
-            // CORE LOGIC LOOP
-            const handleHandResults = (results) => {
-                const log = logic.current;
+            const checkCollision = (cx, cy) => {
+                let hitId = null;
                 
-                // 1. Detection
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0 && !isSpinning && winners.length === 0) {
-                    const lm = results.multiHandLandmarks[0];
-                    const rawCount = countFingersRobust(lm); 
+                // Duyệt qua các nút số
+                [1, 2, 3, 4, 5].forEach(num => {
+                    const btn = btnRefs.current[num];
+                    if (btn) {
+                        const rect = btn.getBoundingClientRect();
+                        // Check if cursor is inside button rect
+                        if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
+                            hitId = num;
+                        }
+                    }
+                });
 
-                    // HIỂN THỊ SỐ NGAY LẬP TỨC CHO NGƯỜI DÙNG THẤY
-                    setDisplayFinger(rawCount);
-
-                    // 2. Logic "Locking" (Phải giữ yên số này mới chọn)
-                    const now = Date.now();
-                    if (rawCount !== log.rawFingerCount) {
-                        log.rawFingerCount = rawCount;
-                        log.lastChangeTime = now;
-                        // Reset lock nếu số ngón tay thay đổi
-                        log.lockStartTime = 0;
-                        setLockProgress(0);
+                // Logic Hover
+                const now = Date.now();
+                if (hitId) {
+                    if (hitId !== hoverTarget) {
+                        // Mới bắt đầu hover vào nút mới
+                        setHoverTarget(hitId);
+                        logic.current.hoverStartTime = now;
+                        setHoverProgress(0);
+                        playSound('hover');
                     } else {
-                        // Nếu số ngón tay ổn định trong 100ms
-                        if (now - log.lastChangeTime > 100) {
-                             if (rawCount > 0) {
-                                if (log.lockStartTime === 0) log.lockStartTime = now;
-                                
-                                // Thời gian giữ để chốt: 1.5 giây
-                                const progress = Math.min(((now - log.lockStartTime) / 1500) * 100, 100);
-                                setLockProgress(progress);
-
-                                if (progress >= 100 && !log.isLocked) {
-                                    log.isLocked = true;
-                                    playSound('lock');
-                                    triggerGift(rawCount);
-                                }
-                            } else {
-                                log.lockStartTime = 0;
-                                setLockProgress(0);
-                            }
+                        // Đang hover liên tục
+                        const elapsed = now - logic.current.hoverStartTime;
+                        const prog = Math.min((elapsed / 1500) * 100, 100); // 1.5s to select
+                        setHoverProgress(prog);
+                        
+                        if (prog >= 100 && !isSpinning) {
+                            triggerGift(hitId);
+                            setHoverTarget(null); // Reset
                         }
                     }
                 } else {
-                    // Lost hand
-                    log.lockStartTime = 0;
-                    setLockProgress(0);
-                    setDisplayFinger(0);
+                    // Không hover gì cả
+                    if (hoverTarget !== null) {
+                        setHoverTarget(null);
+                        setHoverProgress(0);
+                    }
                 }
             };
 
             const triggerGift = (count) => {
-                if(studentList.length < count) {
-                    alert("Không đủ học sinh để tặng quà!");
-                    logic.current.isLocked = false;
-                    return;
-                }
-
+                if(studentList.length < count) { alert("Không đủ học sinh!"); return; }
+                playSound('select');
                 setIsSpinning(true);
                 
                 setTimeout(() => {
@@ -377,40 +333,32 @@
                     const selected = [];
                     for(let i=0; i<count; i++) {
                         const idx = Math.floor(Math.random() * pool.length);
-                        selected.push(pool[idx]);
-                        pool.splice(idx, 1);
+                        selected.push(pool[idx]); pool.splice(idx, 1);
                     }
-                    
                     setWinners(selected);
                     setIsSpinning(false);
-                    logic.current.isLocked = false;
                     playSound('win');
-
                     logic.current.confetti.forEach(p => p.explode(new THREE.Vector3((Math.random()-0.5)*5, (Math.random()-0.5)*2, 0)));
-
                 }, 2500);
             };
 
             const confirmResult = (remove) => {
-                if(remove) {
-                    const newList = studentList.filter(s => !winners.includes(s));
-                    setStudentList(newList);
-                }
+                if(remove) setStudentList(studentList.filter(s => !winners.includes(s)));
                 setWinners([]);
-                setDisplayFinger(0);
-                logic.current.lastFingerCount = 0; 
             };
 
-            // Render Helpers
-            const r = 60; const circ = 2 * Math.PI * r;
-            const offset = circ - (lockProgress / 100) * circ;
-
             return (
-                <div className="w-full h-full relative text-white">
+                <div className="w-full h-full relative text-white select-none">
                     <video ref={videoRef} playsInline muted id="input-video"></video>
                     <div ref={containerRef} className="absolute inset-0 z-0"></div>
 
-                    {/* --- TOP BAR --- */}
+                    {/* VIRTUAL CURSOR */}
+                    <div className="virtual-cursor" style={{ 
+                        transform: `translate(${cursorPos.x - 15}px, ${cursorPos.y - 15}px)`,
+                        opacity: cursorPos.x < 0 ? 0 : 1
+                    }}></div>
+
+                    {/* TOP BAR */}
                     <div className="absolute top-0 w-full p-4 flex justify-between items-start z-50 pointer-events-none">
                         <div className="ui-glass px-6 py-2 pointer-events-auto">
                             <h1 className="text-2xl title-font text-pink-600">Hộp Quà May Mắn</h1>
@@ -421,36 +369,37 @@
                         </button>
                     </div>
 
-                    {/* --- CENTER UI --- */}
-                    <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+                    {/* CENTER UI */}
+                    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none">
                         
-                        {/* 1. LOCK UI */}
+                        {/* SELECTION INTERFACE */}
                         {appState === "READY" && !isSpinning && winners.length === 0 && (
-                            <div className={`relative transition-all duration-300 ${displayFinger > 0 ? 'opacity-100 scale-100' : 'opacity-60 scale-90'}`}>
-                                <svg className="w-48 h-48 drop-shadow-xl" viewBox="0 0 140 140">
-                                    <circle cx="70" cy="70" r={r} stroke="rgba(255,255,255,0.3)" strokeWidth="6" fill="none"/>
-                                    <circle cx="70" cy="70" r={r} stroke="#d63384" strokeWidth="8" strokeLinecap="round" fill="none"
-                                        style={{strokeDasharray: circ, strokeDashoffset: offset, transition: 'stroke-dashoffset 0.1s linear', transform: 'rotate(-90deg)', transformOrigin: '50% 50%'}} />
-                                </svg>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    {displayFinger > 0 ? (
-                                        <>
-                                            <span className="text-7xl font-bold text-pink-500 drop-shadow-md animate__animated animate__pulse animate__infinite">{displayFinger}</span>
-                                            <span className="text-sm font-bold text-purple-900 mt-2 bg-white/50 px-3 py-1 rounded-full">BẠN</span>
-                                        </>
-                                    ) : (
-                                        <i className="fas fa-hand-paper text-5xl text-white/50 animate-pulse"></i>
-                                    )}
-                                </div>
-                                <div className="absolute -bottom-16 w-full text-center">
-                                    <p className="text-lg font-bold text-white shadow-black drop-shadow-md bg-black/20 px-4 py-1 rounded-full">
-                                        {displayFinger > 0 ? "Giữ yên để chọn..." : "Giơ ngón tay"}
+                            <div className="flex flex-col items-center animate__animated animate__fadeIn">
+                                <div className="mb-12 text-center pointer-events-auto">
+                                    <h2 className="text-4xl font-bold text-white drop-shadow-md mb-2">Chọn Số Lượng Quà</h2>
+                                    <p className="text-lg bg-black/40 px-4 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                                        👉 Dùng ngón tay di chuyển con trỏ vào ô số
                                     </p>
+                                </div>
+
+                                <div className="flex gap-4 md:gap-8 pointer-events-auto">
+                                    {[1, 2, 3, 4, 5].map(num => (
+                                        <div 
+                                            key={num}
+                                            ref={el => btnRefs.current[num] = el}
+                                            className={`ar-btn w-16 h-16 md:w-24 md:h-24 rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl md:text-5xl font-bold cursor-pointer
+                                                ${hoverTarget === num ? 'hovered' : ''}`}
+                                        >
+                                            <div className="z-10 relative drop-shadow-md">{num}</div>
+                                            {/* Progress Fill */}
+                                            <div className="fill-overlay" style={{ height: hoverTarget === num ? `${hoverProgress}%` : '0%' }}></div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* 2. SPINNING */}
+                        {/* SPINNING */}
                         {isSpinning && (
                             <div className="text-center">
                                 <div className="text-6xl animate-bounce mb-4">🎁</div>
@@ -458,7 +407,7 @@
                             </div>
                         )}
 
-                        {/* 3. WINNERS */}
+                        {/* WINNERS */}
                         {winners.length > 0 && (
                             <div className="w-full max-w-4xl px-4 flex flex-col items-center pointer-events-auto animate__animated animate__zoomIn">
                                 <h2 className="text-3xl title-font mb-6 text-white drop-shadow-lg">🎉 Chúc Mừng 🎉</h2>
@@ -467,63 +416,44 @@
                                         <div key={i} className="ui-glass p-6 gift-card flex flex-col items-center min-w-[200px] bg-white/40">
                                             <div className="text-4xl mb-2">🎁</div>
                                             <div className="text-xl font-bold text-purple-900 text-center">{w}</div>
-                                            <div className="text-xs text-pink-600 font-bold mt-1">Người may mắn #{i+1}</div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => confirmResult(false)} className="px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-white shadow-lg">
-                                        Giữ lại tên
-                                    </button>
-                                    <button onClick={() => confirmResult(true)} className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg transform hover:scale-105 transition-transform">
-                                        Xóa & Tiếp tục
-                                    </button>
+                                    <button onClick={()=>confirmResult(false)} className="px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold shadow-lg">Giữ lại tên</button>
+                                    <button onClick={()=>confirmResult(true)} className="px-8 py-3 rounded-full bg-pink-500 text-white font-bold shadow-lg">Xóa & Tiếp tục</button>
                                 </div>
                             </div>
                         )}
-
                     </div>
 
-                    {/* --- MODALS --- */}
-                    
                     {/* START SCREEN */}
                     {appState === "INIT" && (
                         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                             <div className="ui-glass max-w-md w-full p-10 text-center">
                                 <h1 className="text-4xl title-font mb-4">Tặng Quà May Mắn</h1>
-                                <div className="flex justify-center gap-4 mb-8 text-purple-900 text-left text-sm font-bold bg-white/30 p-4 rounded-xl">
-                                    <div>
-                                        <p>✌️ Giơ 2 ngón = Chọn 2 bạn</p>
-                                        <p>🖐️ Giơ 5 ngón = Chọn 5 bạn</p>
-                                    </div>
-                                </div>
+                                <p className="mb-8">Hệ thống chọn ngẫu nhiên bằng tương tác AR</p>
                                 <button onClick={startCamera} className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold text-xl shadow-xl hover:scale-105 transition-transform">
                                     BẮT ĐẦU
                                 </button>
                             </div>
                         </div>
                     )}
-
-                    {/* EDIT LIST */}
+                    
+                    {/* EDIT LIST MODAL */}
                     {isEditing && (
                         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                             <div className="ui-glass w-full max-w-2xl p-6 h-[80vh] flex flex-col bg-white/90">
-                                <h3 className="text-2xl font-bold text-purple-900 mb-4 text-center">Danh Sách Nhận Quà</h3>
-                                <textarea 
-                                    className="flex-1 border-2 border-pink-200 rounded-xl p-4 text-purple-900 font-mono resize-none focus:outline-none focus:border-pink-500"
-                                    value={tempList} onChange={(e) => setTempList(e.target.value)}
-                                ></textarea>
+                                <h3 className="text-2xl font-bold text-purple-900 mb-4 text-center">Danh Sách</h3>
+                                <textarea className="flex-1 border-2 border-pink-200 rounded-xl p-4 text-purple-900 font-mono resize-none focus:outline-none focus:border-pink-500"
+                                    value={tempList} onChange={(e) => setTempList(e.target.value)}></textarea>
                                 <div className="flex justify-end gap-4 mt-4">
                                     <button onClick={() => setIsEditing(false)} className="px-6 py-2 text-gray-500 font-bold hover:bg-gray-200 rounded-lg">Hủy</button>
-                                    <button onClick={() => {
-                                        setStudentList(tempList.split('\n').filter(l => l.trim()));
-                                        setIsEditing(false);
-                                    }} className="px-8 py-2 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600">Lưu Lại</button>
+                                    <button onClick={() => { setStudentList(tempList.split('\n').filter(l => l.trim())); setIsEditing(false); }} className="px-8 py-2 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600">Lưu Lại</button>
                                 </div>
                             </div>
                         </div>
                     )}
-
                 </div>
             );
         }
