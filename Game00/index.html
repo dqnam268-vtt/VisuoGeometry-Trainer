@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Gift Picker - Smart Detection</title>
+    <title>AR Gift Picker - Stable Edition</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,9 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+    
+    <!-- Updated MediaPipe Hands Version -->
+    <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1675469240/hands.js"></script>
     
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Pacifico&family=Quicksand:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -62,26 +64,22 @@
         const { useState, useEffect, useRef } = React;
 
         // --- 1. ROBUST FINGER COUNTING ALGORITHM ---
-        // Tính khoảng cách Euclidean
         const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 
         const countFingersRobust = (lm) => {
             let count = 0;
             const wrist = lm[0];
 
-            // 1. Thumb (Ngón cái): So sánh khoảng cách đầu ngón cái đến khớp ngón út
-            // Tip(4) phải xa khớp út(17) hơn là khớp đốt 1(2)
+            // 1. Thumb
             const thumbTipDist = dist(lm[4], lm[17]);
             const thumbIpDist = dist(lm[2], lm[17]);
-            if (thumbTipDist > thumbIpDist * 1.1) count++; 
+            if (thumbTipDist > thumbIpDist) count++; 
 
-            // 2. Fingers (Ngón 2-5): So sánh khoảng cách đầu ngón đến cổ tay vs khớp nối đến cổ tay
-            // Tip (8,12,16,20) vs PIP (6,10,14,18)
-            // Nếu đầu ngón xa cổ tay hơn khớp nối -> Ngón đang duỗi
-            if (dist(lm[8], wrist) > dist(lm[6], wrist) * 1.1) count++;   // Index
-            if (dist(lm[12], wrist) > dist(lm[10], wrist) * 1.1) count++; // Middle
-            if (dist(lm[16], wrist) > dist(lm[14], wrist) * 1.1) count++; // Ring
-            if (dist(lm[20], wrist) > dist(lm[18], wrist) * 1.1) count++; // Pinky
+            // 2. Fingers
+            if (dist(lm[8], wrist) > dist(lm[6], wrist)) count++;   // Index
+            if (dist(lm[12], wrist) > dist(lm[10], wrist)) count++; // Middle
+            if (dist(lm[16], wrist) > dist(lm[14], wrist)) count++; // Ring
+            if (dist(lm[20], wrist) > dist(lm[18], wrist)) count++; // Pinky
 
             return Math.min(count, 5);
         };
@@ -138,7 +136,6 @@
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
-            // Text shadow/glow
             ctx.shadowColor = '#d63384'; ctx.shadowBlur = 20; ctx.lineWidth = 5;
             ctx.strokeStyle = '#d63384';
             ctx.strokeText("🎁 " + text, 512, 128);
@@ -164,12 +161,11 @@
                 gain.gain.linearRampToValueAtTime(0, now + 0.1);
                 osc.start(now); osc.stop(now + 0.1);
             } else if (type === 'win') {
-                // Tada sound
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
+                osc.frequency.setValueAtTime(1046.50, now + 0.3);
                 gain.gain.setValueAtTime(0.1, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
                 osc.start(now); osc.stop(now + 1.5);
@@ -190,7 +186,7 @@
 
             // States
             const [appState, setAppState] = useState("INIT");
-            const [displayFinger, setDisplayFinger] = useState(0); // Số ngón tay hiển thị (đã qua lọc)
+            const [displayFinger, setDisplayFinger] = useState(0); 
             const [lockProgress, setLockProgress] = useState(0);
             const [isSpinning, setIsSpinning] = useState(false);
             const [winners, setWinners] = useState([]);
@@ -206,12 +202,15 @@
                 lastChangeTime: 0,
                 lockStartTime: 0,
                 isLocked: false,
+                isProcessing: false, // NEW: Prevent crash
                 scene: null, camera: null, renderer: null,
-                confetti: [], nameGroup: null
+                confetti: [], nameGroup: null,
+                isMounted: true
             });
 
             // 3D Init
             useEffect(() => {
+                logic.current.isMounted = true;
                 if(!containerRef.current) return;
                 const w = window.innerWidth, h = window.innerHeight;
                 
@@ -232,6 +231,7 @@
                 logic.current.confetti = confetti;
 
                 const animate = () => {
+                    if(!logic.current.isMounted) return;
                     requestAnimationFrame(animate);
                     // Update Confetti
                     confetti.forEach(p => p.update());
@@ -246,6 +246,9 @@
                 // Update Name Ring
                 updateNameRing(scene, studentList);
 
+                return () => {
+                    logic.current.isMounted = false;
+                }
             }, []);
 
             // Update 3D Text when list changes
@@ -277,16 +280,29 @@
                         await videoRef.current.play();
                     }
 
-                    const hands = new window.Hands({locateFile: (f) => `https://unpkg.com/@mediapipe/hands@0.4.1646424915/${f}`});
-                    hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7});
+                    // Use updated version URL
+                    const hands = new window.Hands({locateFile: (f) => `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${f}`});
+                    hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6});
                     
                     hands.onResults(handleHandResults);
 
+                    // Safer loop to prevent "Aborted" error
                     const process = async () => {
-                        if(videoRef.current && videoRef.current.readyState >= 2) {
-                            await hands.send({image: videoRef.current});
+                        if (!logic.current.isMounted) return;
+                        
+                        if(videoRef.current && videoRef.current.readyState >= 2 && !logic.current.isProcessing) {
+                            try {
+                                logic.current.isProcessing = true;
+                                await hands.send({image: videoRef.current});
+                                logic.current.isProcessing = false;
+                            } catch (err) {
+                                console.error("MediaPipe Error:", err);
+                                logic.current.isProcessing = false;
+                            }
                         }
-                        requestAnimationFrame(process);
+                        if (logic.current.isMounted) {
+                            requestAnimationFrame(process);
+                        }
                     };
                     process();
                     setAppState("READY");
@@ -294,6 +310,7 @@
                 } catch(e) {
                     console.error(e);
                     alert("Không thể mở camera: " + e.message);
+                    setAppState("INIT");
                 }
             };
 
@@ -304,45 +321,40 @@
                 // 1. Detection
                 if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0 && !isSpinning && winners.length === 0) {
                     const lm = results.multiHandLandmarks[0];
-                    const rawCount = countFingersRobust(lm); // Use new algorithm
+                    const rawCount = countFingersRobust(lm); 
 
-                    // 2. Stability Filter (Debounce)
+                    // HIỂN THỊ SỐ NGAY LẬP TỨC CHO NGƯỜI DÙNG THẤY
+                    setDisplayFinger(rawCount);
+
+                    // 2. Logic "Locking" (Phải giữ yên số này mới chọn)
                     const now = Date.now();
                     if (rawCount !== log.rawFingerCount) {
                         log.rawFingerCount = rawCount;
                         log.lastChangeTime = now;
+                        // Reset lock nếu số ngón tay thay đổi
+                        log.lockStartTime = 0;
+                        setLockProgress(0);
                     } else {
-                        // If value is stable for 300ms
-                        if (now - log.lastChangeTime > 300) {
-                            if (log.stableFingerCount !== rawCount) {
-                                log.stableFingerCount = rawCount;
-                                setDisplayFinger(rawCount);
-                                // Reset lock if count changed
+                        // Nếu số ngón tay ổn định trong 100ms
+                        if (now - log.lastChangeTime > 100) {
+                             if (rawCount > 0) {
+                                if (log.lockStartTime === 0) log.lockStartTime = now;
+                                
+                                // Thời gian giữ để chốt: 1.5 giây
+                                const progress = Math.min(((now - log.lockStartTime) / 1500) * 100, 100);
+                                setLockProgress(progress);
+
+                                if (progress >= 100 && !log.isLocked) {
+                                    log.isLocked = true;
+                                    playSound('lock');
+                                    triggerGift(rawCount);
+                                }
+                            } else {
                                 log.lockStartTime = 0;
-                                log.isLocked = false;
                                 setLockProgress(0);
                             }
                         }
                     }
-
-                    // 3. Locking Logic (Hold to confirm)
-                    if (log.stableFingerCount > 0) {
-                        if (log.lockStartTime === 0) log.lockStartTime = now;
-                        
-                        // Calculate progress (1.5 seconds to lock)
-                        const progress = Math.min(((now - log.lockStartTime) / 1500) * 100, 100);
-                        setLockProgress(progress);
-
-                        if (progress >= 100 && !log.isLocked) {
-                            log.isLocked = true;
-                            playSound('lock');
-                            triggerGift(log.stableFingerCount);
-                        }
-                    } else {
-                        log.lockStartTime = 0;
-                        setLockProgress(0);
-                    }
-
                 } else {
                     // Lost hand
                     log.lockStartTime = 0;
@@ -359,10 +371,8 @@
                 }
 
                 setIsSpinning(true);
-                // Visual feedback
                 
                 setTimeout(() => {
-                    // Pick random
                     const pool = [...studentList];
                     const selected = [];
                     for(let i=0; i<count; i++) {
@@ -376,7 +386,6 @@
                     logic.current.isLocked = false;
                     playSound('win');
 
-                    // Explode Confetti
                     logic.current.confetti.forEach(p => p.explode(new THREE.Vector3((Math.random()-0.5)*5, (Math.random()-0.5)*2, 0)));
 
                 }, 2500);
@@ -389,7 +398,7 @@
                 }
                 setWinners([]);
                 setDisplayFinger(0);
-                logic.current.lastFingerCount = 0; // Reset
+                logic.current.lastFingerCount = 0; 
             };
 
             // Render Helpers
@@ -426,16 +435,16 @@
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                                     {displayFinger > 0 ? (
                                         <>
-                                            <span className="text-6xl font-bold text-pink-500 drop-shadow-md">{displayFinger}</span>
-                                            <span className="text-sm font-bold text-purple-900 mt-2 bg-white/50 px-2 rounded">QUÀ</span>
+                                            <span className="text-7xl font-bold text-pink-500 drop-shadow-md animate__animated animate__pulse animate__infinite">{displayFinger}</span>
+                                            <span className="text-sm font-bold text-purple-900 mt-2 bg-white/50 px-3 py-1 rounded-full">BẠN</span>
                                         </>
                                     ) : (
                                         <i className="fas fa-hand-paper text-5xl text-white/50 animate-pulse"></i>
                                     )}
                                 </div>
-                                <div className="absolute -bottom-10 w-full text-center">
-                                    <p className="text-sm font-bold text-white shadow-black drop-shadow-md">
-                                        {displayFinger > 0 ? "Giữ yên để chọn..." : "Giơ ngón tay để chọn quà"}
+                                <div className="absolute -bottom-16 w-full text-center">
+                                    <p className="text-lg font-bold text-white shadow-black drop-shadow-md bg-black/20 px-4 py-1 rounded-full">
+                                        {displayFinger > 0 ? "Giữ yên để chọn..." : "Giơ ngón tay"}
                                     </p>
                                 </div>
                             </div>
