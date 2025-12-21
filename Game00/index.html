@@ -50,14 +50,25 @@
         
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Virtual Cursor */
+        /* Virtual Cursor - MÀU XANH DƯƠNG */
         .virtual-cursor {
-            position: fixed; pointer-events: none; z-index: 100;
-            width: 30px; height: 30px;
-            border: 3px solid #00ffea; border-radius: 50%;
-            box-shadow: 0 0 15px #00ffea, inset 0 0 10px #00ffea;
-            background: rgba(0, 255, 234, 0.2);
-            transition: transform 0.1s;
+            position: fixed; pointer-events: none; z-index: 9999; /* Z-index cao nhất */
+            width: 40px; height: 40px; /* To hơn chút */
+            border: 4px solid #0066ff; /* Viền xanh dương đậm */
+            border-radius: 50%;
+            background: rgba(0, 102, 255, 0.3); /* Nền xanh nhạt */
+            box-shadow: 0 0 20px #0066ff, inset 0 0 10px #0066ff; /* Phát sáng xanh */
+            transition: transform 0.05s linear; /* Mượt mà hơn */
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        /* Tâm ngắm của con trỏ */
+        .virtual-cursor::after {
+            content: '';
+            width: 8px; height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px white;
         }
         
         /* Interactive Buttons */
@@ -66,14 +77,15 @@
             position: relative; overflow: hidden;
         }
         .ar-btn.hovered {
-            transform: scale(1.2);
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 20px #ff00ff;
-            border-color: #ff00ff;
-            color: #d63384;
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 30px #0066ff; /* Glow xanh khi hover */
+            border-color: #0066ff;
+            color: #0044cc;
         }
         .ar-btn .fill-overlay {
-            position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 0, 255, 0.3);
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background: rgba(0, 102, 255, 0.4); /* Fill màu xanh */
             transition: height 0.1s linear;
         }
 
@@ -172,9 +184,10 @@
             const [tempList, setTempList] = useState("");
             
             // Cursor State
-            const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
-            const [hoverTarget, setHoverTarget] = useState(null); // ID of button being hovered
-            const [hoverProgress, setHoverProgress] = useState(0); // 0-100%
+            const [cursorPos, setCursorPos] = useState({ x: -200, y: -200 }); // Offscreen default
+            const [isHandDetected, setIsHandDetected] = useState(false);
+            const [hoverTarget, setHoverTarget] = useState(null); 
+            const [hoverProgress, setHoverProgress] = useState(0); 
 
             // Refs
             const videoRef = useRef(null);
@@ -184,7 +197,7 @@
                 isMounted: true, isProcessing: false,
                 hoverStartTime: 0
             });
-            const btnRefs = useRef({}); // Store button DOM refs
+            const btnRefs = useRef({}); 
 
             // 3D Init
             useEffect(() => {
@@ -260,20 +273,23 @@
             // LOGIC CHÍNH: CẬP NHẬT CON TRỎ & CHECK VA CHẠM
             const onHandResults = (results) => {
                 if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-                    setCursorPos({x: -100, y: -100}); // Hide cursor
+                    setIsHandDetected(false);
+                    // Giữ nguyên vị trí cũ hoặc ẩn đi nếu muốn. Ở đây ta để nó trôi ra ngoài.
                     return;
                 }
+
+                setIsHandDetected(true);
 
                 // 1. Lấy vị trí đầu ngón trỏ (Landmark 8)
                 const lm = results.multiHandLandmarks[0];
                 const indexTip = lm[8];
                 
-                // 2. Chuyển đổi sang tọa độ màn hình (Lật ngược trục X vì video bị mirror)
+                // 2. Chuyển đổi sang tọa độ màn hình
                 const x = (1 - indexTip.x) * window.innerWidth;
                 const y = indexTip.y * window.innerHeight;
                 setCursorPos({x, y});
 
-                // 3. Kiểm tra va chạm với các nút (Chỉ khi đang ở màn hình chọn)
+                // 3. Kiểm tra va chạm với các nút
                 if (appState === "READY" && !isSpinning && winners.length === 0) {
                     checkCollision(x, y);
                 }
@@ -282,40 +298,35 @@
             const checkCollision = (cx, cy) => {
                 let hitId = null;
                 
-                // Duyệt qua các nút số
                 [1, 2, 3, 4, 5].forEach(num => {
                     const btn = btnRefs.current[num];
                     if (btn) {
                         const rect = btn.getBoundingClientRect();
-                        // Check if cursor is inside button rect
                         if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
                             hitId = num;
                         }
                     }
                 });
 
-                // Logic Hover
+                // Logic Hover - TĂNG THỜI GIAN LÊN 2 GIÂY
                 const now = Date.now();
                 if (hitId) {
                     if (hitId !== hoverTarget) {
-                        // Mới bắt đầu hover vào nút mới
                         setHoverTarget(hitId);
                         logic.current.hoverStartTime = now;
                         setHoverProgress(0);
                         playSound('hover');
                     } else {
-                        // Đang hover liên tục
                         const elapsed = now - logic.current.hoverStartTime;
-                        const prog = Math.min((elapsed / 1500) * 100, 100); // 1.5s to select
+                        const prog = Math.min((elapsed / 2000) * 100, 100); // 2000ms = 2 giây
                         setHoverProgress(prog);
                         
                         if (prog >= 100 && !isSpinning) {
                             triggerGift(hitId);
-                            setHoverTarget(null); // Reset
+                            setHoverTarget(null);
                         }
                     }
                 } else {
-                    // Không hover gì cả
                     if (hoverTarget !== null) {
                         setHoverTarget(null);
                         setHoverProgress(0);
@@ -354,8 +365,8 @@
 
                     {/* VIRTUAL CURSOR */}
                     <div className="virtual-cursor" style={{ 
-                        transform: `translate(${cursorPos.x - 15}px, ${cursorPos.y - 15}px)`,
-                        opacity: cursorPos.x < 0 ? 0 : 1
+                        transform: `translate(${cursorPos.x - 20}px, ${cursorPos.y - 20}px)`, // Canh giữa con trỏ (40px/2 = 20)
+                        opacity: isHandDetected ? 1 : 0
                     }}></div>
 
                     {/* TOP BAR */}
@@ -372,13 +383,20 @@
                     {/* CENTER UI */}
                     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none">
                         
+                        {/* HAND STATUS INDICATOR */}
+                        {appState === "READY" && !isHandDetected && !isSpinning && winners.length === 0 && (
+                            <div className="absolute top-20 bg-black/50 px-4 py-2 rounded-full text-sm font-bold animate-pulse text-yellow-300 border border-yellow-500">
+                                ✋ Đang tìm tay của bạn...
+                            </div>
+                        )}
+
                         {/* SELECTION INTERFACE */}
                         {appState === "READY" && !isSpinning && winners.length === 0 && (
                             <div className="flex flex-col items-center animate__animated animate__fadeIn">
                                 <div className="mb-12 text-center pointer-events-auto">
                                     <h2 className="text-4xl font-bold text-white drop-shadow-md mb-2">Chọn Số Lượng Quà</h2>
                                     <p className="text-lg bg-black/40 px-4 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                                        👉 Dùng ngón tay di chuyển con trỏ vào ô số
+                                        👉 Di chuyển con trỏ XANH vào ô số và giữ 2 giây
                                     </p>
                                 </div>
 
