@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thiên Cơ Bảng - Đếm Ngược 3s</title>
+    <title>Thiên Cơ Bảng - Kết Ấn (Auto Finger)</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,7 +24,7 @@
         #input-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; transform: scaleX(-1); z-index: 0;
-            opacity: 0.25; mix-blend-mode: hard-light; filter: contrast(1.1) grayscale(0.4);
+            opacity: 0.2; mix-blend-mode: hard-light; filter: contrast(1.1) grayscale(0.2);
         }
 
         /* Theme Tu Tiên */
@@ -38,59 +38,61 @@
 
         .title-font { font-family: 'Cinzel Decorative', cursive; letter-spacing: 2px; text-shadow: 0 0 10px #d4af37; }
 
-        /* Nút chọn số lượng (Trận Pháp) */
-        .rune-btn {
-            position: relative;
-            width: 80px; height: 80px;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #444;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 32px; font-weight: bold; color: #888;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
+        /* Kết Ấn UI */
+        .mudra-container {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50; pointer-events: none;
         }
-        .rune-btn::before {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, transparent 70%);
+
+        .mudra-circle {
+            width: 250px; height: 250px;
+            border: 4px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .mudra-circle.active {
+            border-color: #00ffff;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .finger-count-display {
+            font-size: 120px; font-weight: 900; color: #fff;
+            text-shadow: 0 0 20px #00ffff;
+            z-index: 2;
+        }
+
+        .progress-ring {
+            position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%;
+            border: 10px solid transparent;
+            border-top-color: #ffd700; /* Vàng kim */
+            border-right-color: #ffd700;
+            transform: rotate(-90deg);
             opacity: 0; transition: opacity 0.3s;
         }
-        .rune-btn.hovered, .rune-btn:hover {
-            transform: scale(1.2);
-            border-color: #00ffff; color: #00ffff;
-            background: rgba(0, 20, 40, 0.8);
-            box-shadow: 0 0 20px cyan;
-        }
-        .rune-btn.hovered::before, .rune-btn:hover::before { opacity: 1; }
-
-        /* Progress Ring cho Hover */
-        .progress-ring {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-        }
-        
-        /* Con trỏ Linh Hồn */
-        .spirit-cursor {
-            position: fixed; pointer-events: none; z-index: 9999;
-            transition: transform 0.05s linear;
-        }
-        .spirit-core {
-            width: 20px; height: 20px; background: #00ffff; border-radius: 50%;
-            box-shadow: 0 0 15px #00ffff, 0 0 30px #0000ff;
+        .progress-ring.charging {
+            opacity: 1;
+            animation: spinLoad 1.5s linear infinite; /* Fallback animation */
         }
 
-        /* Đếm ngược */
-        .countdown-overlay {
-            position: fixed; inset: 0; z-index: 100;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
+        /* Nút chọn số lượng (Visual Reference) */
+        .rune-card {
+            background: rgba(0,0,0,0.5); border: 1px solid #444; color: #666;
+            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: bold; border-radius: 8px;
+            transition: all 0.3s;
         }
-        .countdown-number {
-            font-size: 200px; font-weight: 900; color: #ffd700;
-            text-shadow: 0 0 50px #ff0000;
-            animation: zoomBeat 0.8s infinite;
+        .rune-card.highlight {
+            background: rgba(0, 255, 255, 0.2); border-color: #00ffff; color: #00ffff;
+            transform: scale(1.2) translateY(-10px);
+            box-shadow: 0 0 15px cyan;
         }
-        @keyframes zoomBeat { 0% {transform: scale(0.5); opacity: 0;} 50% {transform: scale(1.2); opacity: 1;} 100% {transform: scale(1); opacity: 0;} }
 
         .winner-card {
             background: rgba(20, 0, 0, 0.9); border: 2px solid gold;
@@ -119,19 +121,19 @@
                 
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 
-                if(type === 'hover') {
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.linearRampToValueAtTime(600, now + 0.1);
-                    gain.gain.setValueAtTime(0.05, now);
+                if(type === 'charge') {
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.linearRampToValueAtTime(400, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
                     gain.gain.linearRampToValueAtTime(0, now + 0.1);
                     osc.start(now); osc.stop(now + 0.1);
-                } else if (type === 'countdown') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(200, now);
-                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+                } else if (type === 'lock') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
                     gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now); osc.stop(now + 0.3);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now); osc.stop(now + 0.5);
                 } else if (type === 'win') {
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(523.25, now);
@@ -162,7 +164,7 @@
                 containerRef.current.innerHTML = '';
                 containerRef.current.appendChild(renderer.domElement);
 
-                // Particles
+                // Particles (Linh Khí)
                 for(let i=0; i<60; i++) {
                     const geo = new THREE.TetrahedronGeometry(0.2);
                     const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 });
@@ -240,20 +242,19 @@
             const [winners, setWinners] = useState([]);
             const [useCamera, setUseCamera] = useState(true);
 
-            // Logic State
-            const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
-            const [hoverTarget, setHoverTarget] = useState(null);
-            const [countdown, setCountdown] = useState(null); // null, 3, 2, 1
-
+            // Gesture State
+            const [detectedFingers, setDetectedFingers] = useState(0);
+            const [chargeProgress, setChargeProgress] = useState(0);
+            
             const videoRef = useRef(null);
-            const btnRefs = useRef({});
             const logicRef = useRef({ 
-                hoverStartTime: 0, 
+                lastFingerCount: 0, 
+                holdStartTime: 0, 
                 isProcessing: false,
-                targetCount: 0 // Số lượng muốn chọn
+                requiredHoldTime: 1500 // 1.5 giây
             });
 
-            // --- CAMERA SETUP ---
+            // --- CAMERA & FINGER COUNTING ---
             const startSystem = async (enableCam) => {
                 setAppState("LOADING");
                 setUseCamera(enableCam);
@@ -268,7 +269,7 @@
                         
                         if (window.Hands) {
                             const hands = new window.Hands({locateFile: (f) => `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${f}`});
-                            hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5});
+                            hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.5});
                             hands.onResults(onHandResults);
                             
                             const processVideo = async () => {
@@ -291,81 +292,88 @@
                 }
             };
 
-            // --- XỬ LÝ NGÓN TAY (CURSOR MODE) ---
-            const onHandResults = (results) => {
-                if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
+            // Hàm đếm ngón tay (Logic: Y Tip < Y Knuckle cho 4 ngón, X cho ngón cái)
+            const countExtendedFingers = (landmarks) => {
+                let count = 0;
                 
-                // Lấy đầu ngón trỏ (Landmark 8) làm con trỏ
-                const lm = results.multiHandLandmarks[0][8]; 
-                const x = (1 - lm.x) * window.innerWidth;
-                const y = lm.y * window.innerHeight;
+                // 1. Bốn ngón dài (Trỏ, Giữa, Áp út, Út)
+                // Tip (8, 12, 16, 20) phải cao hơn PIP (6, 10, 14, 18)
+                // Lưu ý: Trong Canvas, Y càng nhỏ càng ở trên cao.
+                if (landmarks[8].y < landmarks[6].y) count++;
+                if (landmarks[12].y < landmarks[10].y) count++;
+                if (landmarks[16].y < landmarks[14].y) count++;
+                if (landmarks[20].y < landmarks[18].y) count++;
+
+                // 2. Ngón cái (Thumb)
+                // Kiểm tra dựa trên trục X.
+                // Xác định tay trái/phải dựa trên vị trí ngón trỏ (5) so với ngón út (17)
+                // Nếu x[5] < x[17] => Tay Phải (trên màn hình), Ngón cái bên trái.
+                // Nếu Ngón cái mở, Tip(4) sẽ nằm xa hơn về phía bên trái so với Knuckle(3).
                 
-                setCursorPos({x, y});
-                if (appState === "READY" && !isSpinning && winners.length === 0 && countdown === null) {
-                    checkCollision(x, y);
-                }
-            };
-
-            const onMouseMove = (e) => {
-                if (!useCamera) {
-                    setCursorPos({x: e.clientX, y: e.clientY});
-                    // Mouse hover logic is handled via CSS/onClick mostly, but we can enable hover trigger too if wanted
-                    // For mouse, click is better.
-                }
-            };
-
-            const checkCollision = (cx, cy) => {
-                let hitId = null;
-                [1, 2, 3, 4, 5].forEach(num => {
-                    const btn = btnRefs.current[num];
-                    if (btn) {
-                        const rect = btn.getBoundingClientRect();
-                        if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
-                            hitId = num;
-                        }
-                    }
-                });
-
-                if (hitId) {
-                    if (hitId !== hoverTarget) {
-                        setHoverTarget(hitId);
-                        logicRef.current.hoverStartTime = Date.now();
-                        playSound('hover');
-                    } else {
-                        // Hold 1 second to select
-                        if (Date.now() - logicRef.current.hoverStartTime > 1000) {
-                            startCountdown(hitId);
-                            setHoverTarget(null);
-                        }
-                    }
+                const isRightHandOnScreen = landmarks[5].x < landmarks[17].x;
+                if (isRightHandOnScreen) {
+                    // Tay phải: Ngón cái bên trái -> Tip x phải nhỏ hơn IP x
+                    if (landmarks[4].x < landmarks[3].x) count++;
                 } else {
-                    setHoverTarget(null);
+                    // Tay trái: Ngón cái bên phải -> Tip x phải lớn hơn IP x
+                    if (landmarks[4].x > landmarks[3].x) count++;
                 }
+
+                return count;
             };
 
-            // --- COUNTDOWN & GAME LOGIC ---
-            const startCountdown = (count) => {
-                if(studentList.length < count) { alert("Không đủ đạo hữu!"); return; }
+            const onHandResults = (results) => {
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+                    resetCharge();
+                    return;
+                }
                 
-                logicRef.current.targetCount = count;
-                setCountdown(3);
-                playSound('countdown');
+                const fingers = countExtendedFingers(results.multiHandLandmarks[0]);
+                processGesture(fingers);
+            };
+
+            const resetCharge = () => {
+                setDetectedFingers(0);
+                setChargeProgress(0);
+                logicRef.current.lastFingerCount = 0;
+                logicRef.current.holdStartTime = 0;
+            };
+
+            const processGesture = (fingers) => {
+                if (appState !== "READY" || isSpinning || winners.length > 0) return;
+
+                const now = Date.now();
                 
-                let val = 3;
-                const timer = setInterval(() => {
-                    val--;
-                    if(val > 0) {
-                        setCountdown(val);
-                        playSound('countdown');
-                    } else {
-                        clearInterval(timer);
-                        setCountdown(null);
-                        triggerGift(logicRef.current.targetCount);
+                // Chỉ nhận 1-5
+                if (fingers === 0 || fingers > 5) {
+                    resetCharge();
+                    return;
+                }
+
+                // Nếu số ngón thay đổi
+                if (fingers !== logicRef.current.lastFingerCount) {
+                    logicRef.current.lastFingerCount = fingers;
+                    logicRef.current.holdStartTime = now;
+                    setDetectedFingers(fingers);
+                    setChargeProgress(0);
+                    playSound('charge'); // Âm thanh báo nhận diện
+                } else {
+                    // Nếu giữ nguyên
+                    const elapsed = now - logicRef.current.holdStartTime;
+                    const progress = Math.min((elapsed / logicRef.current.requiredHoldTime) * 100, 100);
+                    setChargeProgress(progress);
+
+                    if (progress >= 100) {
+                        triggerGift(fingers);
+                        resetCharge();
                     }
-                }, 1000);
+                }
             };
 
             const triggerGift = (count) => {
+                if(studentList.length < count) { alert("Không đủ đạo hữu!"); return; }
+                
+                playSound('lock');
                 setIsSpinning(true);
                 
                 setTimeout(() => {
@@ -378,27 +386,13 @@
                     setWinners(selected);
                     setIsSpinning(false);
                     playSound('win');
-                }, 2000); // 2 giây quay
+                }, 2500); 
             };
 
             return (
-                <div className="w-full h-full relative" onMouseMove={onMouseMove}>
+                <div className="w-full h-full relative">
                     {useCamera && <video ref={videoRef} playsInline muted id="input-video"></video>}
                     <ThreeScene studentList={studentList} isSpinning={isSpinning} />
-
-                    {/* CURSOR (Chỉ hiện khi dùng Camera) */}
-                    {useCamera && (
-                        <div className="spirit-cursor" style={{ transform: `translate(${cursorPos.x}px, ${cursorPos.y}px)` }}>
-                            <div className="spirit-core"></div>
-                        </div>
-                    )}
-
-                    {/* COUNTDOWN OVERLAY */}
-                    {countdown !== null && (
-                        <div className="countdown-overlay">
-                            <div className="countdown-number">{countdown}</div>
-                        </div>
-                    )}
 
                     {/* UI LAYER */}
                     <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center p-4">
@@ -411,37 +405,53 @@
                             </div>
                         </div>
 
-                        {/* MÀN HÌNH CHỌN SỐ (TRẬN PHÁP) */}
-                        {appState === "READY" && !isSpinning && winners.length === 0 && countdown === null && (
-                            <div className="flex flex-col items-center animate__animated animate__fadeInUp">
-                                <div className="mb-8 text-center pointer-events-auto">
-                                    <h2 className="text-2xl text-yellow-200 mb-2 title-font">Chọn Số Lượng Đạo Hữu</h2>
-                                    <p className="text-gray-400 text-sm bg-black/50 px-4 py-1 rounded-full border border-gray-700">
-                                        {useCamera ? "Di chuyển đốm lửa vào ô số và giữ 1 giây" : "Nhấn chuột vào ô số"}
-                                    </p>
-                                </div>
-                                <div className="flex gap-6 pointer-events-auto">
-                                    {[1, 2, 3, 4, 5].map(num => (
-                                        <div 
-                                            key={num}
-                                            ref={el => btnRefs.current[num] = el}
-                                            className={`rune-btn ${hoverTarget === num ? 'hovered' : ''}`}
-                                            onClick={() => startCountdown(num)} // Click cho chuột
-                                        >
-                                            <span className="z-10">{num}</span>
-                                            {/* Visual Progress ring nếu hover */}
-                                            {hoverTarget === num && (
-                                                <svg className="progress-ring animate-spin" viewBox="0 0 100 100">
-                                                    <circle cx="50" cy="50" r="45" stroke="cyan" strokeWidth="4" fill="none" strokeDasharray="283" strokeDashoffset="50" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                    ))}
+                        {/* VÒNG KẾT ẤN (Finger Count UI) */}
+                        {appState === "READY" && !isSpinning && winners.length === 0 && useCamera && detectedFingers > 0 && (
+                            <div className="mudra-container animate__animated animate__zoomIn">
+                                <div className={`mudra-circle ${chargeProgress > 0 ? 'active' : ''}`}>
+                                    <div className="finger-count-display">{detectedFingers}</div>
+                                    {/* Progress SVGs */}
+                                    <svg className="absolute w-full h-full p-2" viewBox="0 0 100 100">
+                                        <circle 
+                                            cx="50" cy="50" r="46" 
+                                            fill="none" stroke="#333" strokeWidth="6" 
+                                        />
+                                        <circle 
+                                            cx="50" cy="50" r="46" 
+                                            fill="none" stroke="#00ffff" strokeWidth="6"
+                                            strokeDasharray="289"
+                                            strokeDashoffset={289 - (289 * chargeProgress) / 100}
+                                            strokeLinecap="round"
+                                            style={{transition: 'stroke-dashoffset 0.1s linear'}}
+                                        />
+                                    </svg>
+                                    <div className="absolute -bottom-12 text-cyan-300 font-bold text-shadow whitespace-nowrap">
+                                        Đang kết ấn... Giữ yên!
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* HIỆU ỨNG QUAY */}
+                        {/* HƯỚNG DẪN DƯỚI */}
+                        {appState === "READY" && !isSpinning && winners.length === 0 && (
+                            <div className="absolute bottom-10 flex flex-col items-center animate__animated animate__fadeInUp">
+                                <div className="flex gap-4 mb-4 opacity-50">
+                                    {[1, 2, 3, 4, 5].map(n => (
+                                        <div key={n} 
+                                            className={`rune-card pointer-events-auto cursor-pointer ${detectedFingers === n ? 'highlight' : ''}`}
+                                            onClick={() => triggerGift(n)} // Fallback click
+                                        >
+                                            {n}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-gray-400 text-sm bg-black/50 px-4 py-1 rounded-full border border-gray-700">
+                                    {useCamera ? "✋ Giơ ngón tay (1-5) và giữ yên 1.5 giây để chọn" : "🖱️ Bấm vào số ở trên để chọn"}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* SPINNING */}
                         {isSpinning && (
                             <div className="text-center animate__animated animate__pulse animate__infinite z-50">
                                 <div className="text-8xl mb-4 opacity-80" style={{filter: 'drop-shadow(0 0 20px cyan)'}}>☯️</div>
@@ -449,7 +459,7 @@
                             </div>
                         )}
 
-                        {/* KẾT QUẢ */}
+                        {/* WINNERS */}
                         {winners.length > 0 && (
                             <div className="flex flex-col items-center animate__animated animate__zoomIn z-50 w-full max-w-5xl">
                                 <h2 className="text-5xl title-font text-yellow-400 mb-10 drop-shadow-[0_0_15px_red]">Đại Cơ Duyên</h2>
@@ -471,17 +481,17 @@
                             </div>
                         )}
 
-                        {/* MÀN HÌNH CHỜ BAN ĐẦU */}
+                        {/* START SCREEN */}
                         {appState === "INIT" && (
                             <div className="glass-panel p-10 text-center max-w-lg pointer-events-auto border-2 border-yellow-600">
                                 <h1 className="text-5xl title-font text-yellow-500 mb-2">Thiên Cơ Bảng</h1>
                                 <p className="text-gray-400 mb-8 italic">"Vạn sự tùy duyên, vận khí do trời"</p>
                                 <div className="space-y-4">
                                     <button onClick={() => startSystem(true)} className="w-full py-4 bg-gradient-to-r from-cyan-900 to-blue-900 text-white border border-cyan-500 rounded hover:scale-105 transition-transform font-bold text-lg shadow-[0_0_15px_cyan]">
-                                        <i className="fas fa-hand-sparkles mr-3"></i> Bắt đầu (Camera)
+                                        <i className="fas fa-hand-sparkles mr-3"></i> Kết Ấn (Camera)
                                     </button>
                                     <button onClick={() => startSystem(false)} className="w-full py-3 bg-transparent text-gray-400 border border-gray-700 rounded hover:bg-gray-800 font-bold">
-                                        <i className="fas fa-mouse mr-3"></i> Bắt đầu (Chuột)
+                                        <i className="fas fa-mouse mr-3"></i> Dùng Chuột
                                     </button>
                                 </div>
                             </div>
