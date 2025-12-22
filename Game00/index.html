@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thiên Cơ Bảng - Kết Ấn (Auto Finger)</title>
+    <title>Thiên Cơ Bảng - Kết Ấn (Robust)</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/hands@0.4.1675469240/hands.js"></script>
+    <script crossorigin="anonymous" src="https://unpkg.com/@mediapipe/drawing_utils@0.3/drawing_utils.js"></script>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
@@ -24,7 +25,12 @@
         #input-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; transform: scaleX(-1); z-index: 0;
-            opacity: 0.2; mix-blend-mode: hard-light; filter: contrast(1.1) grayscale(0.2);
+            opacity: 0.3; /* Tăng độ sáng video lên chút để dễ nhìn tay */
+        }
+        
+        #debug-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none; transform: scaleX(-1); /* Lật ngược canvas vẽ xương */
         }
 
         /* Theme Tu Tiên */
@@ -71,17 +77,17 @@
             position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
             border-radius: 50%;
             border: 10px solid transparent;
-            border-top-color: #ffd700; /* Vàng kim */
+            border-top-color: #ffd700;
             border-right-color: #ffd700;
             transform: rotate(-90deg);
             opacity: 0; transition: opacity 0.3s;
         }
         .progress-ring.charging {
             opacity: 1;
-            animation: spinLoad 1.5s linear infinite; /* Fallback animation */
+            animation: spinLoad 1.5s linear infinite;
         }
 
-        /* Nút chọn số lượng (Visual Reference) */
+        /* Nút chọn số lượng */
         .rune-card {
             background: rgba(0,0,0,0.5); border: 1px solid #444; color: #666;
             width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
@@ -94,7 +100,7 @@
             box-shadow: 0 0 15px cyan;
         }
 
-        /* Status Panel Mới */
+        /* Status Panel */
         .status-panel {
             position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; gap: 15px;
@@ -265,17 +271,18 @@
             // Gesture State
             const [detectedFingers, setDetectedFingers] = useState(0);
             const [chargeProgress, setChargeProgress] = useState(0);
-            const [liveFingers, setLiveFingers] = useState(null); // Real-time feedback
+            const [liveFingers, setLiveFingers] = useState(null); 
             
             const videoRef = useRef(null);
+            const debugCanvasRef = useRef(null); // Ref cho canvas vẽ xương
             const logicRef = useRef({ 
                 lastFingerCount: 0, 
                 holdStartTime: 0, 
                 isProcessing: false,
-                requiredHoldTime: 1500 // 1.5 giây
+                requiredHoldTime: 1500
             });
 
-            // --- CAMERA & FINGER COUNTING ---
+            // --- CAMERA SETUP ---
             const startSystem = async (enableCam) => {
                 setAppState("LOADING");
                 setUseCamera(enableCam);
@@ -290,7 +297,12 @@
                         
                         if (window.Hands) {
                             const hands = new window.Hands({locateFile: (f) => `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${f}`});
-                            hands.setOptions({maxNumHands: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.5});
+                            hands.setOptions({
+                                maxNumHands: 1, 
+                                minDetectionConfidence: 0.5, 
+                                minTrackingConfidence: 0.5,
+                                modelComplexity: 1 // Tăng độ chính xác
+                            });
                             hands.onResults(onHandResults);
                             
                             const processVideo = async () => {
@@ -313,36 +325,107 @@
                 }
             };
 
-            // Hàm đếm ngón tay (Logic: Y Tip < Y Knuckle cho 4 ngón, X cho ngón cái)
+            // --- THUẬT TOÁN ĐẾM NGÓN TAY CẢI TIẾN (DỰA TRÊN KHOẢNG CÁCH) ---
             const countExtendedFingers = (landmarks) => {
                 let count = 0;
                 
-                // 1. Bốn ngón dài
-                if (landmarks[8].y < landmarks[6].y) count++;
-                if (landmarks[12].y < landmarks[10].y) count++;
-                if (landmarks[16].y < landmarks[14].y) count++;
-                if (landmarks[20].y < landmarks[18].y) count++;
+                // Helper: Tính bình phương khoảng cách
+                const distSq = (p1, p2) => Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+                
+                // Wrist (Cổ tay) là mốc 0
+                const wrist = landmarks[0];
+
+                // 1. Kiểm tra 4 ngón dài (Trỏ, Giữa, Áp út, Út)
+                // Logic: Ngón mở khi khoảng cách (Đỉnh -> Cổ tay) > (Khớp giữa -> Cổ tay)
+                // Cách này đúng bất kể tay nghiêng hay thẳng
+                const fingerIndices = [
+                    {tip: 8, pip: 6},   // Index
+                    {tip: 12, pip: 10}, // Middle
+                    {tip: 16, pip: 14}, // Ring
+                    {tip: 20, pip: 18}  // Pinky
+                ];
+
+                fingerIndices.forEach(finger => {
+                    if (distSq(landmarks[finger.tip], wrist) > distSq(landmarks[finger.pip], wrist)) {
+                        count++;
+                    }
+                });
 
                 // 2. Ngón cái (Thumb)
-                const isRightHandOnScreen = landmarks[5].x < landmarks[17].x;
-                if (isRightHandOnScreen) {
-                    if (landmarks[4].x < landmarks[3].x) count++;
-                } else {
-                    if (landmarks[4].x > landmarks[3].x) count++;
+                // Logic: Ngón cái mở khi Đỉnh ngón cái (4) nằm XA Gốc ngón út (17) hơn là Khớp ngón cái (3)
+                // Hoặc đơn giản: Đỉnh ngón cái cách xa gốc ngón út.
+                const thumbTip = landmarks[4];
+                const thumbIP = landmarks[3];
+                const pinkyMCP = landmarks[17];
+                
+                // So sánh khoảng cách tới gốc ngón út
+                if (distSq(thumbTip, pinkyMCP) > distSq(thumbIP, pinkyMCP)) {
+                    count++;
                 }
 
                 return count;
             };
 
+            // Hàm vẽ khung xương lên Debug Canvas
+            const drawDebugSkeleton = (landmarks) => {
+                const canvas = debugCanvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (!landmarks) return;
+                
+                // Set canvas size to match video
+                if (videoRef.current) {
+                    canvas.width = videoRef.current.videoWidth;
+                    canvas.height = videoRef.current.videoHeight;
+                }
+
+                // Vẽ các điểm
+                ctx.fillStyle = '#00ffff';
+                landmarks.forEach(lm => {
+                    ctx.beginPath();
+                    ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+
+                // Vẽ nối (Đơn giản hóa)
+                ctx.strokeStyle = '#ffff00';
+                ctx.lineWidth = 2;
+                const connections = [
+                    [0,1],[1,2],[2,3],[3,4],         // Thumb
+                    [0,5],[5,6],[6,7],[7,8],         // Index
+                    [0,9],[9,10],[10,11],[11,12],    // Middle
+                    [0,13],[13,14],[14,15],[15,16],  // Ring
+                    [0,17],[17,18],[18,19],[19,20],  // Pinky
+                    [5,9],[9,13],[13,17]             // Palm
+                ];
+                
+                connections.forEach(([i, j]) => {
+                    const p1 = landmarks[i];
+                    const p2 = landmarks[j];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
+                    ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
+                    ctx.stroke();
+                });
+            };
+
             const onHandResults = (results) => {
                 if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-                    setLiveFingers(null); // Không thấy tay
+                    setLiveFingers(null); 
                     resetCharge();
+                    // Xóa canvas debug
+                    const canvas = debugCanvasRef.current;
+                    if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
                     return;
                 }
                 
-                const fingers = countExtendedFingers(results.multiHandLandmarks[0]);
-                setLiveFingers(fingers); // Cập nhật live count ngay lập tức
+                const lm = results.multiHandLandmarks[0];
+                drawDebugSkeleton(lm); // Vẽ khung xương
+                
+                const fingers = countExtendedFingers(lm);
+                setLiveFingers(fingers); 
                 processGesture(fingers);
             };
 
@@ -406,6 +489,9 @@
             return (
                 <div className="w-full h-full relative">
                     {useCamera && <video ref={videoRef} playsInline muted id="input-video"></video>}
+                    {/* Canvas Debug vẽ xương tay */}
+                    {useCamera && <canvas ref={debugCanvasRef} id="debug-canvas"></canvas>}
+                    
                     <ThreeScene studentList={studentList} isSpinning={isSpinning} />
 
                     {/* UI LAYER */}
@@ -427,7 +513,7 @@
                                     {liveFingers !== null ? (
                                         <span className="text-cyan-300">ĐÃ THẤY: <span className="text-2xl text-yellow-400">{liveFingers}</span> NGÓN</span>
                                     ) : (
-                                        <span className="text-gray-400 italic">Đang tìm tay...</span>
+                                        <span className="text-gray-400 italic">Hãy giơ tay trước Camera...</span>
                                     )}
                                 </div>
                             </div>
