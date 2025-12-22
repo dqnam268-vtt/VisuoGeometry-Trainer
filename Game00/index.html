@@ -94,6 +94,26 @@
             box-shadow: 0 0 15px cyan;
         }
 
+        /* Status Panel Mới */
+        .status-panel {
+            position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px;
+            padding: 10px 30px;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            background: rgba(0, 20, 40, 0.9);
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            z-index: 60;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        .status-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #333; box-shadow: 0 0 5px #333;
+        }
+        .status-dot.active { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+
         .winner-card {
             background: rgba(20, 0, 0, 0.9); border: 2px solid gold;
             box-shadow: 0 0 30px gold;
@@ -245,6 +265,7 @@
             // Gesture State
             const [detectedFingers, setDetectedFingers] = useState(0);
             const [chargeProgress, setChargeProgress] = useState(0);
+            const [liveFingers, setLiveFingers] = useState(null); // Real-time feedback
             
             const videoRef = useRef(null);
             const logicRef = useRef({ 
@@ -296,26 +317,17 @@
             const countExtendedFingers = (landmarks) => {
                 let count = 0;
                 
-                // 1. Bốn ngón dài (Trỏ, Giữa, Áp út, Út)
-                // Tip (8, 12, 16, 20) phải cao hơn PIP (6, 10, 14, 18)
-                // Lưu ý: Trong Canvas, Y càng nhỏ càng ở trên cao.
+                // 1. Bốn ngón dài
                 if (landmarks[8].y < landmarks[6].y) count++;
                 if (landmarks[12].y < landmarks[10].y) count++;
                 if (landmarks[16].y < landmarks[14].y) count++;
                 if (landmarks[20].y < landmarks[18].y) count++;
 
                 // 2. Ngón cái (Thumb)
-                // Kiểm tra dựa trên trục X.
-                // Xác định tay trái/phải dựa trên vị trí ngón trỏ (5) so với ngón út (17)
-                // Nếu x[5] < x[17] => Tay Phải (trên màn hình), Ngón cái bên trái.
-                // Nếu Ngón cái mở, Tip(4) sẽ nằm xa hơn về phía bên trái so với Knuckle(3).
-                
                 const isRightHandOnScreen = landmarks[5].x < landmarks[17].x;
                 if (isRightHandOnScreen) {
-                    // Tay phải: Ngón cái bên trái -> Tip x phải nhỏ hơn IP x
                     if (landmarks[4].x < landmarks[3].x) count++;
                 } else {
-                    // Tay trái: Ngón cái bên phải -> Tip x phải lớn hơn IP x
                     if (landmarks[4].x > landmarks[3].x) count++;
                 }
 
@@ -324,11 +336,13 @@
 
             const onHandResults = (results) => {
                 if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+                    setLiveFingers(null); // Không thấy tay
                     resetCharge();
                     return;
                 }
                 
                 const fingers = countExtendedFingers(results.multiHandLandmarks[0]);
+                setLiveFingers(fingers); // Cập nhật live count ngay lập tức
                 processGesture(fingers);
             };
 
@@ -356,7 +370,7 @@
                     logicRef.current.holdStartTime = now;
                     setDetectedFingers(fingers);
                     setChargeProgress(0);
-                    playSound('charge'); // Âm thanh báo nhận diện
+                    playSound('charge'); 
                 } else {
                     // Nếu giữ nguyên
                     const elapsed = now - logicRef.current.holdStartTime;
@@ -405,6 +419,20 @@
                             </div>
                         </div>
 
+                        {/* STATUS PANEL - TRẠNG THÁI TRỰC TIẾP */}
+                        {appState === "READY" && !isSpinning && winners.length === 0 && useCamera && (
+                            <div className="status-panel animate__animated animate__fadeInDown">
+                                <div className={`status-dot ${liveFingers !== null ? 'active' : ''}`}></div>
+                                <div className="text-white font-bold text-lg font-mono">
+                                    {liveFingers !== null ? (
+                                        <span className="text-cyan-300">ĐÃ THẤY: <span className="text-2xl text-yellow-400">{liveFingers}</span> NGÓN</span>
+                                    ) : (
+                                        <span className="text-gray-400 italic">Đang tìm tay...</span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* VÒNG KẾT ẤN (Finger Count UI) */}
                         {appState === "READY" && !isSpinning && winners.length === 0 && useCamera && detectedFingers > 0 && (
                             <div className="mudra-container animate__animated animate__zoomIn">
@@ -425,8 +453,8 @@
                                             style={{transition: 'stroke-dashoffset 0.1s linear'}}
                                         />
                                     </svg>
-                                    <div className="absolute -bottom-12 text-cyan-300 font-bold text-shadow whitespace-nowrap">
-                                        Đang kết ấn... Giữ yên!
+                                    <div className="absolute -bottom-12 text-cyan-300 font-bold text-shadow whitespace-nowrap bg-black/50 px-3 py-1 rounded">
+                                        Giữ yên để chọn
                                     </div>
                                 </div>
                             </div>
