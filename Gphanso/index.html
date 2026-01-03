@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Game AR Phân Số: Tiệm Bánh Pizza Thực Tế</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Nhúng A-Frame -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Nhúng thư viện AR.js để hỗ trợ Camera AR -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <script>
+      // --- LOGIC GAME (GIỮ NGUYÊN NHƯ CŨ, CHỈ CHỈNH VỊ TRÍ) ---
+      
+      AFRAME.registerComponent('game-manager', {
+        schema: {
+          score: {type: 'int', default: 0}
+        },
+
+        init: function () {
+          this.score = 0;
+          this.targetFraction = 0;
+          
+          // Lấy tham chiếu UI (lần này UI nằm trong Camera nên selector sẽ khác một chút)
+          this.questionText = document.querySelector('#questionText');
+          this.scoreText = document.querySelector('#scoreText');
+          this.feedbackText = document.querySelector('#feedbackText');
+          
+          this.nextRound();
+        },
+
+        nextRound: function () {
+          const options = [
+            { label: "1/2", val: 0.5, degree: 180, color: "#F4A460" }, 
+            { label: "1/4", val: 0.25, degree: 90, color: "#FF6347" }, 
+            { label: "3/4", val: 0.75, degree: 270, color: "#FFD700" }
+          ];
+
+          // Random đáp án
+          const targetIndex = Math.floor(Math.random() * options.length);
+          const target = options[targetIndex];
+          this.targetFraction = target.val;
+
+          // Cập nhật text (màu vàng cho dễ nhìn trên nền camera thực tế)
+          this.questionText.setAttribute('value', `TIM: ${target.label}`);
+          this.feedbackText.setAttribute('value', "Soi camera vao banh...");
+          
+          // Cập nhật 3 miếng bánh
+          this.updatePizza('#pizzaLeft', options[0]);
+          this.updatePizza('#pizzaCenter', options[1]);
+          this.updatePizza('#pizzaRight', options[2]);
+        },
+
+        updatePizza: function(id, data) {
+          const el = document.querySelector(id);
+          // Giảm kích thước bánh một chút để vừa trên mã Marker
+          el.setAttribute('geometry', `primitive: cylinder; radius: 0.3; height: 0.05; thetaLength: ${data.degree}`);
+          el.setAttribute('material', `color: ${data.color}`);
+          el.setAttribute('data-val', data.val);
+          
+          const label = el.querySelector('.label');
+          label.setAttribute('value', data.label);
+        },
+
+        checkAnswer: function (selectedVal) {
+          if (parseFloat(selectedVal) === this.targetFraction) {
+            this.score += 10;
+            this.feedbackText.setAttribute('value', "DUNG ROI! (+10)");
+            this.feedbackText.setAttribute('color', '#00FF00');
+            this.scoreText.setAttribute('value', `DIEM: ${this.score}`);
+            
+            setTimeout(() => {
+              this.feedbackText.setAttribute('color', '#FFFF00');
+              this.nextRound();
+            }, 1500);
+          } else {
+            this.feedbackText.setAttribute('value', "SAI ROI!");
+            this.feedbackText.setAttribute('color', '#FF0000');
+            setTimeout(() => {
+               this.feedbackText.setAttribute('value', "Thu lai nhe!");
+               this.feedbackText.setAttribute('color', '#FFFF00');
+            }, 1000);
+          }
+        }
+      });
+
+      AFRAME.registerComponent('clickable-pizza', {
+        init: function () {
+          var el = this.el;
+          
+          el.addEventListener('mouseenter', function () {
+            el.setAttribute('scale', '1.2 1.2 1.2'); 
+            // Đổi màu con trỏ để người chơi biết đang ngắm trúng
+            document.querySelector('#cursor').setAttribute('color', '#00FF00');
+          });
+
+          el.addEventListener('mouseleave', function () {
+            el.setAttribute('scale', '1 1 1');
+            document.querySelector('#cursor').setAttribute('color', '#FF0000');
+          });
+
+          el.addEventListener('click', function () {
+            const val = el.getAttribute('data-val');
+            // Tìm game-manager từ scene
+            document.querySelector('a-scene').components['game-manager'].checkAnswer(val);
+          });
+        }
+      });
+    </script>
+  </head>
+
+  <body style="margin: 0; overflow: hidden;">
+    <!-- THIẾT LẬP SCENE AR -->
+    <!-- embedded: để nhúng vào web; arjs: kích hoạt chế độ camera -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" game-manager>
+      
+      <!-- 1. CÁC VẬT THỂ ẢO (GẮN VÀO MARKER HIRO) -->
+      <!-- Mọi thứ bên trong a-marker này sẽ chỉ hiện ra khi Camera nhìn thấy hình ảnh Hiro -->
+      <a-marker preset="hiro">
+          <!-- Bánh Trái -->
+          <a-entity position="-0.8 0 0">
+            <a-cylinder id="pizzaLeft" clickable-pizza color="#F4A460" radius="0.3" height="0.05" theta-start="0" theta-length="180">
+                <a-text class="label" value="1/2" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
+            </a-cylinder>
+          </a-entity>
+
+          <!-- Bánh Giữa -->
+          <a-entity position="0 0 0.5">
+            <a-cylinder id="pizzaCenter" clickable-pizza color="#FF6347" radius="0.3" height="0.05" theta-start="0" theta-length="90">
+                 <a-text class="label" value="1/4" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
+            </a-cylinder>
+          </a-entity>
+
+          <!-- Bánh Phải -->
+          <a-entity position="0.8 0 0">
+            <a-cylinder id="pizzaRight" clickable-pizza color="#FFD700" radius="0.3" height="0.05" theta-start="0" theta-length="270">
+                 <a-text class="label" value="3/4" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
+            </a-cylinder>
+          </a-entity>
+      </a-marker>
+
+      <!-- 2. CAMERA + GIAO DIỆN NGƯỜI DÙNG (HUD) -->
+      <!-- Camera trong AR là cố định, chúng ta gắn UI vào đây để nó luôn trôi theo màn hình -->
+      <a-entity camera>
+        
+        <!-- Con trỏ ngắm (Reticle) ở giữa màn hình -->
+        <a-cursor id="cursor" position="0 0 -1" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: #FF0000; shader: flat"></a-cursor>
+
+        <!-- Bảng Điểm (Góc trên trái) -->
+        <a-text id="scoreText" value="DIEM: 0" position="-1.5 0.8 -2" color="yellow" width="4"></a-text>
+        
+        <!-- Câu hỏi (Ở giữa trên) -->
+        <a-text id="questionText" value="Dang tai..." position="0 0.6 -2" align="center" color="white" width="5" font="kmozart"></a-text>
+        
+        <!-- Phản hồi (Ở giữa dưới) -->
+        <a-text id="feedbackText" value="" position="0 -0.5 -2" align="center" color="yellow" width="4"></a-text>
+      
+      </a-entity>
+
+    </a-scene>
+  </body>
+</html>
