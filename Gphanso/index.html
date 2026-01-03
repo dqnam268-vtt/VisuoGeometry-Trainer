@@ -2,161 +2,252 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Game AR Phân Số: Tiệm Bánh Pizza Thực Tế</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
-    <!-- Nhúng A-Frame -->
+    <title>Trạm Không Gian Alpha: Nhiệm Vụ Phân Số</title>
+    <meta name="description" content="Game VR Giáo dục Toán lớp 6">
+    <!-- Nhúng A-Frame (Thư viện VR) -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Nhúng thư viện AR.js để hỗ trợ Camera AR -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
+    <!-- Nhúng Component Môi trường để tạo cảnh vũ trụ -->
+    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
+
     <script>
-      // --- LOGIC GAME (GIỮ NGUYÊN NHƯ CŨ, CHỈ CHỈNH VỊ TRÍ) ---
-      
+      // --- LOGIC TRÒ CHƠI (GAME MANAGER) ---
       AFRAME.registerComponent('game-manager', {
         schema: {
+          level: {type: 'int', default: 1},
           score: {type: 'int', default: 0}
         },
 
         init: function () {
-          this.score = 0;
-          this.targetFraction = 0;
+          // Khởi tạo các biến
+          this.currentLevel = 1;
+          this.holdingItem = null; // Vật phẩm đang cầm (ảo)
+          this.fusionReady = [];   // Danh sách vật phẩm chờ hợp nhất (cho Level 3)
+
+          // Lấy tham chiếu UI
+          this.uiMessage = document.querySelector('#ui-message');
+          this.uiSubtext = document.querySelector('#ui-subtext');
+          this.uiLevel = document.querySelector('#ui-level');
           
-          // Lấy tham chiếu UI (lần này UI nằm trong Camera nên selector sẽ khác một chút)
-          this.questionText = document.querySelector('#questionText');
-          this.scoreText = document.querySelector('#scoreText');
-          this.feedbackText = document.querySelector('#feedbackText');
-          
-          this.nextRound();
+          // Âm thanh (mô phỏng bằng log)
+          console.log("Hệ thống khởi động... Chào mừng Kỹ Sư Năng Lượng.");
+
+          // Bắt đầu Level 1
+          this.setupLevel(1);
         },
 
-        nextRound: function () {
-          const options = [
-            { label: "1/2", val: 0.5, degree: 180, color: "#F4A460" }, 
-            { label: "1/4", val: 0.25, degree: 90, color: "#FF6347" }, 
-            { label: "3/4", val: 0.75, degree: 270, color: "#FFD700" }
-          ];
-
-          // Random đáp án
-          const targetIndex = Math.floor(Math.random() * options.length);
-          const target = options[targetIndex];
-          this.targetFraction = target.val;
-
-          // Cập nhật text (màu vàng cho dễ nhìn trên nền camera thực tế)
-          this.questionText.setAttribute('value', `TIM: ${target.label}`);
-          this.feedbackText.setAttribute('value', "Soi camera vao banh...");
+        // Hàm thiết lập màn chơi
+        setupLevel: function(level) {
+          this.currentLevel = level;
+          this.uiLevel.setAttribute('value', `TANG: ${level}/3`);
           
-          // Cập nhật 3 miếng bánh
-          this.updatePizza('#pizzaLeft', options[0]);
-          this.updatePizza('#pizzaCenter', options[1]);
-          this.updatePizza('#pizzaRight', options[2]);
-        },
+          // Xóa vật thể cũ
+          this.clearZone();
 
-        updatePizza: function(id, data) {
-          const el = document.querySelector(id);
-          // Giảm kích thước bánh một chút để vừa trên mã Marker
-          el.setAttribute('geometry', `primitive: cylinder; radius: 0.3; height: 0.05; thetaLength: ${data.degree}`);
-          el.setAttribute('material', `color: ${data.color}`);
-          el.setAttribute('data-val', data.val);
-          
-          const label = el.querySelector('.label');
-          label.setAttribute('value', data.label);
-        },
-
-        checkAnswer: function (selectedVal) {
-          if (parseFloat(selectedVal) === this.targetFraction) {
-            this.score += 10;
-            this.feedbackText.setAttribute('value', "DUNG ROI! (+10)");
-            this.feedbackText.setAttribute('color', '#00FF00');
-            this.scoreText.setAttribute('value', `DIEM: ${this.score}`);
+          if (level === 1) {
+            // LEVEL 1: NHẬN BIẾT
+            this.uiMessage.setAttribute('value', 'NHIEM VU: TIM KHOI 1/4');
+            this.uiSubtext.setAttribute('value', 'Nap nang luong cho Khoang So Cap');
             
-            setTimeout(() => {
-              this.feedbackText.setAttribute('color', '#FFFF00');
-              this.nextRound();
-            }, 1500);
-          } else {
-            this.feedbackText.setAttribute('value', "SAI ROI!");
-            this.feedbackText.setAttribute('color', '#FF0000');
-            setTimeout(() => {
-               this.feedbackText.setAttribute('value', "Thu lai nhe!");
-               this.feedbackText.setAttribute('color', '#FFFF00');
-            }, 1000);
+            // Tạo 3 khối: 1/2, 1/4, 1/3
+            this.createBlock(-2, 1, -3, 1, 2, "#FF0055"); // 1/2
+            this.createBlock(0, 1, -3, 1, 4, "#00FFAA");  // 1/4 (Đúng)
+            this.createBlock(2, 1, -3, 1, 3, "#5500FF");  // 1/3
+          } 
+          else if (level === 2) {
+            // LEVEL 2: SO SÁNH
+            this.uiMessage.setAttribute('value', 'CAN BANG AP SUAT: > 1/2');
+            this.uiSubtext.setAttribute('value', 'Tim khoi nang luong LON HON 1/2');
+            
+            // Tạo 3 khối: 1/3 (nhỏ hơn), 3/4 (lớn hơn - Đúng), 1/4 (nhỏ hơn)
+            this.createBlock(-2, 1, -3, 1, 3, "#FF0055"); // 1/3
+            this.createBlock(0, 1, -3, 3, 4, "#00FFAA");  // 3/4 (Mục tiêu)
+            this.createBlock(2, 1, -3, 1, 4, "#5500FF");  // 1/4
           }
-        }
-      });
+          else if (level === 3) {
+            // LEVEL 3: CỘNG PHÂN SỐ (BOSS)
+            this.uiMessage.setAttribute('value', 'LO PHAN UNG: CAN 5/6');
+            this.uiSubtext.setAttribute('value', 'Hop nhat 1/2 va 1/3 de tao ra 5/6');
 
-      AFRAME.registerComponent('clickable-pizza', {
-        init: function () {
-          var el = this.el;
+            // Tạo nguyên liệu: 1/2 và 1/3
+            this.createBlock(-1.5, 1, -3, 1, 2, "#FF0055"); // 1/2
+            this.createBlock(1.5, 1, -3, 1, 3, "#5500FF");  // 1/3
+            
+            // Tạo máy hợp nhất ở giữa
+            this.createFusionMachine(0, 1, -4);
+          }
+          else {
+            // CHIẾN THẮNG
+            this.uiMessage.setAttribute('value', 'NHIEM VU HOAN THANH!');
+            this.uiSubtext.setAttribute('value', 'Tram Khong Gian Alpha da duoc cuu.');
+            this.clearZone();
+          }
+        },
+
+        // Hàm xử lý khi người chơi chọn một khối
+        checkAction: function(selectedBlock) {
+          const val = selectedBlock.getAttribute('data-val'); // Giá trị thập phân
+          const label = selectedBlock.getAttribute('data-label');
+
+          // LOGIC LEVEL 1
+          if (this.currentLevel === 1) {
+            if (Math.abs(val - 0.25) < 0.01) {
+              this.showFeedback("CHINH XAC! KHOI DONG...", "green");
+              setTimeout(() => this.setupLevel(2), 2000);
+            } else {
+              this.showFeedback("SAI ROI! CAN KHOI 1/4", "red");
+            }
+          }
+          // LOGIC LEVEL 2
+          else if (this.currentLevel === 2) {
+            if (val > 0.5) {
+              this.showFeedback("AP SUAT CAN BANG!", "green");
+              setTimeout(() => this.setupLevel(3), 2000);
+            } else {
+              this.showFeedback("NANG LUONG QUA THAP!", "red");
+            }
+          }
+          // LOGIC LEVEL 3 (HỢP NHẤT)
+          else if (this.currentLevel === 3) {
+             // Nếu chọn khối 5/6 (sau khi đã hợp nhất thành công)
+             if (Math.abs(val - (5/6)) < 0.01) {
+                this.showFeedback("KICH HOAT WARP DRIVE!", "gold");
+                setTimeout(() => this.setupLevel(4), 3000);
+                return;
+             }
+
+             // Logic chọn nguyên liệu đưa vào máy
+             selectedBlock.setAttribute('visible', 'false'); // Ẩn khối đi
+             this.fusionReady.push(val);
+             
+             this.showFeedback(`Da nap: ${label}. Can them...`, "yellow");
+
+             // Nếu đã nạp đủ 2 khối (1/2 và 1/3)
+             if (this.fusionReady.length >= 2) {
+               this.showFeedback("DANG HOP NHAT...", "cyan");
+               // Gọi máy tạo khối mới
+               setTimeout(() => {
+                 this.createBlock(0, 1.5, -3, 5, 6, "#FFD700"); // Tạo khối 5/6 vàng rực
+                 this.showFeedback("TAO THANH CONG KHOI 5/6! HAY KICH HOAT.", "green");
+               }, 1500);
+             }
+          }
+        },
+
+        // Hàm trợ giúp: Tạo khối năng lượng (Hình trụ khuyết)
+        createBlock: function(x, y, z, tu, mau, color) {
+          const scene = document.querySelector('a-scene');
+          const entity = document.createElement('a-entity');
           
-          el.addEventListener('mouseenter', function () {
-            el.setAttribute('scale', '1.2 1.2 1.2'); 
-            // Đổi màu con trỏ để người chơi biết đang ngắm trúng
-            document.querySelector('#cursor').setAttribute('color', '#00FF00');
+          // Tính toán hình dáng (360 độ * giá trị phân số)
+          const fractionVal = tu / mau;
+          const degrees = fractionVal * 360;
+
+          entity.setAttribute('position', `${x} ${y} ${z}`);
+          
+          // Hình dáng: Cylinder khuyết
+          entity.setAttribute('geometry', `primitive: cylinder; radius: 0.5; height: 0.2; thetaStart: 0; thetaLength: ${degrees}`);
+          entity.setAttribute('material', `color: ${color}; opacity: 0.9; metalness: 0.6; roughness: 0.2`);
+          
+          // Hiệu ứng xoay nhẹ
+          entity.setAttribute('animation', `property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear`);
+          
+          // Dữ liệu game
+          entity.setAttribute('data-val', fractionVal);
+          entity.setAttribute('data-label', `${tu}/${mau}`);
+          entity.setAttribute('class', 'interactable');
+          
+          // Nhãn tên (Floating Text)
+          const text = document.createElement('a-text');
+          text.setAttribute('value', `${tu}/${mau}`);
+          text.setAttribute('align', 'center');
+          text.setAttribute('position', '0 0.4 0');
+          text.setAttribute('side', 'double');
+          text.setAttribute('scale', '2 2 2');
+          entity.appendChild(text);
+
+          // Sự kiện click
+          entity.addEventListener('click', () => {
+             // Hiệu ứng nảy
+             entity.setAttribute('animation__click', `property: scale; from: 1.2 1.2 1.2; to: 1 1 1; dur: 200`);
+             this.checkAction(entity);
+          });
+          
+          // Sự kiện Hover
+          entity.addEventListener('mouseenter', () => {
+             entity.setAttribute('scale', '1.1 1.1 1.1');
+             entity.setAttribute('material', 'emissive', '#333');
+          });
+          entity.addEventListener('mouseleave', () => {
+             entity.setAttribute('scale', '1 1 1');
+             entity.setAttribute('material', 'emissive', '#000');
           });
 
-          el.addEventListener('mouseleave', function () {
-            el.setAttribute('scale', '1 1 1');
-            document.querySelector('#cursor').setAttribute('color', '#FF0000');
-          });
+          scene.appendChild(entity);
+        },
 
-          el.addEventListener('click', function () {
-            const val = el.getAttribute('data-val');
-            // Tìm game-manager từ scene
-            document.querySelector('a-scene').components['game-manager'].checkAnswer(val);
-          });
+        // Tạo máy hợp nhất (Level 3)
+        createFusionMachine: function(x, y, z) {
+          const scene = document.querySelector('a-scene');
+          const machine = document.createElement('a-box');
+          machine.setAttribute('position', `${x} ${y-0.5} ${z}`);
+          machine.setAttribute('scale', '1 0.1 1');
+          machine.setAttribute('color', '#444');
+          machine.setAttribute('material', 'wireframe: true');
+          
+          const label = document.createElement('a-text');
+          label.setAttribute('value', 'MAY QUY DONG');
+          label.setAttribute('position', '0 0.5 0');
+          label.setAttribute('align', 'center');
+          machine.appendChild(label);
+          
+          scene.appendChild(machine);
+        },
+
+        // Xóa vật thể màn cũ
+        clearZone: function() {
+          const els = document.querySelectorAll('.interactable');
+          els.forEach(el => el.parentNode.removeChild(el));
+          this.fusionReady = [];
+        },
+
+        // Hiển thị thông báo
+        showFeedback: function(msg, colorName) {
+          this.uiSubtext.setAttribute('value', msg);
+          this.uiSubtext.setAttribute('color', colorName);
         }
       });
     </script>
   </head>
 
-  <body style="margin: 0; overflow: hidden;">
-    <!-- THIẾT LẬP SCENE AR -->
-    <!-- embedded: để nhúng vào web; arjs: kích hoạt chế độ camera -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" game-manager>
+  <body>
+    <a-scene game-manager cursor="rayOrigin: mouse" raycaster="objects: .interactable">
       
-      <!-- 1. CÁC VẬT THỂ ẢO (GẮN VÀO MARKER HIRO) -->
-      <!-- Mọi thứ bên trong a-marker này sẽ chỉ hiện ra khi Camera nhìn thấy hình ảnh Hiro -->
-      <a-marker preset="hiro">
-          <!-- Bánh Trái -->
-          <a-entity position="-0.8 0 0">
-            <a-cylinder id="pizzaLeft" clickable-pizza color="#F4A460" radius="0.3" height="0.05" theta-start="0" theta-length="180">
-                <a-text class="label" value="1/2" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
-            </a-cylinder>
-          </a-entity>
+      <!-- 1. MÔI TRƯỜNG (TRẠM VŨ TRỤ) -->
+      <!-- Sử dụng preset 'tron' để tạo cảm giác sci-fi lưới điện tử -->
+      <a-entity environment="preset: tron; skyType: atmosphere; lighting: point; grid: 1x1"></a-entity>
 
-          <!-- Bánh Giữa -->
-          <a-entity position="0 0 0.5">
-            <a-cylinder id="pizzaCenter" clickable-pizza color="#FF6347" radius="0.3" height="0.05" theta-start="0" theta-length="90">
-                 <a-text class="label" value="1/4" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
-            </a-cylinder>
-          </a-entity>
-
-          <!-- Bánh Phải -->
-          <a-entity position="0.8 0 0">
-            <a-cylinder id="pizzaRight" clickable-pizza color="#FFD700" radius="0.3" height="0.05" theta-start="0" theta-length="270">
-                 <a-text class="label" value="3/4" position="0 0.5 0" align="center" color="black" scale="1.5 1.5 1.5"></a-text>
-            </a-cylinder>
-          </a-entity>
-      </a-marker>
-
-      <!-- 2. CAMERA + GIAO DIỆN NGƯỜI DÙNG (HUD) -->
-      <!-- Camera trong AR là cố định, chúng ta gắn UI vào đây để nó luôn trôi theo màn hình -->
-      <a-entity camera>
+      <!-- 2. UI NGƯỜI CHƠI (HUD) -->
+      <a-entity position="0 1.6 -1.5">
+        <!-- Bảng thông báo chính -->
+        <a-plane color="#000" opacity="0.7" width="2.5" height="1" position="0 0.5 0"></a-plane>
         
-        <!-- Con trỏ ngắm (Reticle) ở giữa màn hình -->
-        <a-cursor id="cursor" position="0 0 -1" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: #FF0000; shader: flat"></a-cursor>
-
-        <!-- Bảng Điểm (Góc trên trái) -->
-        <a-text id="scoreText" value="DIEM: 0" position="-1.5 0.8 -2" color="yellow" width="4"></a-text>
+        <a-text id="ui-message" value="KHOI DONG..." align="center" position="0 0.7 0.01" width="4" color="#00FFFF"></a-text>
+        <a-text id="ui-subtext" value="..." align="center" position="0 0.5 0.01" width="3" color="#CCCCCC"></a-text>
         
-        <!-- Câu hỏi (Ở giữa trên) -->
-        <a-text id="questionText" value="Dang tai..." position="0 0.6 -2" align="center" color="white" width="5" font="kmozart"></a-text>
-        
-        <!-- Phản hồi (Ở giữa dưới) -->
-        <a-text id="feedbackText" value="" position="0 -0.5 -2" align="center" color="yellow" width="4"></a-text>
-      
+        <!-- Cấp độ -->
+        <a-text id="ui-level" value="TANG: 1/3" align="right" position="1 0.9 0.01" width="3" color="yellow"></a-text>
       </a-entity>
+
+      <!-- 3. CAMERA & CONTROLLER -->
+      <a-entity position="0 1.6 2">
+        <a-camera look-controls wasd-controls>
+           <!-- Con trỏ ảo (nếu không dùng chuột) -->
+           <a-cursor color="cyan" fuse="false"></a-cursor>
+        </a-camera>
+      </a-entity>
+
+      <!-- 4. ÂM THANH NỀN (Tùy chọn) -->
+      <!-- <a-sound src="url_nhac_nen.mp3" autoplay="true" loop="true"></a-sound> -->
 
     </a-scene>
   </body>
