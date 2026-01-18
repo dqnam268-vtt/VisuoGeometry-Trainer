@@ -423,12 +423,12 @@
         const boomGroup = new THREE.Group(); boomGroup.position.set(0.8, 1.0, -0.5); excBody.add(boomGroup);
         const boomPart1 = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 0.6), matYellow); boomPart1.position.set(1.5, 1.5, 0); boomPart1.rotation.z = Math.PI / 6; boomPart1.castShadow = true;
         const boomPart2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 0.5), matYellow); boomPart2.position.set(3.5, 1.8, 0); boomPart2.rotation.z = -Math.PI / 6; boomPart2.castShadow = true;
-        const cylinderGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.5, 16); const hydroBoom = new THREE.Mesh(cylinderGeo, matSilver); hydroBoom.position.set(1.5, 2.2, 0); hydroBoom.rotation.z = Math.PI / 6;
+        const cylinderGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.5, 16); const hydroBoom = new THREE.Mesh(cylinderGeo, matSilver); hydroBoom.position.set(1.5, 2.2, 0); hydroBoom.rotation.z = -Math.PI / 3;
         boomGroup.add(boomPart1, boomPart2, hydroBoom);
 
         const stickGroup = new THREE.Group(); stickGroup.position.set(4.5, 1.2, 0); boomGroup.add(stickGroup);
         const stickMain = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.0, 0.5), matYellow); stickMain.position.y = -1.2; stickMain.castShadow = true;
-        const hydroStick = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.0), matSilver); hydroStick.position.set(-0.4, -0.5, 0); hydroStick.rotation.z = -0.2;
+        const hydroStick = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.0), matSilver); hydroStick.position.set(-0.4, -0.5, 0); hydroStick.rotation.z = 0;
         stickGroup.add(stickMain, hydroStick);
 
         const bucketGroup = new THREE.Group(); bucketGroup.position.set(0, -2.8, 0); stickGroup.add(bucketGroup);
