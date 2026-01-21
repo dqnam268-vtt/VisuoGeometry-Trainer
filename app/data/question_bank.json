@@ -818,7 +818,7 @@
         "question_id": "dien_tich_the_tich_hinh_hop_02_01",
         "content": {
             "text": "Một hình hộp chữ nhật có chiều dài 5 m, chiều rộng 3 m, chiều cao 2 m. Tính thể tích của hình hộp đó.",
-            "formula_latex": "$V=a.b.h",
+            "formula_latex": "$V=a.b.h$",
             "image": null
         },
         "question_type": "multiple_choice",
