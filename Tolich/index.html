@@ -30,7 +30,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 320px;
+            width: 340px;
             background: white;
             padding: 20px;
             border-radius: 12px;
@@ -41,48 +41,78 @@
         }
 
         .panel-header { font-size: 18px; font-weight: bold; color: #2E8B57; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .question-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #B22222; margin-bottom: 15px; }
-        .question-text { font-weight: 600; margin-bottom: 10px; display: block; }
+        
+        .question-box { background: #fff9f9; padding: 15px; border-radius: 8px; border-left: 5px solid #B22222; margin-bottom: 15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
+        .question-title { font-weight: bold; color: #B22222; display: block; margin-bottom: 5px; text-transform: uppercase; font-size: 13px; }
+        .question-text { font-size: 15px; line-height: 1.5; color: #333; display: block; margin-bottom: 10px; }
+        .dynamic-value { color: #B22222; font-weight: bold; border-bottom: 1px dashed #B22222; }
+
         .input-group { display: flex; gap: 5px; margin-bottom: 10px; }
-        input[type="number"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; transition: background 0.2s; margin-bottom: 5px; width: 100%; }
-        #checkBtn { background-color: #2E8B57; color: white; width: auto; margin-bottom: 0; }
+        input[type="number"] { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.3s; }
+        input[type="number"]:focus { border-color: #2E8B57; }
+        
+        button { cursor: pointer; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; transition: all 0.2s; margin-bottom: 8px; width: 100%; font-size: 14px; }
+        #checkBtn { background-color: #2E8B57; color: white; width: auto; margin-bottom: 0; padding: 10px 20px; }
+        #checkBtn:hover { background-color: #257045; transform: scale(1.02); }
+        
         #guideBtn { background-color: #FF8C00; color: white; }
-        #newExerciseBtn { background-color: #4682B4; color: white; margin-top: 10px; }
-        #customForm { display: none; background: #eee; padding: 10px; border-radius: 8px; margin-top: 10px; }
-        .feedback { margin-top: 10px; font-weight: bold; min-height: 20px; font-size: 14px; }
-        .correct { color: green; }
-        .incorrect { color: red; }
+        #newExerciseBtn { background-color: #4682B4; color: white; margin-top: 5px; }
+        
+        #customForm { display: none; background: #f0f4f8; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #d1d9e6; }
+        #customForm label { font-size: 12px; color: #555; font-weight: bold; display: block; margin-top: 5px; }
+        #customForm input { width: 100%; margin: 2px 0 8px 0; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .feedback { margin-top: 12px; font-weight: bold; min-height: 24px; font-size: 14px; padding: 10px; border-radius: 4px; display: none; }
+        .correct { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; display: block !important; }
+        .incorrect { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; display: block !important; }
+
         #guideContent { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; display: none; }
-        #guideContent.show { display: block; }
-        .math { font-family: "Times New Roman", Times, serif; font-style: italic; background: #eee; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #00008B; }
+        #guideContent.show { display: block; animation: fadeIn 0.4s; }
+        .math { font-family: "Times New Roman", Times, serif; font-style: italic; background: #eee; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #00008B; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="info">
-        <h2>Lịch Tết 2026 - Học Hình Học 3D</h2>
-        <p>🖱️ <strong>Xoay:</strong> Chuột trái</p>
-        <p>🔍 <strong>Zoom:</strong> Cuộn chuột</p>
+        <h2>Lịch Tết 2026 - Hình Lăng Trụ</h2>
+        <p>🖱️ <strong>Xoay:</strong> Chuột trái | 🔍 <strong>Zoom:</strong> Cuộn chuột</p>
     </div>
 
     <div id="learning-panel">
         <div class="panel-header">🎓 Góc Học Tập</div>
+        
         <div class="question-box">
-            <span class="question-text">Tính diện tích xung quanh (cm²)?</span>
+            <span class="question-title">📝 Đề bài toán học:</span>
+            <span class="question-text" id="questionContent">
+                Cho chiếc lịch để bàn có hình lăng trụ đứng tam giác với các kích thước: 
+                cạnh bên đáy <span class="dynamic-value" id="valSlant">15</span> cm, 
+                cạnh đáy <span class="dynamic-value" id="valBase">7</span> cm và 
+                chiều dài lịch <span class="dynamic-value" id="valLength">16</span> cm.
+                <br><br>
+                Hãy tính <b>diện tích xung quanh</b> của chiếc lịch (cm²).
+                <br><i>(Làm tròn kết quả đến hàng đơn vị)</i>
+            </span>
+            
             <div class="input-group">
-                <input type="number" id="userAnswer" placeholder="Đáp án...">
+                <input type="number" id="userAnswer" placeholder="Kết quả của em...">
                 <button id="checkBtn">Kiểm tra</button>
             </div>
             <div id="feedback" class="feedback"></div>
         </div>
-        <button id="guideBtn">💡 Hướng dẫn cách tính</button>
+
+        <button id="guideBtn">💡 Xem gợi ý giải bài</button>
         <div id="guideContent"></div>
-        <button id="newExerciseBtn">➕ Đổi kích thước lịch</button>
+        
+        <button id="newExerciseBtn">➕ Điều chỉnh kích thước (Thử thách)</button>
         <div id="customForm">
-            <input type="number" id="inputSlant" value="15" placeholder="Cạnh bên">
-            <input type="number" id="inputBase" value="7" placeholder="Cạnh đáy">
-            <input type="number" id="inputLength" value="16" placeholder="Chiều dài">
-            <button id="applyCustomBtn" style="background:#2E8B57; color:white; margin-top:5px;">Cập nhật</button>
+            <label>Cạnh bên tam giác đáy (cm):</label>
+            <input type="number" id="inputSlant" value="15" step="1" min="1">
+            <label>Cạnh đáy tam giác (cm):</label>
+            <input type="number" id="inputBase" value="7" step="1" min="1">
+            <label>Chiều dài khối lịch (cm):</label>
+            <input type="number" id="inputLength" value="16" step="1" min="1">
+            <p style="font-size: 11px; color: #666; margin: 0;">* Các thay đổi sẽ cập nhật ngay lập tức lên mô hình và đề bài.</p>
         </div>
     </div>
 
@@ -99,6 +129,7 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+        // Biến toàn cục
         let slantHeight = 15; 
         let width = 16;       
         let baseDepth = 7;    
@@ -106,6 +137,7 @@
 
         let scene, camera, renderer, controls, calendarGroup, dimensionGroup;
         
+        // Vật liệu
         const coverMaterial = new THREE.MeshStandardMaterial({ color: 0xB22222, roughness: 0.6, side: THREE.DoubleSide });
         const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
         const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
@@ -128,28 +160,15 @@
             controls.enableDamping = true;
 
             // Ánh sáng
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(ambientLight);
-            
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
             dirLight.position.set(15, 25, 15);
             dirLight.castShadow = true;
-            // Cấu hình bóng đổ mịn hơn
-            dirLight.shadow.mapSize.width = 1024;
-            dirLight.shadow.mapSize.height = 1024;
-            dirLight.shadow.camera.near = 0.5;
-            dirLight.shadow.camera.far = 100;
             scene.add(dirLight);
 
-            // --- THÊM LƯỚI NỀN (GRID) ---
-            const grid = new THREE.GridHelper(100, 50, 0xcccccc, 0xe5e5e5);
-            scene.add(grid);
-
-            // Thêm mặt phẳng nhận bóng đổ ẩn dưới lưới
-            const plane = new THREE.Mesh(
-                new THREE.PlaneGeometry(200, 200),
-                new THREE.ShadowMaterial({ opacity: 0.1 })
-            );
+            // Nền 3D
+            scene.add(new THREE.GridHelper(100, 50, 0xcccccc, 0xe5e5e5));
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: 0.1 }));
             plane.rotation.x = -Math.PI / 2;
             plane.receiveShadow = true;
             scene.add(plane);
@@ -164,51 +183,36 @@
             });
         }
 
+        // Tạo nhãn kích thước động
         function createDimensionLabel(text, startPoint, endPoint, offsetDir) {
             const group = new THREE.Group();
             const arrowColor = 0xcc0000;
             const p1 = startPoint.clone().add(offsetDir);
             const p2 = endPoint.clone().add(offsetDir);
 
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-            const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: arrowColor }));
+            const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1, p2]), new THREE.LineBasicMaterial({ color: arrowColor }));
             group.add(line);
 
             const coneGeo = new THREE.ConeGeometry(0.2, 0.6, 8);
             const coneMat = new THREE.MeshBasicMaterial({ color: arrowColor });
-            
-            const cone1 = new THREE.Mesh(coneGeo, coneMat);
-            cone1.position.copy(p1); 
-            cone1.lookAt(p2); 
-            cone1.rotateX(-Math.PI/2); 
-            group.add(cone1);
-
-            const cone2 = new THREE.Mesh(coneGeo, coneMat);
-            cone2.position.copy(p2); 
-            cone2.lookAt(p1); 
-            cone2.rotateX(-Math.PI/2); 
-            group.add(cone2);
+            const c1 = new THREE.Mesh(coneGeo, coneMat); c1.position.copy(p1); c1.lookAt(p2); c1.rotateX(-Math.PI/2); group.add(c1);
+            const c2 = new THREE.Mesh(coneGeo, coneMat); c2.position.copy(p2); c2.lookAt(p1); c2.rotateX(-Math.PI/2); group.add(c2);
 
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 128;
+            canvas.width = 450; canvas.height = 120;
             const ctx = canvas.getContext('2d');
-            ctx.font = "Bold 40px Arial"; ctx.fillStyle = "black"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText(text, 128, 64);
+            ctx.font = "Bold 36px Arial"; ctx.fillStyle = "black"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(text, 225, 60);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
-            
-            const midPoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-            const textOffset = offsetDir.clone().normalize().multiplyScalar(0.8);
-            sprite.position.copy(midPoint).add(textOffset);
-            sprite.scale.set(6, 3, 1);
+            sprite.position.copy(new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5)).add(offsetDir.clone().normalize().multiplyScalar(1.2));
+            sprite.scale.set(11, 3, 1);
             group.add(sprite);
-            
             dimensionGroup.add(group);
         }
 
         function rebuildModel() {
             if (calendarGroup) scene.remove(calendarGroup);
             if (dimensionGroup) scene.remove(dimensionGroup);
-
             calendarGroup = new THREE.Group();
             dimensionGroup = new THREE.Group();
             scene.add(calendarGroup);
@@ -216,169 +220,167 @@
 
             const halfBase = baseDepth / 2;
             const verticalHeight = Math.sqrt(Math.max(0, Math.pow(slantHeight, 2) - Math.pow(halfBase, 2)));
-            const tiltAngle = Math.asin(halfBase / slantHeight);
+            const tiltAngle = Math.asin(Math.min(1, halfBase / slantHeight));
             const thickness = 0.2;
 
             const coverGeo = new THREE.BoxGeometry(width, slantHeight, thickness);
-            const frontCover = new THREE.Mesh(coverGeo, coverMaterial);
-            frontCover.position.set(0, verticalHeight / 2, halfBase / 2);
-            frontCover.rotation.x = -tiltAngle;
-            frontCover.castShadow = true;
-            calendarGroup.add(frontCover);
+            const front = new THREE.Mesh(coverGeo, coverMaterial);
+            front.position.set(0, verticalHeight / 2, halfBase / 2); front.rotation.x = -tiltAngle; front.castShadow = true;
+            calendarGroup.add(front);
 
-            const backCover = new THREE.Mesh(coverGeo, coverMaterial);
-            backCover.position.set(0, verticalHeight / 2, -halfBase / 2);
-            backCover.rotation.x = tiltAngle;
-            backCover.castShadow = true;
-            calendarGroup.add(backCover);
+            const back = new THREE.Mesh(coverGeo, coverMaterial);
+            back.position.set(0, verticalHeight / 2, -halfBase / 2); back.rotation.x = tiltAngle; back.castShadow = true;
+            calendarGroup.add(back);
 
-            const bottomCover = new THREE.Mesh(new THREE.BoxGeometry(width, baseDepth, thickness), coverMaterial);
-            bottomCover.rotation.x = Math.PI / 2;
-            bottomCover.position.y = 0.05;
-            bottomCover.receiveShadow = true;
-            calendarGroup.add(bottomCover);
+            const bottom = new THREE.Mesh(new THREE.BoxGeometry(width, baseDepth, thickness), coverMaterial);
+            bottom.rotation.x = Math.PI / 2; bottom.position.y = 0.05; bottom.receiveShadow = true;
+            calendarGroup.add(bottom);
 
+            // Các trang lịch
             function addPages(isFront) {
-                const monthIdx = isFront ? 0 : 1; 
-                const texture = createCalendarTexture(monthIdx); 
-                const pageMat = new THREE.MeshBasicMaterial({ map: texture });
-                const mats = [whiteMaterial, whiteMaterial, whiteMaterial, whiteMaterial, pageMat, whiteMaterial];
+                const texture = createCalendarTexture(isFront ? 0 : 1);
+                const mats = [whiteMaterial, whiteMaterial, whiteMaterial, whiteMaterial, new THREE.MeshBasicMaterial({ map: texture }), whiteMaterial];
                 const page = new THREE.Mesh(new THREE.BoxGeometry(width - 0.8, slantHeight - 0.8, 0.05), mats);
-                
-                if (isFront) {
-                    page.position.set(0, verticalHeight / 2, halfBase / 2 + 0.15);
-                    page.rotation.x = -tiltAngle;
-                } else {
-                    page.position.set(0, verticalHeight / 2, -halfBase / 2 - 0.15);
-                    page.rotation.x = tiltAngle;
-                    page.rotation.y = Math.PI;
-                }
-                page.castShadow = true;
-                calendarGroup.add(page);
+                if (isFront) { page.position.set(0, verticalHeight/2, halfBase/2 + 0.15); page.rotation.x = -tiltAngle; }
+                else { page.position.set(0, verticalHeight/2, -halfBase/2 - 0.15); page.rotation.x = tiltAngle; page.rotation.y = Math.PI; }
+                page.castShadow = true; calendarGroup.add(page);
             }
-            addPages(true);
-            addPages(false);
+            addPages(true); addPages(false);
 
+            // Lò xo
             const ringCount = 12;
             for (let i = 0; i < ringCount; i++) {
                 const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.06, 8, 16), ringMaterial);
                 ring.position.set(-width/2 + 1 + (i * (width-2)/(ringCount-1)), verticalHeight, 0);
-                ring.rotation.y = Math.PI / 2;
-                ring.castShadow = true;
-                calendarGroup.add(ring);
+                ring.rotation.y = Math.PI / 2; ring.castShadow = true; calendarGroup.add(ring);
             }
 
-            const offset = 1.5;
-            createDimensionLabel(`${slantHeight} cm`, 
+            // Nhãn số liệu (Đã được nâng độ cao hiển thị Y để không bị chìm)
+            createDimensionLabel(`Cạnh bên: ${slantHeight} cm`, 
                 new THREE.Vector3(-width/2, verticalHeight, 0), 
                 new THREE.Vector3(-width/2, 0, halfBase), 
-                new THREE.Vector3(-1, 0, 1));
+                new THREE.Vector3(-3, 0, 1));
             
-            createDimensionLabel(`${width} cm`, 
-                new THREE.Vector3(-width/2, 0.2, halfBase), 
-                new THREE.Vector3(width/2, 0.2, halfBase), 
-                new THREE.Vector3(0, 0, offset));
+            createDimensionLabel(`Chiều dài lịch: ${width} cm`, 
+                new THREE.Vector3(-width/2, 0.8, halfBase), // Tăng Y từ 0.1 lên 0.8
+                new THREE.Vector3(width/2, 0.8, halfBase),  // Tăng Y từ 0.1 lên 0.8
+                new THREE.Vector3(0, 0, 3));
 
-            createDimensionLabel(`${baseDepth} cm`, 
-                new THREE.Vector3(width/2 + 0.5, 0.2, halfBase), 
-                new THREE.Vector3(width/2 + 0.5, 0.2, -halfBase), 
-                new THREE.Vector3(1, 0, 0));
+            createDimensionLabel(`Cạnh đáy: ${baseDepth} cm`, 
+                new THREE.Vector3(width/2 + 0.5, 0.8, halfBase), // Tăng Y từ 0.1 lên 0.8
+                new THREE.Vector3(width/2 + 0.5, 0.8, -halfBase),// Tăng Y từ 0.1 lên 0.8
+                new THREE.Vector3(3, 0, 0));
         }
 
+        // Vẽ trang trí Tết (Mai & Đào)
         function drawDecoration(ctx, type) {
             ctx.save();
-            ctx.strokeStyle = '#5D4037';
-            ctx.lineWidth = 6; ctx.lineCap = 'round';
+            ctx.strokeStyle = '#5D4037'; ctx.lineWidth = 6; ctx.lineCap = 'round';
             ctx.beginPath(); ctx.moveTo(480, 220); ctx.bezierCurveTo(400, 150, 450, 100, 320, 50); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(350, 65); ctx.lineTo(380, 20); ctx.stroke();
             const flowerColor = (type === 'mai') ? '#FFD700' : '#FF69B4';
             const centerColor = (type === 'mai') ? '#FF8C00' : '#D00060';
             const points = [[450, 180], [380, 120], [320, 50], [380, 25], [410, 140], [460, 100]];
             points.forEach(p => {
-                const x = p[0]; const y = p[1];
                 ctx.fillStyle = flowerColor;
                 for (let i = 0; i < 5; i++) {
-                    ctx.beginPath();
-                    const angle = (i * 2 * Math.PI) / 5;
-                    ctx.ellipse(x + Math.cos(angle) * 8, y + Math.sin(angle) * 8, 8, 5, angle, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.beginPath(); const angle = (i * 2 * Math.PI) / 5;
+                    ctx.ellipse(p[0] + Math.cos(angle) * 8, p[1] + Math.sin(angle) * 8, 8, 5, angle, 0, Math.PI * 2); ctx.fill();
                 }
-                ctx.fillStyle = centerColor; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = centerColor; ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, Math.PI * 2); ctx.fill();
             });
             ctx.restore();
         }
 
         function createCalendarTexture(monthIndex) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 512;
+            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 512, 512);
-            ctx.fillStyle = monthIndex === 0 ? '#B22222' : '#2E8B57';
-            ctx.fillRect(0, 0, 512, 120);
+            ctx.fillStyle = monthIndex === 0 ? '#B22222' : '#2E8B57'; ctx.fillRect(0, 0, 512, 120);
             if (monthIndex === 0) {
                 drawDecoration(ctx, 'mai');
-                ctx.fillStyle = '#FFD700'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right';
-                ctx.fillText("Chúc Mừng Năm Mới", 500, 110);
+                ctx.fillStyle = '#FFD700'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right'; ctx.fillText("Chúc Mừng Năm Mới", 500, 110);
             } else {
                 drawDecoration(ctx, 'dao');
-                ctx.fillStyle = '#FFC0CB'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right';
-                ctx.fillText("Vạn Sự Như Ý", 500, 110);
+                ctx.fillStyle = '#FFC0CB'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right'; ctx.fillText("Vạn Sự Như Ý", 500, 110);
             }
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px Arial'; ctx.textAlign = 'center';
-            ctx.fillText(`THÁNG 0${monthIndex + 1} / 2026`, 256, 75);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px Arial'; ctx.textAlign = 'center'; ctx.fillText(`THÁNG 0${monthIndex + 1} / 2026`, 256, 75);
             const daysHeader = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
             ctx.font = 'bold 22px Arial';
-            daysHeader.forEach((d, i) => {
-                ctx.fillStyle = i === 0 ? '#d00' : '#333'; ctx.fillText(d, 60 + i * 65, 170);
-            });
+            daysHeader.forEach((d, i) => { ctx.fillStyle = i === 0 ? '#d00' : '#333'; ctx.fillText(d, 60 + i * 65, 170); });
             let firstDayIndex = monthIndex === 0 ? 4 : 0;
-            let totalDays = monthIndex === 0 ? 31 : 28;
-            let date = 1;
-            ctx.font = 'bold 28px Arial';
+            let date = 1; ctx.font = 'bold 28px Arial';
             for (let row = 0; row < 6; row++) {
                 for (let col = 0; col < 7; col++) {
-                    const index = row * 7 + col;
-                    if (index >= firstDayIndex && date <= totalDays) {
+                    const idx = row * 7 + col;
+                    if (idx >= firstDayIndex && date <= (monthIndex === 0 ? 31 : 28)) {
                         const x = 60 + col * 65; const y = 230 + row * 50;
                         if (monthIndex === 0 && date === 25) {
                             ctx.strokeStyle = 'red'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y - 10, 25, 0, Math.PI * 2); ctx.stroke();
                             ctx.fillStyle = 'red'; ctx.font = 'bold 14px Arial'; ctx.fillText("Seminar", x, y + 30);
-                            ctx.font = 'bold 28px Arial'; 
                         }
-                        ctx.fillStyle = col === 0 ? '#d00' : '#333'; ctx.textAlign = 'center';
-                        ctx.fillText(date.toString(), x, y); date++;
+                        ctx.fillStyle = col === 0 ? '#d00' : '#333'; ctx.textAlign = 'center'; ctx.fillText(date.toString(), x, y); date++;
                     }
                 }
             }
-            const tex = new THREE.CanvasTexture(canvas);
-            tex.colorSpace = THREE.SRGBColorSpace; return tex;
+            const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; return tex;
         }
 
         function updateMathLogic() {
-            correctAnswer = (slantHeight * 2 + baseDepth) * width;
+            // Cập nhật giá trị hiển thị trên đề bài
+            document.getElementById('valSlant').textContent = slantHeight;
+            document.getElementById('valBase').textContent = baseDepth;
+            document.getElementById('valLength').textContent = width;
+
+            const perimeter = (slantHeight * 2) + baseDepth;
+            const exactResult = perimeter * width;
+            correctAnswer = Math.round(exactResult);
+
             const guideHTML = `
                 <div style="font-size:14px; line-height:1.6;">
-                    - Chu vi đáy: <span class="math">C = ${slantHeight} + ${slantHeight} + ${baseDepth} = ${slantHeight*2 + baseDepth} cm</span><br>
-                    - Diện tích xung quanh: <span class="math">S = C × ${width} = ${correctAnswer} cm²</span>
+                    <b>💡 Gợi ý giải:</b><br>
+                    - Chu vi tam giác đáy: <br><span class="math">P = ${slantHeight} + ${slantHeight} + ${baseDepth} = ${perimeter} (cm)</span><br>
+                    - Diện tích xung quanh: <br><span class="math">S_xq = P × h = ${perimeter} × ${width} = ${exactResult} (cm²)</span><br>
+                    - Kết quả làm tròn: <b>${correctAnswer} cm²</b>
                 </div>`;
             document.getElementById('guideContent').innerHTML = guideHTML;
         }
 
+        // --- XỬ LÝ SỰ KIỆN LIVE UPDATE ---
+        const inputs = ['inputSlant', 'inputBase', 'inputLength'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (val > 0) {
+                    if (id === 'inputSlant') slantHeight = val;
+                    if (id === 'inputBase') baseDepth = val;
+                    if (id === 'inputLength') width = val;
+                    
+                    rebuildModel();
+                    updateMathLogic();
+                    
+                    document.getElementById('feedback').style.display = 'none';
+                    document.getElementById('userAnswer').value = '';
+                }
+            });
+        });
+
         document.getElementById('checkBtn').onclick = () => {
-            const val = parseFloat(document.getElementById('userAnswer').value);
-            const feedback = document.getElementById('feedback');
-            if (Math.abs(val - correctAnswer) < 1) {
-                feedback.innerHTML = "Chính xác! Chúc mừng bạn! 🎉";
-                feedback.className = "feedback correct";
+            const userVal = parseFloat(document.getElementById('userAnswer').value);
+            const fb = document.getElementById('feedback');
+            fb.style.display = 'block';
+            if (isNaN(userVal)) {
+                fb.innerHTML = "⚠️ Em hãy nhập con số đáp án nhé!"; fb.className = "feedback incorrect";
+            } else if (Math.abs(userVal - correctAnswer) < 0.1) {
+                fb.innerHTML = `🎉 Tuyệt vời! ${correctAnswer} cm² là đáp án chính xác.`; fb.className = "feedback correct";
             } else {
-                feedback.innerHTML = "Chưa đúng, hãy nhìn kỹ các số đo trên hình.";
-                feedback.className = "feedback incorrect";
+                fb.innerHTML = "❌ Chưa đúng rồi. Em hãy kiểm tra lại các số đo trên hình và đề bài nhé!"; fb.className = "feedback incorrect";
             }
         };
 
         document.getElementById('guideBtn').onclick = () => {
             const g = document.getElementById('guideContent');
-            g.style.display = g.style.display === 'block' ? 'none' : 'block';
+            g.classList.toggle('show');
+            document.getElementById('guideBtn').textContent = g.classList.contains('show') ? "Ẩn gợi ý" : "💡 Xem gợi ý giải bài";
         };
 
         document.getElementById('newExerciseBtn').onclick = () => {
@@ -386,20 +388,7 @@
             f.style.display = f.style.display === 'block' ? 'none' : 'block';
         };
 
-        document.getElementById('applyCustomBtn').onclick = () => {
-            slantHeight = parseFloat(document.getElementById('inputSlant').value);
-            baseDepth = parseFloat(document.getElementById('inputBase').value);
-            width = parseFloat(document.getElementById('inputLength').value);
-            rebuildModel();
-            updateMathLogic();
-            document.getElementById('customForm').style.display = 'none';
-        };
-
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
     </script>
 </body>
 </html>
