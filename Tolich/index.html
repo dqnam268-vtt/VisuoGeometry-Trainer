@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Liệu Số: Hình Lăng Trụ Đứng - Lịch Để Bàn</title>
+    <title>Học Liệu Số: Hình Lăng Trụ Đứng - Lịch Để Bàn 2026</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #f0f0f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* Giao diện 3D container */
         #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
-        /* Tiêu đề & Hướng dẫn thao tác */
         #info {
             position: absolute;
             top: 10px;
@@ -28,7 +26,6 @@
         #info h2 { margin: 0 0 5px 0; font-size: 18px; color: #B22222; }
         #info p { margin: 0; font-size: 13px; color: #555; }
 
-        /* Bảng Học Tập (Learning Panel) */
         #learning-panel {
             position: absolute;
             top: 10px;
@@ -41,94 +38,51 @@
             z-index: 20;
             max-height: 90vh;
             overflow-y: auto;
-            transition: all 0.3s ease;
         }
 
         .panel-header { font-size: 18px; font-weight: bold; color: #2E8B57; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        
         .question-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #B22222; margin-bottom: 15px; }
         .question-text { font-weight: 600; margin-bottom: 10px; display: block; }
-        
         .input-group { display: flex; gap: 5px; margin-bottom: 10px; }
         input[type="number"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        
         button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; transition: background 0.2s; margin-bottom: 5px; width: 100%; }
         #checkBtn { background-color: #2E8B57; color: white; width: auto; margin-bottom: 0; }
-        #checkBtn:hover { background-color: #257045; }
-        
         #guideBtn { background-color: #FF8C00; color: white; }
-        #guideBtn:hover { background-color: #e07b00; }
-
         #newExerciseBtn { background-color: #4682B4; color: white; margin-top: 10px; }
-        #newExerciseBtn:hover { background-color: #36648b; }
-
-        /* Form tạo bài tập mới */
-        #customForm { display: none; background: #eee; padding: 10px; border-radius: 8px; margin-top: 10px; animation: fadeIn 0.3s; }
-        .custom-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; }
-        .custom-row input { width: 60px; padding: 4px; }
-        #applyCustomBtn { background-color: #2E8B57; color: white; margin-top: 5px; }
-
+        #customForm { display: none; background: #eee; padding: 10px; border-radius: 8px; margin-top: 10px; }
         .feedback { margin-top: 10px; font-weight: bold; min-height: 20px; font-size: 14px; }
         .correct { color: green; }
         .incorrect { color: red; }
-
-        /* Phần Hướng dẫn */
         #guideContent { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; display: none; }
-        #guideContent.show { display: block; animation: fadeIn 0.5s; }
-        .step { margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
-        .step strong { color: #333; display: block; margin-bottom: 2px; }
+        #guideContent.show { display: block; }
         .math { font-family: "Times New Roman", Times, serif; font-style: italic; background: #eee; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #00008B; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 600px) {
-            #learning-panel { top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: 15px 15px 0 0; max-height: 60vh; }
-            #info { display: none; }
-        }
     </style>
 </head>
 <body>
     <div id="info">
-        <h2>Mô hình Lịch Để Bàn 3D</h2>
-        <p>🖱️ <strong>Xoay:</strong> Giữ chuột trái</p>
-        <p>🖐️ <strong>Di chuyển:</strong> Giữ chuột phải</p>
-        <p>🔍 <strong>Zoom:</strong> Lăn chuột giữa</p>
+        <h2>Lịch Tết 2026 - Học Hình Học 3D</h2>
+        <p>🖱️ <strong>Xoay:</strong> Chuột trái</p>
+        <p>🔍 <strong>Zoom:</strong> Cuộn chuột</p>
     </div>
 
     <div id="learning-panel">
         <div class="panel-header">🎓 Góc Học Tập</div>
-        
         <div class="question-box">
-            <span class="question-text">Câu hỏi: Tính diện tích xung quanh của chiếc lịch (cm²)?</span>
-            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">(Làm tròn kết quả đến hàng đơn vị)</div>
-            
+            <span class="question-text">Tính diện tích xung quanh (cm²)?</span>
             <div class="input-group">
-                <input type="number" id="userAnswer" placeholder="Nhập đáp án...">
+                <input type="number" id="userAnswer" placeholder="Đáp án...">
                 <button id="checkBtn">Kiểm tra</button>
             </div>
             <div id="feedback" class="feedback"></div>
         </div>
-
         <button id="guideBtn">💡 Hướng dẫn cách tính</button>
         <div id="guideContent"></div>
-
-        <!-- Nút và Form tạo bài tập mới -->
-        <button id="newExerciseBtn">➕ Tạo bài tập mới</button>
-        
+        <button id="newExerciseBtn">➕ Đổi kích thước lịch</button>
         <div id="customForm">
-            <div class="custom-row">
-                <label>Cạnh bên (cm):</label>
-                <input type="number" id="inputSlant" value="15" min="1">
-            </div>
-            <div class="custom-row">
-                <label>Cạnh đáy (cm):</label>
-                <input type="number" id="inputBase" value="7" min="1">
-            </div>
-            <div class="custom-row">
-                <label>Chiều dài (cm):</label>
-                <input type="number" id="inputLength" value="16" min="1">
-            </div>
-            <button id="applyCustomBtn">Áp dụng kích thước mới</button>
+            <input type="number" id="inputSlant" value="15" placeholder="Cạnh bên">
+            <input type="number" id="inputBase" value="7" placeholder="Cạnh đáy">
+            <input type="number" id="inputLength" value="16" placeholder="Chiều dài">
+            <button id="applyCustomBtn" style="background:#2E8B57; color:white; margin-top:5px;">Cập nhật</button>
         </div>
     </div>
 
@@ -145,55 +99,64 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- GLOBAL VARIABLES (Kích thước mặc định) ---
-        let slantHeight = 15; // Cạnh bên
-        let width = 16;       // Chiều dài lăng trụ
-        let baseDepth = 7;    // Cạnh đáy
+        let slantHeight = 15; 
+        let width = 16;       
+        let baseDepth = 7;    
         let correctAnswer = 0;
 
-        // Các biến Scene Three.js
-        let scene, camera, renderer, controls;
-        let calendarGroup, dimensionGroup; // Nhóm chứa model và nhóm chứa nhãn kích thước
+        let scene, camera, renderer, controls, calendarGroup, dimensionGroup;
         
-        // Vật liệu dùng chung
         const coverMaterial = new THREE.MeshStandardMaterial({ color: 0xB22222, roughness: 0.6, side: THREE.DoubleSide });
         const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
-        const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.7, roughness: 0.2 });
+        const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
 
         init();
         animate();
 
         function init() {
-            // Setup cơ bản
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf0f0f0);
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(25, 20, 30);
+
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
+
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
             // Ánh sáng
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(10, 20, 10);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
             
-            // Mặt sàn
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: 0.1 }));
-            plane.rotation.x = -Math.PI / 2; plane.receiveShadow = true; scene.add(plane);
-            scene.add(new THREE.GridHelper(100, 50, 0xcccccc, 0xe5e5e5));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(15, 25, 15);
+            dirLight.castShadow = true;
+            // Cấu hình bóng đổ mịn hơn
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 100;
+            scene.add(dirLight);
 
-            // Khởi tạo model lần đầu
+            // --- THÊM LƯỚI NỀN (GRID) ---
+            const grid = new THREE.GridHelper(100, 50, 0xcccccc, 0xe5e5e5);
+            scene.add(grid);
+
+            // Thêm mặt phẳng nhận bóng đổ ẩn dưới lưới
+            const plane = new THREE.Mesh(
+                new THREE.PlaneGeometry(200, 200),
+                new THREE.ShadowMaterial({ opacity: 0.1 })
+            );
+            plane.rotation.x = -Math.PI / 2;
+            plane.receiveShadow = true;
+            scene.add(plane);
+
             rebuildModel();
             updateMathLogic();
 
-            // Setup sự kiện Resize
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -201,209 +164,6 @@
             });
         }
 
-        // --- HÀM XÂY DỰNG LẠI MODEL 3D ---
-        function rebuildModel() {
-            // 1. Xóa model cũ nếu có
-            if (calendarGroup) scene.remove(calendarGroup);
-            if (dimensionGroup) scene.remove(dimensionGroup);
-
-            calendarGroup = new THREE.Group();
-            dimensionGroup = new THREE.Group();
-            scene.add(calendarGroup);
-            scene.add(dimensionGroup);
-
-            // 2. Tính toán các thông số hình học phái sinh
-            const halfBase = baseDepth / 2;
-            const verticalHeight = Math.sqrt(Math.max(0, Math.pow(slantHeight, 2) - Math.pow(halfBase, 2)));
-            // Nếu không tạo thành tam giác (slantHeight < halfBase), verticalHeight sẽ là 0 hoặc NaN
-            const tiltAngle = (slantHeight > halfBase) ? Math.asin(halfBase / slantHeight) : 0;
-
-            const thickness = 0.2;
-            const coverGeo = new THREE.BoxGeometry(width, slantHeight, thickness);
-
-            // 3. Vẽ Bìa
-            const frontCover = new THREE.Mesh(coverGeo, coverMaterial);
-            frontCover.position.set(0, verticalHeight / 2, halfBase / 2);
-            frontCover.rotation.x = -tiltAngle;
-            frontCover.castShadow = true; calendarGroup.add(frontCover);
-
-            const backCover = new THREE.Mesh(coverGeo, coverMaterial);
-            backCover.position.set(0, verticalHeight / 2, -halfBase / 2);
-            backCover.rotation.x = tiltAngle;
-            backCover.castShadow = true; calendarGroup.add(backCover);
-
-            const bottomGeo = new THREE.BoxGeometry(width, baseDepth - 0.5, thickness);
-            const bottomCover = new THREE.Mesh(bottomGeo, coverMaterial);
-            bottomCover.rotation.x = -Math.PI / 2;
-            bottomCover.position.y = 0.1;
-            calendarGroup.add(bottomCover);
-
-            // 4. Vẽ Trang Lịch
-            function addPages(isFrontSide) {
-                const pageCount = 6;
-                for(let i = 0; i < pageCount; i++) {
-                    let currentMonth = isFrontSide ? (5 - i) : (6 + i);
-                    const texture = createCalendarTexture(currentMonth);
-                    const pageMat = new THREE.MeshBasicMaterial({ map: texture }); 
-                    const materials = [whiteMaterial, whiteMaterial, whiteMaterial, whiteMaterial, pageMat, pageMat];
-                    const page = new THREE.Mesh(new THREE.BoxGeometry(width - 1, slantHeight - 1, 0.05), materials);
-                    const zOffset = 0.2 + (i * 0.06); 
-                    
-                    if (isFrontSide) {
-                        page.position.set(0, verticalHeight / 2 - 0.5, (halfBase / 2) + zOffset);
-                        page.rotation.x = -tiltAngle;
-                    } else {
-                        page.position.set(0, verticalHeight / 2 - 0.5, -(halfBase / 2) - zOffset);
-                        page.rotation.x = tiltAngle; page.rotation.y = Math.PI; 
-                    }
-                    calendarGroup.add(page);
-                }
-            }
-            addPages(true); addPages(false);
-
-            // 5. Vẽ Lò Xo
-            const ringCount = Math.max(5, Math.floor(width / 1.5)); // Số lượng lò xo tùy theo chiều dài
-            const ringRadius = 0.6; const tubeRadius = 0.08;
-            const startX = -width / 2 + 1;
-            const stepX = (width - 2) / (ringCount - 1);
-            for (let i = 0; i < ringCount; i++) {
-                const ring = new THREE.Mesh(new THREE.TorusGeometry(ringRadius, tubeRadius, 8, 20), ringMaterial);
-                ring.position.set(startX + i * stepX, verticalHeight, 0);
-                ring.rotation.y = Math.PI / 2;
-                calendarGroup.add(ring);
-            }
-
-            // 6. Vẽ Đường Kích Thước (Cập nhật vị trí mới)
-            const yOffset = 0.25;
-            // Cạnh bên
-            createDimensionLabel(`${slantHeight} cm`, 
-                new THREE.Vector3(-width/2, verticalHeight, 0), 
-                new THREE.Vector3(-width/2, 0, halfBase), 
-                new THREE.Vector3(-2, 0, 0));
-            // Chiều dài
-            createDimensionLabel(`${width} cm`, 
-                new THREE.Vector3(-width/2, yOffset, halfBase), 
-                new THREE.Vector3(width/2, yOffset, halfBase), 
-                new THREE.Vector3(0, 0, 2));
-            // Cạnh đáy
-            createDimensionLabel(`${baseDepth} cm`, 
-                new THREE.Vector3(width/2 + 1, yOffset, halfBase), 
-                new THREE.Vector3(width/2 + 1, yOffset, -halfBase), 
-                new THREE.Vector3(1, 0, 0));
-        }
-
-        // --- CẬP NHẬT LOGIC TOÁN & HƯỚNG DẪN ---
-        function updateMathLogic() {
-            // Tính toán đáp án
-            const perimeter = slantHeight + slantHeight + baseDepth;
-            correctAnswer = perimeter * width;
-
-            // Cập nhật nội dung Hướng Dẫn (Guide HTML)
-            const guideHTML = `
-                <div class="step">
-                    <strong>Bước 1: Công thức tính</strong>
-                    <span class="math">S_xq = Chuvi_đáy × Chiều_cao</span>
-                </div>
-                <div class="step">
-                    <strong>Bước 2: Xác định các cạnh</strong>
-                    - Các cạnh đáy tam giác: <b>${slantHeight}cm, ${slantHeight}cm, ${baseDepth}cm</b>.<br>
-                    - Chiều cao lăng trụ (chiều dài lịch): <b>${width}cm</b>.
-                </div>
-                <div class="step">
-                    <strong>Bước 3: Tính Chu vi đáy (C)</strong>
-                    <span class="math">C = ${slantHeight} + ${slantHeight} + ${baseDepth} = ${perimeter} cm</span>
-                </div>
-                <div class="step">
-                    <strong>Bước 4: Tính Diện tích xung quanh</strong>
-                    <span class="math">S_xq = ${perimeter} × ${width} = ${correctAnswer} cm²</span>
-                </div>
-            `;
-            document.getElementById('guideContent').innerHTML = guideHTML;
-            
-            // Reset input và feedback
-            document.getElementById('userAnswer').value = '';
-            const feedback = document.getElementById('feedback');
-            feedback.textContent = '';
-            feedback.className = 'feedback';
-        }
-
-        // --- XỬ LÝ UI SỰ KIỆN ---
-        const newExerciseBtn = document.getElementById('newExerciseBtn');
-        const customForm = document.getElementById('customForm');
-        const applyCustomBtn = document.getElementById('applyCustomBtn');
-        const guideBtn = document.getElementById('guideBtn');
-        const guideContent = document.getElementById('guideContent');
-        const checkBtn = document.getElementById('checkBtn');
-        const userAnswerInput = document.getElementById('userAnswer');
-        const feedback = document.getElementById('feedback');
-
-        // Toggle form nhập liệu
-        newExerciseBtn.addEventListener('click', () => {
-            if (customForm.style.display === 'block') {
-                customForm.style.display = 'none';
-            } else {
-                customForm.style.display = 'block';
-            }
-        });
-
-        // Áp dụng kích thước mới
-        applyCustomBtn.addEventListener('click', () => {
-            const s = parseFloat(document.getElementById('inputSlant').value);
-            const b = parseFloat(document.getElementById('inputBase').value);
-            const l = parseFloat(document.getElementById('inputLength').value);
-
-            if (s <= 0 || b <= 0 || l <= 0) {
-                alert("Vui lòng nhập số dương!"); return;
-            }
-            if (s * 2 <= b) {
-                alert("Không thể tạo thành tam giác! Cạnh bên phải lớn hơn một nửa cạnh đáy."); return;
-            }
-
-            // Cập nhật biến toàn cục
-            slantHeight = s;
-            baseDepth = b;
-            width = l;
-
-            // Xây dựng lại mô hình và toán
-            rebuildModel();
-            updateMathLogic();
-            
-            // Ẩn form
-            customForm.style.display = 'none';
-            // Ẩn hướng dẫn nếu đang mở để học sinh tự làm lại
-            guideContent.classList.remove('show');
-            guideBtn.textContent = "💡 Hướng dẫn cách tính";
-        });
-
-        // Kiểm tra đáp án
-        checkBtn.addEventListener('click', () => {
-            const userVal = parseFloat(userAnswerInput.value);
-            if (isNaN(userVal)) {
-                feedback.textContent = "Vui lòng nhập số!";
-                feedback.className = "feedback incorrect";
-                return;
-            }
-            if (Math.abs(userVal - correctAnswer) <= 1) {
-                feedback.textContent = `Chính xác! Kết quả là ${correctAnswer} cm².`;
-                feedback.className = "feedback correct";
-            } else {
-                feedback.textContent = "Chưa đúng. Hãy xem lại kích thước hoặc mở Hướng dẫn.";
-                feedback.className = "feedback incorrect";
-            }
-        });
-
-        // Toggle hướng dẫn
-        guideBtn.addEventListener('click', () => {
-            if (guideContent.classList.contains('show')) {
-                guideContent.classList.remove('show');
-                guideBtn.textContent = "💡 Hướng dẫn cách tính";
-            } else {
-                guideContent.classList.add('show');
-                guideBtn.textContent = "Ẩn hướng dẫn";
-            }
-        });
-
-        // --- CÁC HÀM PHỤ TRỢ (Drawing) ---
         function createDimensionLabel(text, startPoint, endPoint, offsetDir) {
             const group = new THREE.Group();
             const arrowColor = 0xcc0000;
@@ -416,10 +176,18 @@
 
             const coneGeo = new THREE.ConeGeometry(0.2, 0.6, 8);
             const coneMat = new THREE.MeshBasicMaterial({ color: arrowColor });
+            
             const cone1 = new THREE.Mesh(coneGeo, coneMat);
-            cone1.position.copy(p1); cone1.lookAt(p2); cone1.rotateX(-Math.PI/2); group.add(cone1);
+            cone1.position.copy(p1); 
+            cone1.lookAt(p2); 
+            cone1.rotateX(-Math.PI/2); 
+            group.add(cone1);
+
             const cone2 = new THREE.Mesh(coneGeo, coneMat);
-            cone2.position.copy(p2); cone2.lookAt(p1); cone2.rotateX(-Math.PI/2); group.add(cone2);
+            cone2.position.copy(p2); 
+            cone2.lookAt(p1); 
+            cone2.rotateX(-Math.PI/2); 
+            group.add(cone2);
 
             const canvas = document.createElement('canvas');
             canvas.width = 256; canvas.height = 128;
@@ -429,56 +197,209 @@
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
             
             const midPoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-            const textOffset = offsetDir.clone().normalize().multiplyScalar(0.5);
+            const textOffset = offsetDir.clone().normalize().multiplyScalar(0.8);
             sprite.position.copy(midPoint).add(textOffset);
             sprite.scale.set(6, 3, 1);
             group.add(sprite);
+            
             dimensionGroup.add(group);
         }
 
-        // Texture functions (giữ nguyên logic cũ nhưng gọn hơn)
-        function drawApricotBlossom(ctx) {
-            ctx.beginPath(); ctx.moveTo(0, 240); ctx.bezierCurveTo(150, 200, 200, 280, 400, 100);
-            ctx.lineWidth = 8; ctx.strokeStyle = '#5D4037'; ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(250, 180); ctx.quadraticCurveTo(300, 150, 350, 180);
-            ctx.lineWidth = 4; ctx.stroke();
-            function f(cx, cy, c) { ctx.fillStyle=c; ctx.beginPath(); ctx.arc(cx,cy,c==='#FFD700'?10:5,0,Math.PI*2); ctx.fill(); }
-            [[400,100],[350,180],[250,180],[300,120],[150,210],[80,230]].forEach(p=>f(p[0],p[1],'#FFD700'));
-            [[400,100],[350,180],[250,180],[300,120],[150,210],[80,230]].forEach(p=>f(p[0],p[1],'#FF4500'));
-        }
-        function drawPineTree(ctx) {
-            ctx.fillStyle="#E0F7FA"; ctx.beginPath(); ctx.ellipse(256,220,200,30,0,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle="#5D4037"; ctx.fillRect(236,180,40,40);
-            ctx.fillStyle="#2E7D32"; 
-            [[156,180,356,180,256,100],[176,120,336,120,256,60],[196,70,316,70,256,30]].forEach(c=>{
-                ctx.beginPath(); ctx.moveTo(c[0],c[1]); ctx.lineTo(c[2],c[3]); ctx.lineTo(c[4],c[5]); ctx.fill();
-            });
-            ctx.fillStyle="#FFD700"; ctx.beginPath(); ctx.arc(256,30,8,0,Math.PI*2); ctx.fill();
-        }
-        function createCalendarTexture(monthIndex) {
-            const cvs = document.createElement('canvas'); cvs.width=512; cvs.height=512;
-            const ctx = cvs.getContext('2d');
-            ctx.fillStyle='#fff'; ctx.fillRect(0,0,512,512);
-            const cols=['#FF9A9E','#FECFEF','#A18CD1','#FBC2EB','#8FD3F4','#84FAB0','#ffc3a0','#ffafbd','#c9ffbf','#ffcc33','#2193b0','#6dd5ed'];
-            ctx.fillStyle=cols[monthIndex%12]; ctx.fillRect(20,20,472,220);
+        function rebuildModel() {
+            if (calendarGroup) scene.remove(calendarGroup);
+            if (dimensionGroup) scene.remove(dimensionGroup);
+
+            calendarGroup = new THREE.Group();
+            dimensionGroup = new THREE.Group();
+            scene.add(calendarGroup);
+            scene.add(dimensionGroup);
+
+            const halfBase = baseDepth / 2;
+            const verticalHeight = Math.sqrt(Math.max(0, Math.pow(slantHeight, 2) - Math.pow(halfBase, 2)));
+            const tiltAngle = Math.asin(halfBase / slantHeight);
+            const thickness = 0.2;
+
+            const coverGeo = new THREE.BoxGeometry(width, slantHeight, thickness);
+            const frontCover = new THREE.Mesh(coverGeo, coverMaterial);
+            frontCover.position.set(0, verticalHeight / 2, halfBase / 2);
+            frontCover.rotation.x = -tiltAngle;
+            frontCover.castShadow = true;
+            calendarGroup.add(frontCover);
+
+            const backCover = new THREE.Mesh(coverGeo, coverMaterial);
+            backCover.position.set(0, verticalHeight / 2, -halfBase / 2);
+            backCover.rotation.x = tiltAngle;
+            backCover.castShadow = true;
+            calendarGroup.add(backCover);
+
+            const bottomCover = new THREE.Mesh(new THREE.BoxGeometry(width, baseDepth, thickness), coverMaterial);
+            bottomCover.rotation.x = Math.PI / 2;
+            bottomCover.position.y = 0.05;
+            bottomCover.receiveShadow = true;
+            calendarGroup.add(bottomCover);
+
+            function addPages(isFront) {
+                const monthIdx = isFront ? 0 : 1; 
+                const texture = createCalendarTexture(monthIdx); 
+                const pageMat = new THREE.MeshBasicMaterial({ map: texture });
+                const mats = [whiteMaterial, whiteMaterial, whiteMaterial, whiteMaterial, pageMat, whiteMaterial];
+                const page = new THREE.Mesh(new THREE.BoxGeometry(width - 0.8, slantHeight - 0.8, 0.05), mats);
+                
+                if (isFront) {
+                    page.position.set(0, verticalHeight / 2, halfBase / 2 + 0.15);
+                    page.rotation.x = -tiltAngle;
+                } else {
+                    page.position.set(0, verticalHeight / 2, -halfBase / 2 - 0.15);
+                    page.rotation.x = tiltAngle;
+                    page.rotation.y = Math.PI;
+                }
+                page.castShadow = true;
+                calendarGroup.add(page);
+            }
+            addPages(true);
+            addPages(false);
+
+            const ringCount = 12;
+            for (let i = 0; i < ringCount; i++) {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.06, 8, 16), ringMaterial);
+                ring.position.set(-width/2 + 1 + (i * (width-2)/(ringCount-1)), verticalHeight, 0);
+                ring.rotation.y = Math.PI / 2;
+                ring.castShadow = true;
+                calendarGroup.add(ring);
+            }
+
+            const offset = 1.5;
+            createDimensionLabel(`${slantHeight} cm`, 
+                new THREE.Vector3(-width/2, verticalHeight, 0), 
+                new THREE.Vector3(-width/2, 0, halfBase), 
+                new THREE.Vector3(-1, 0, 1));
             
-            if(monthIndex%12===0) { drawApricotBlossom(ctx); ctx.fillStyle='#d00'; ctx.font='italic bold 25px Arial'; ctx.textAlign='right'; ctx.fillText("Happy New Year",470,60); }
-            else if(monthIndex%12===11) { drawPineTree(ctx); ctx.fillStyle='#fff'; ctx.font='italic bold 25px Arial'; ctx.textAlign='left'; ctx.fillText("Merry Christmas",30,60); }
-            else { ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.arc(400,80,40,0,Math.PI*2); ctx.fill(); }
-            
-            ctx.strokeStyle="#333"; ctx.lineWidth=2; ctx.strokeRect(20,20,472,220);
-            ctx.fillStyle=monthIndex%12===0?'#d00':(monthIndex%12===11?'#006400':'#000');
-            ctx.font='bold 50px Arial'; ctx.textAlign='center'; ctx.fillText(`THÁNG ${monthIndex+1}`,256,300);
-            
-            ctx.font='bold 24px monospace'; ctx.fillStyle='#333';
-            let d=1, startX=60, startY=350;
-            ['CN','T2','T3','T4','T5','T6','T7'].forEach((t,i)=>{ ctx.fillStyle=i===0?'#d00':'#000'; ctx.fillText(t,startX+i*60,startY-30); });
-            for(let r=0;r<5;r++) for(let c=0;c<7;c++) { if(d>30) break; ctx.fillStyle=c===0?'#d00':'#333'; ctx.fillText(d++,startX+c*60,startY+r*40); }
-            
-            const tex = new THREE.CanvasTexture(cvs); tex.colorSpace=THREE.SRGBColorSpace; return tex;
+            createDimensionLabel(`${width} cm`, 
+                new THREE.Vector3(-width/2, 0.2, halfBase), 
+                new THREE.Vector3(width/2, 0.2, halfBase), 
+                new THREE.Vector3(0, 0, offset));
+
+            createDimensionLabel(`${baseDepth} cm`, 
+                new THREE.Vector3(width/2 + 0.5, 0.2, halfBase), 
+                new THREE.Vector3(width/2 + 0.5, 0.2, -halfBase), 
+                new THREE.Vector3(1, 0, 0));
         }
 
-        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+        function drawDecoration(ctx, type) {
+            ctx.save();
+            ctx.strokeStyle = '#5D4037';
+            ctx.lineWidth = 6; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(480, 220); ctx.bezierCurveTo(400, 150, 450, 100, 320, 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(350, 65); ctx.lineTo(380, 20); ctx.stroke();
+            const flowerColor = (type === 'mai') ? '#FFD700' : '#FF69B4';
+            const centerColor = (type === 'mai') ? '#FF8C00' : '#D00060';
+            const points = [[450, 180], [380, 120], [320, 50], [380, 25], [410, 140], [460, 100]];
+            points.forEach(p => {
+                const x = p[0]; const y = p[1];
+                ctx.fillStyle = flowerColor;
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    const angle = (i * 2 * Math.PI) / 5;
+                    ctx.ellipse(x + Math.cos(angle) * 8, y + Math.sin(angle) * 8, 8, 5, angle, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = centerColor; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        function createCalendarTexture(monthIndex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 512, 512);
+            ctx.fillStyle = monthIndex === 0 ? '#B22222' : '#2E8B57';
+            ctx.fillRect(0, 0, 512, 120);
+            if (monthIndex === 0) {
+                drawDecoration(ctx, 'mai');
+                ctx.fillStyle = '#FFD700'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right';
+                ctx.fillText("Chúc Mừng Năm Mới", 500, 110);
+            } else {
+                drawDecoration(ctx, 'dao');
+                ctx.fillStyle = '#FFC0CB'; ctx.font = 'italic bold 22px Arial'; ctx.textAlign = 'right';
+                ctx.fillText("Vạn Sự Như Ý", 500, 110);
+            }
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 50px Arial'; ctx.textAlign = 'center';
+            ctx.fillText(`THÁNG 0${monthIndex + 1} / 2026`, 256, 75);
+            const daysHeader = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            ctx.font = 'bold 22px Arial';
+            daysHeader.forEach((d, i) => {
+                ctx.fillStyle = i === 0 ? '#d00' : '#333'; ctx.fillText(d, 60 + i * 65, 170);
+            });
+            let firstDayIndex = monthIndex === 0 ? 4 : 0;
+            let totalDays = monthIndex === 0 ? 31 : 28;
+            let date = 1;
+            ctx.font = 'bold 28px Arial';
+            for (let row = 0; row < 6; row++) {
+                for (let col = 0; col < 7; col++) {
+                    const index = row * 7 + col;
+                    if (index >= firstDayIndex && date <= totalDays) {
+                        const x = 60 + col * 65; const y = 230 + row * 50;
+                        if (monthIndex === 0 && date === 25) {
+                            ctx.strokeStyle = 'red'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y - 10, 25, 0, Math.PI * 2); ctx.stroke();
+                            ctx.fillStyle = 'red'; ctx.font = 'bold 14px Arial'; ctx.fillText("Seminar", x, y + 30);
+                            ctx.font = 'bold 28px Arial'; 
+                        }
+                        ctx.fillStyle = col === 0 ? '#d00' : '#333'; ctx.textAlign = 'center';
+                        ctx.fillText(date.toString(), x, y); date++;
+                    }
+                }
+            }
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace; return tex;
+        }
+
+        function updateMathLogic() {
+            correctAnswer = (slantHeight * 2 + baseDepth) * width;
+            const guideHTML = `
+                <div style="font-size:14px; line-height:1.6;">
+                    - Chu vi đáy: <span class="math">C = ${slantHeight} + ${slantHeight} + ${baseDepth} = ${slantHeight*2 + baseDepth} cm</span><br>
+                    - Diện tích xung quanh: <span class="math">S = C × ${width} = ${correctAnswer} cm²</span>
+                </div>`;
+            document.getElementById('guideContent').innerHTML = guideHTML;
+        }
+
+        document.getElementById('checkBtn').onclick = () => {
+            const val = parseFloat(document.getElementById('userAnswer').value);
+            const feedback = document.getElementById('feedback');
+            if (Math.abs(val - correctAnswer) < 1) {
+                feedback.innerHTML = "Chính xác! Chúc mừng bạn! 🎉";
+                feedback.className = "feedback correct";
+            } else {
+                feedback.innerHTML = "Chưa đúng, hãy nhìn kỹ các số đo trên hình.";
+                feedback.className = "feedback incorrect";
+            }
+        };
+
+        document.getElementById('guideBtn').onclick = () => {
+            const g = document.getElementById('guideContent');
+            g.style.display = g.style.display === 'block' ? 'none' : 'block';
+        };
+
+        document.getElementById('newExerciseBtn').onclick = () => {
+            const f = document.getElementById('customForm');
+            f.style.display = f.style.display === 'block' ? 'none' : 'block';
+        };
+
+        document.getElementById('applyCustomBtn').onclick = () => {
+            slantHeight = parseFloat(document.getElementById('inputSlant').value);
+            baseDepth = parseFloat(document.getElementById('inputBase').value);
+            width = parseFloat(document.getElementById('inputLength').value);
+            rebuildModel();
+            updateMathLogic();
+            document.getElementById('customForm').style.display = 'none';
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
     </script>
 </body>
 </html>
