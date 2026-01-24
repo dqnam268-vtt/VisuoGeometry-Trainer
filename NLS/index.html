@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Sơ đồ Phát triển Năng lực số - Luận văn</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .node-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Tự định nghĩa các biểu tượng SVG để tránh lỗi thư viện ngoài
+        const IconNetwork = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="9" width="6" height="6" rx="1"/><rect x="16" y="9" width="6" height="6" rx="1"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+        );
+
+        const IconBox = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        );
+
+        const IconActivity = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        );
+
+        const IconShieldCheck = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+        );
+
+        const IconLightbulb = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        );
+
+        const IconSettings = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        );
+
+        const IconDatabase = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+        );
+
+        const IconChevronRight = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        );
+
+        const IconBookOpen = ({ size = 24, color = "currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        );
+
+        const CompetenceNode = ({ title, subTitle, icon: Icon, color, activities }) => {
+            const [isOpen, setIsOpen] = useState(true);
+
+            return (
+                <div className="flex flex-col items-center w-full max-w-6xl mx-auto my-8">
+                    {/* Main Node */}
+                    <div 
+                        className="relative z-10 flex items-center p-6 rounded-2xl shadow-xl border-4 bg-white node-transition hover:scale-[1.02] cursor-pointer w-full md:w-5/6"
+                        style={{ borderColor: color }}
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        <div className="p-4 rounded-xl mr-6" style={{ backgroundColor: `${color}15` }}>
+                            <Icon size={40} color={color} />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-extrabold text-gray-900 text-2xl lg:text-3xl leading-tight mb-1">{title}</h3>
+                            <p className="text-lg lg:text-xl text-gray-500 font-semibold italic">{subTitle}</p>
+                        </div>
+                        <div className={`transition-transform duration-500 ${isOpen ? 'rotate-90' : ''}`}>
+                            <IconChevronRight size={32} color="#94a3b8" />
+                        </div>
+                    </div>
+
+                    {/* Connection Line */}
+                    {isOpen && (
+                        <div className="w-1 h-12 bg-gray-200" />
+                    )}
+
+                    {/* Child Nodes (Activities) */}
+                    {isOpen && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full px-4">
+                            {activities.map((act, index) => (
+                                <div 
+                                    key={index}
+                                    className="relative p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-white hover:shadow-2xl transition-all duration-300"
+                                >
+                                    <div className="flex items-start mb-4">
+                                        <div className="bg-blue-50 p-2 rounded-lg shadow-sm mr-3 border border-blue-100">
+                                            <IconActivity size={24} color="#2563eb" />
+                                        </div>
+                                        <h4 className="font-bold text-blue-900 text-xl uppercase tracking-wide">{act.name}</h4>
+                                    </div>
+                                    
+                                    <div className="space-y-4 mt-4">
+                                        <div className="flex items-start text-lg text-gray-600 italic">
+                                            <IconBox size={22} color="#94a3b8" className="mr-3 mt-1 shrink-0" />
+                                            <span className="ml-3"><strong className="text-gray-800">Học liệu:</strong> {act.material}</span>
+                                        </div>
+                                        <div className="flex items-start text-lg text-gray-700">
+                                            <IconSettings size={22} color="#94a3b8" className="mr-3 mt-1 shrink-0" />
+                                            <span className="ml-3"><strong className="text-gray-800">Tương tác:</strong> {act.interaction}</span>
+                                        </div>
+                                        <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-lg font-bold text-emerald-800 shadow-sm">
+                                            ✨ {act.outcome}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const data = [
+                {
+                    title: "MIỀN I: KHAI THÁC DỮ LIỆU VÀ THÔNG TIN",
+                    subTitle: "Năng lực 1.3: Quản lý dữ liệu, thông tin và nội dung số",
+                    icon: IconDatabase,
+                    color: "#2563eb",
+                    activities: [
+                        {
+                            name: "Khám phá hình khối",
+                            material: "Mô hình 3D tương tác",
+                            interaction: "Xoay 360 độ, ẩn/hiện bộ phận, thay đổi kích thước.",
+                            outcome: "Tổ chức và truy xuất dữ liệu hình học có cấu trúc."
+                        }
+                    ]
+                },
+                {
+                    title: "MIỀN V: GIẢI QUYẾT VẤN ĐỀ",
+                    subTitle: "Năng lực 5.3 VÀ 5.4: Sáng tạo và Tự đánh giá",
+                    icon: IconLightbulb,
+                    color: "#7c3aed",
+                    activities: [
+                        {
+                            name: "Hình thành công thức",
+                            material: "Web mô phỏng động",
+                            interaction: "Trải hình, điều khiển thanh trượt đại lượng.",
+                            outcome: "Sử dụng sáng tạo công cụ để tạo kiến thức mới (5.3)."
+                        },
+                        {
+                            name: "Luyện tập kỹ năng",
+                            material: "Hệ thống thích ứng (Adaptive)",
+                            interaction: "Trắc nghiệm, phản hồi tức thì, theo dõi biểu đồ.",
+                            outcome: "Tự điều chỉnh lộ trình học tập từ dữ liệu phản hồi (5.4)."
+                        }
+                    ]
+                },
+                {
+                    title: "MIỀN IV: AN TOÀN VÀ AN SINH",
+                    subTitle: "Năng lực 4.3: Bảo vệ sức khỏe và an sinh số",
+                    icon: IconShieldCheck,
+                    color: "#059669",
+                    activities: [
+                        {
+                            name: "Vận dụng thực tiễn",
+                            material: "Trò chơi nhập vai",
+                            interaction: "Giải quyết tình huống, tính toán chi phí thực tế.",
+                            outcome: "Hiểu vai trò công nghệ trong an sinh và thịnh vượng xã hội."
+                        }
+                    ]
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-slate-50 py-12 px-6 font-sans">
+                    
+                    {/* Central Core */}
+                    <div className="flex justify-center mb-12">
+                        <div className="bg-gray-900 text-white p-10 rounded-[2.5rem] shadow-2xl flex items-center space-x-8 border-8 border-white">
+                            <IconNetwork size={56} color="#60a5fa" />
+                            <div className="text-left">
+                                <span className="text-4xl font-black tracking-tight">BIỂU HIỆN NĂNG LỰC SỐ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mindmap Nodes */}
+                    <div className="relative">
+                        <div className="absolute top-0 bottom-0 left-1/2 w-1.5 bg-gradient-to-b from-gray-900 via-gray-200 to-transparent -z-0 hidden md:block" />
+                        
+                        {data.map((domain, idx) => (
+                            <CompetenceNode key={idx} {...domain} />
+                        ))}
+                    </div>
+
+                    {/* Legend / Key */}
+                    <div className="max-w-6xl mx-auto mt-24 p-10 bg-white rounded-[2rem] shadow-xl border border-gray-100 flex flex-wrap justify-around gap-10 text-2xl font-black">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-6 h-6 rounded-full bg-blue-600 shadow-sm" />
+                            <span className="text-gray-800 uppercase">Dữ liệu và Thông tin</span>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <div className="w-6 h-6 rounded-full bg-purple-600 shadow-sm" />
+                            <span className="text-gray-800 uppercase">Giải quyết vấn đề</span>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <div className="w-6 h-6 rounded-full bg-emerald-600 shadow-sm" />
+                            <span className="text-gray-800 uppercase">An toàn và An sinh</span>
+                        </div>
+                       
+                    </div>
+                    
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
