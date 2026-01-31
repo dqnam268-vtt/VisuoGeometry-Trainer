@@ -10,7 +10,7 @@
         body {
             font-family: 'Quicksand', sans-serif;
             background: radial-gradient(circle, #cc0000 0%, #800000 100%);
-            overflow: hidden; /* Ngăn cuộn trang trên desktop để tạo cảm giác app full màn hình */
+            overflow: hidden; 
             height: 100vh;
             width: 100vw;
         }
@@ -54,7 +54,6 @@
             border-radius: 50%;
             pointer-events: none;
         }
-        /* Khung tranh gỗ cho video */
         .painting-frame {
             border: 10px solid #5d4037;
             border-image: linear-gradient(to bottom, #8d6e63, #3e2723, #8d6e63) 1;
@@ -77,7 +76,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             border: 1px solid #78350f;
         }
-        /* Tùy chỉnh thanh cuộn cho lưới bao lì xì */
         #envelope-container::-webkit-scrollbar {
             width: 6px;
         }
@@ -91,6 +89,11 @@
     </style>
 </head>
 <body class="text-yellow-200">
+
+    <!-- Nhạc nền MP3 - Luôn phát và lặp lại -->
+    <audio id="bgMusic" loop>
+        <source src="nhac_tet.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="petals-container"></div>
 
@@ -108,36 +111,33 @@
 
             <div class="bg-red-900/40 p-4 rounded-2xl border border-yellow-600/30 backdrop-blur-sm">
                 <p class="text-md italic text-yellow-100 leading-relaxed">
-                    "Mã đáo thành công" - Chúc 29 bạn nhỏ và 3 thầy cô một năm mới dồi dào năng lượng, bứt phá mạnh mẽ như những chú ngựa thần!
+                    "Mã đáo thành công" - Chúc 29 bạn nhỏ và thầy cô một năm mới dồi dào năng lượng, bứt phá mạnh mẽ như những chú ngựa thần!
                 </p>
             </div>
 
-            <!-- Tranh Mã Đáo Thành Công nằm ngang -->
+            <!-- Tranh Mã Đáo Thành Công -->
             <div class="space-y-4">
                 <h3 class="tet-font text-2xl text-yellow-500 flex items-center gap-2">
-                    <span>🐎</span> Tranh Mã Đáo Thành Công
+                    <span>🐎</span> Mã Đáo Thành Công
                 </h3>
-                <div class="painting-frame rounded-sm overflow-hidden group w-full">
+                <div class="painting-frame rounded-sm overflow-hidden group w-full bg-black flex items-center justify-center aspect-video">
+                    <!-- Video được tắt tiếng hoàn toàn bằng thuộc tính muted -->
                     <video 
                         id="horseVideo"
                         autoplay 
                         muted 
                         loop 
                         playsinline 
-                        class="w-full h-auto block min-h-[150px] object-cover"
+                        class="w-full h-full block object-cover"
                     >
-                        <source src="https://v.ftcdn.net/02/10/82/11/700_F_210821102_9w6E4ZfF7I6vOqM0Wv9Y0n2z8z8n4Z9w_ST.mp4" type="video/mp4">
-                        <source src="https://assets.mixkit.co/videos/preview/mixkit-herd-of-horses-running-on-the-plain-41443-large.mp4" type="video/mp4">
-                        <img src="https://media.giphy.com/media/l2JIk0Y6t58rXo7W0/giphy.gif" class="w-full h-auto" alt="Mã Đáo Thành Công Fallback">
+                        <source src="video.mp4" type="video/mp4">
                     </video>
                     <div class="painting-label uppercase tracking-widest">Bính Ngọ 2026</div>
                 </div>
-            </div>
-
-            <div class="hidden lg:flex justify-start gap-6 text-yellow-500/30">
-                <span class="text-3xl animate-bounce">🧧</span>
-                <span class="text-3xl animate-pulse">🌸</span>
-                <span class="text-3xl animate-bounce" style="animation-delay: 0.5s">✨</span>
+                <div class="flex justify-between items-center px-1">
+                    <p class="text-[9px] text-yellow-500/50 italic">Chỉ hình ảnh: video_cua_ban.mp4 | Nhạc: nhac_tet.mp3</p>
+                    <button id="musicControl" class="text-xs bg-yellow-600/20 px-2 py-0.5 rounded border border-yellow-600/30 text-yellow-400">Nhạc nền: Tắt</button>
+                </div>
             </div>
         </div>
 
@@ -150,11 +150,10 @@
             
             <div id="envelope-container" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div id="envelope-grid" class="grid grid-cols-4 sm:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
-                    <!-- Render via JS -->
+                    <!-- Render qua JavaScript -->
                 </div>
             </div>
         </div>
-
     </main>
 
     <!-- Modal hiển thị lời chúc -->
@@ -163,13 +162,11 @@
             <div class="absolute -top-14 left-1/2 -translate-x-1/2 w-24 h-24 bg-red-600 rounded-full border-4 border-yellow-400 flex items-center justify-center shadow-xl">
                 <span class="text-4xl">🐎</span>
             </div>
-            
             <div class="text-center mt-6">
                 <h3 class="text-red-500 font-bold text-xs uppercase mb-2 tracking-widest">Lời Chúc Đầu Xuân</h3>
                 <div id="wish-text" class="text-3xl md:text-4xl font-bold tet-font mb-8 leading-tight min-h-[100px] flex items-center justify-center">
                     Lời chúc
                 </div>
-                
                 <div class="border-t-2 border-dashed border-red-200 pt-8">
                     <button onclick="closeModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg active:scale-95">
                         Mã Đáo Thành Công!
@@ -212,27 +209,44 @@
             }
             createPetals();
 
-            // Kích hoạt video
-            document.addEventListener('click', () => {
-                const video = document.getElementById('horseVideo');
-                if (video && video.paused) {
-                    video.play().catch(e => console.log("Video auto-play blocked"));
+            const music = document.getElementById('bgMusic');
+            const video = document.getElementById('horseVideo');
+            const controlBtn = document.getElementById('musicControl');
+
+            // Đảm bảo video luôn im lặng cho dù file gốc có tiếng
+            if (video) video.muted = true;
+
+            const startMedia = () => {
+                if (video) video.play().catch(() => {});
+                if (music) {
+                    music.play().then(() => {
+                        controlBtn.innerText = "Nhạc nền: Bật";
+                    }).catch(() => {});
                 }
-            }, { once: true });
+            };
+
+            document.addEventListener('click', startMedia, { once: true });
+
+            controlBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (music.paused) {
+                    music.play();
+                    controlBtn.innerText = "Nhạc nền: Bật";
+                } else {
+                    music.pause();
+                    controlBtn.innerText = "Nhạc nền: Tắt";
+                }
+            };
         }
 
         function openEnvelope(index, element) {
             if (element.classList.contains('opened')) return;
-
             element.classList.add('opened');
             document.getElementById('wish-text').innerText = shuffledWishes[index];
-            
             const modal = document.getElementById('wish-modal');
             const content = document.getElementById('modal-content');
-            
             modal.classList.remove('hidden');
             setTimeout(() => content.classList.add('scale-100'), 50);
-
             createFireworks();
         }
 
@@ -271,17 +285,12 @@
                 const colors = ['#fbbf24', '#ef4444', '#ffffff', '#4ade80'];
                 f.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 document.body.appendChild(f);
-                
                 const angle = Math.random() * Math.PI * 2;
                 const dist = Math.random() * 250 + 50;
-                
                 f.animate([
                     { transform: 'translate(0, 0) scale(1)', opacity: 1 },
                     { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`, opacity: 0 }
-                ], {
-                    duration: 1000,
-                    easing: 'ease-out'
-                }).onfinish = () => f.remove();
+                ], { duration: 1000, easing: 'ease-out' }).onfinish = () => f.remove();
             }
         }
 
