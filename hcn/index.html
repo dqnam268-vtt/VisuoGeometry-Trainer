@@ -58,10 +58,16 @@
         #racing-car { position: absolute; top: 10px; left: 10px; font-size: 35px; transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10; filter: drop-shadow(2px 4px 6px black); }
 
         /* === TRẠM 4: DẤU HIỆU === */
-        #ggb-container-4 { margin: 20px auto; width: 800px; height: 450px; border-radius: 15px; border: 2px solid #ccc; overflow: hidden; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
+        #ggb-container-4 { margin: 10px auto; width: 800px; height: 450px; border-radius: 15px; border: 2px solid #ccc; overflow: hidden; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
         .m4-btn { padding: 10px 20px; font-size: 15px; margin: 0 5px; opacity: 0.5; transition: 0.3s; border-radius: 8px; cursor: pointer; border: 2px solid transparent; color: white; font-weight: bold;}
         .m4-btn:hover { opacity: 0.8; }
         .m4-active { opacity: 1 !important; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 2px solid #2c3e50;}
+
+        /* === CHÂN TRANG (FOOTER) === */
+        .site-footer { text-align: center; padding: 25px 20px; margin-top: 40px; color: #7f8c8d; font-size: 15px; border-top: 2px dashed #bdc3c7; background-color: transparent; }
+        .site-footer b { color: #2c3e50; }
+        .site-footer .heart { color: #e74c3c; animation: heartbeat 1.5s infinite; display: inline-block; }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -154,9 +160,15 @@
             <button class="m4-btn" id="btn-m4-3" style="background: #e74c3c;" onclick="loadMission4(3)">3. Tam giác + Trung tuyến</button>
         </div>
 
-        <p id="msg-tram4" style="text-align: center; font-weight: bold; font-size: 18px; color: #e67e22; min-height: 25px;">Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)...</p>
+        <p id="msg-tram4" style="text-align: center; font-weight: bold; font-size: 18px; color: #e67e22; min-height: 25px; transition: 0.3s;"></p>
+        <p id="guide-tram4" style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: -10px; margin-bottom: 15px; font-size: 14px;"></p>
         
         <div id="ggb-container-4"></div>
+    </div>
+
+    <div class="site-footer">
+        © 2026 - Hệ thống Học Liệu Số Tương Tác <br>
+        Thiết kế và phát triển với <span class="heart">❤️</span> bởi <b>Thầy Đinh Quốc Nam</b> - THCS Võ Trường Toản
     </div>
 
     <script>
@@ -457,35 +469,44 @@
            ========================================= */
         let apiTram4 = null;
         let currentMission4 = 1;
+        window.isSnapping = false;
 
         function loadMission4(m) {
             currentMission4 = m;
             
-            // Xử lý UI nút bấm
             document.querySelectorAll('.m4-btn').forEach(btn => btn.classList.remove('m4-active'));
             document.getElementById('btn-m4-' + m).classList.add('m4-active');
 
             let msgBox = document.getElementById('msg-tram4');
+            let guideBox = document.getElementById('guide-tram4');
 
             if(apiTram4) {
-                // Xóa tàn dư cũ thay vì newConstruction để giữ nguyên bộ lắng nghe sự kiện
                 apiTram4.evalCommand("Delete(A)");
-                apiTram4.evalCommand("Delete(B)"); // Trong trường hợp Tam giác
+                apiTram4.evalCommand("Delete(B)"); 
                 
                 setTimeout(() => {
                     apiTram4.evalCommand("SetPerspective(\"G\")");
                     apiTram4.evalCommand("ShowAxes(false)");
                     apiTram4.evalCommand("ShowGrid(false)");
 
-                    // SỨ MỆNH 1 & 2: HÌNH BÌNH HÀNH
                     if (m === 1 || m === 2) {
+                        if(m === 1) {
+                            msgBox.innerHTML = "🔍 Thám tử tìm góc vuông: Kéo điểm C sao cho góc A bằng 90°!";
+                            msgBox.style.color = "#e67e22";
+                            guideBox.innerHTML = "👉 <b>Hướng dẫn:</b> Nhấp và kéo điểm C sang trái hoặc phải để điều chỉnh độ mở của góc A.";
+                        } else {
+                            msgBox.innerHTML = "📏 Thám tử so sánh: Kéo điểm C để 2 đường chéo AC và BD bằng nhau!";
+                            msgBox.style.color = "#9b59b6";
+                            guideBox.innerHTML = "👉 <b>Hướng dẫn:</b> Nhấp và kéo điểm C sao cho độ dài AC và BD hiển thị khớp nhau.";
+                        }
+
                         apiTram4.evalCommand("A = (2, 2)");
                         apiTram4.evalCommand("B = (8, 2)");
-                        apiTram4.evalCommand("C = (9, 5)"); // Để lệch 1 chút thành hình bình hành
-                        apiTram4.evalCommand("D = A + C - B"); // Tính tịnh tiến D để luôn tạo ra HBH
+                        apiTram4.evalCommand("C = (9, 5)"); 
+                        apiTram4.evalCommand("D = A + C - B"); 
 
                         apiTram4.evalCommand("HBH = Polygon(A, B, C, D)");
-                        apiTram4.setColor("HBH", 230, 126, 34); // Màu cam
+                        apiTram4.setColor("HBH", 230, 126, 34); 
                         apiTram4.setFilling("HBH", 0.15);
 
                         apiTram4.evalCommand("CachAB = Segment(A, B)");
@@ -500,16 +521,13 @@
                         apiTram4.setFixed("A", true, false);
                         apiTram4.setFixed("B", true, false);
                         apiTram4.setFixed("D", false, false);
-                        apiTram4.setFixed("C", false, true); // Chỉ cho phép kéo C
+                        apiTram4.setFixed("C", false, true); 
+                        apiTram4.setPointSize("C", 7);
 
                         if (m === 1) {
-                            msgBox.innerText = "Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)...";
-                            msgBox.style.color = "#e67e22";
                             apiTram4.evalCommand("AngA = Angle(D, A, B)");
                             apiTram4.setColor("AngA", 41, 128, 185);
                         } else {
-                            msgBox.innerText = "Kéo đỉnh C để 2 đường chéo AC và BD bằng nhau...";
-                            msgBox.style.color = "#8e44ad";
                             apiTram4.evalCommand("Cheo1 = Segment(A, C)");
                             apiTram4.evalCommand("Cheo2 = Segment(B, D)");
                             apiTram4.setColor("Cheo1", 155, 89, 182);
@@ -517,7 +535,6 @@
                             apiTram4.setLineThickness("Cheo1", 3);
                             apiTram4.setLineThickness("Cheo2", 3);
                             
-                            // Hiển thị độ dài động
                             apiTram4.evalCommand("Txt1 = Text(\"AC = \" + round(Distance(A,C)*10)/10, (1, 6))");
                             apiTram4.evalCommand("Txt2 = Text(\"BD = \" + round(Distance(B,D)*10)/10, (1, 5.5))");
                             apiTram4.setColor("Txt1", 142, 68, 173);
@@ -526,22 +543,22 @@
                         apiTram4.evalCommand("CenterView((5, 3))");
                         apiTram4.evalCommand("ZoomIn(0.8)");
                     } 
-                    // SỨ MỆNH 3: TAM GIÁC VUÔNG
                     else if (m === 3) {
-                        msgBox.innerText = "Kéo đỉnh A để đường trung tuyến AM bằng nửa cạnh BC...";
+                        msgBox.innerHTML = "📐 Thám tử trung tuyến: Kéo điểm A sao cho AM bằng đúng 4 cm!";
                         msgBox.style.color = "#e74c3c";
+                        guideBox.innerHTML = "👉 <b>Hướng dẫn:</b> Di chuyển điểm A (đỉnh tam giác). Khi AM = 1/2 BC (4cm), tam giác sẽ vuông tại A.";
                         
                         apiTram4.evalCommand("B = (2, 2)");
                         apiTram4.evalCommand("C = (10, 2)");
                         apiTram4.evalCommand("M = Midpoint(B, C)");
-                        apiTram4.evalCommand("A = (5, 6)"); // Điểm A được phép kéo
+                        apiTram4.evalCommand("A = (5, 6)"); 
 
                         apiTram4.evalCommand("TamGiac = Polygon(A, B, C)");
-                        apiTram4.setColor("TamGiac", 231, 76, 60); // Màu đỏ
+                        apiTram4.setColor("TamGiac", 231, 76, 60); 
                         apiTram4.setFilling("TamGiac", 0.15);
 
                         apiTram4.evalCommand("AM = Segment(A, M)");
-                        apiTram4.setColor("AM", 52, 152, 219); // Tuyến màu xanh
+                        apiTram4.setColor("AM", 52, 152, 219); 
                         apiTram4.setLineThickness("AM", 4);
 
                         ["A", "B", "C", "M"].forEach(pt => {
@@ -552,10 +569,11 @@
                         apiTram4.setFixed("B", true, false);
                         apiTram4.setFixed("C", true, false);
                         apiTram4.setFixed("M", true, false);
-                        apiTram4.setFixed("A", false, true); // Chỉ kéo A
+                        apiTram4.setFixed("A", false, true); 
+                        apiTram4.setPointSize("A", 7);
 
                         apiTram4.evalCommand("TxtAM = Text(\"Trung tuyến AM = \" + round(Distance(A,M)*10)/10, (1, 6))");
-                        apiTram4.evalCommand("TxtBC = Text(\"Nửa cạnh BC/2 = \" + round(Distance(B,C)/2*10)/10, (1, 5.5))");
+                        apiTram4.evalCommand("TxtBC = Text(\"Nửa cạnh BC/2 = 4\", (1, 5.5))");
                         apiTram4.setColor("TxtAM", 41, 128, 185);
                         
                         apiTram4.evalCommand("CenterView((6, 3))");
@@ -565,31 +583,35 @@
             }
         }
 
-        // LẮNG NGHE SỰ KIỆN KÉO ĐỈNH VÀ CHẤM ĐIỂM
         window.listenerTram4 = function(objName) {
-            if(!apiTram4) return;
+            if(!apiTram4 || window.isSnapping) return;
             let msgBox = document.getElementById('msg-tram4');
 
             if (currentMission4 === 1 || currentMission4 === 2) {
-                // Đang chơi HBH (kéo đỉnh C)
-                if (objName === "C" || objName === "A" || objName === "B" || objName === "D") {
-                    let ac = apiTram4.getValue("Distance(A, C)");
-                    let bd = apiTram4.getValue("Distance(B, D)");
+                if (objName === "C") {
+                    let xC = apiTram4.getXcoord("C");
+                    let yC = apiTram4.getYcoord("C");
 
-                    // Về bản chất hình học, HBH có 2 chéo bằng nhau thì chắc chắn có 1 góc vuông và là HCN
-                    if (Math.abs(ac - bd) < 0.1) {
-                        msgBox.innerText = currentMission4 === 1 
-                            ? "Tuyệt vời! Hình bình hành có 1 góc vuông là Hình chữ nhật." 
-                            : "Tuyệt vời! Hình bình hành có 2 đường chéo bằng nhau là Hình chữ nhật.";
+                    if (Math.abs(xC - 8) > 0.01 && Math.abs(xC - 8) < 0.35) {
+                        window.isSnapping = true;
+                        apiTram4.setCoords("C", 8, yC);
+                        setTimeout(() => { window.isSnapping = false; }, 50);
+                        return;
+                    }
+
+                    if (Math.abs(xC - 8) < 0.1) {
+                        msgBox.innerHTML = currentMission4 === 1 
+                            ? "🎉 Tuyệt vời! Hình bình hành có 1 góc vuông là Hình chữ nhật." 
+                            : "🎉 Tuyệt vời! Hình bình hành có 2 đường chéo bằng nhau là Hình chữ nhật.";
                         msgBox.style.color = "#27ae60";
 
                         apiTram4.setColor("HBH", 46, 204, 113);
                         ["CachAB", "CachBC", "CachCD", "CachDA"].forEach(e => apiTram4.setColor(e, 39, 174, 96));
                     } else {
-                        msgBox.innerText = currentMission4 === 1 
-                            ? "Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)..." 
-                            : "Kéo đỉnh C để 2 đường chéo AC và BD bằng nhau...";
-                        msgBox.style.color = currentMission4 === 1 ? "#e67e22" : "#8e44ad";
+                        msgBox.innerHTML = currentMission4 === 1 
+                            ? "🔍 Thám tử tìm góc vuông: Kéo điểm C sao cho góc A bằng 90°!" 
+                            : "📏 Thám tử so sánh: Kéo điểm C để 2 đường chéo AC và BD bằng nhau!";
+                        msgBox.style.color = currentMission4 === 1 ? "#e67e22" : "#9b59b6";
 
                         apiTram4.setColor("HBH", 230, 126, 34);
                         ["CachAB", "CachBC", "CachCD", "CachDA"].forEach(e => apiTram4.setColor(e, 211, 84, 0));
@@ -597,17 +619,25 @@
                 }
             } 
             else if (currentMission4 === 3) {
-                // Đang chơi Tam Giác (kéo đỉnh A)
-                if (objName === "A" || objName === "B" || objName === "C") {
+                if (objName === "A") {
                     let am = apiTram4.getValue("Distance(A, M)");
-                    let bc2 = apiTram4.getValue("Distance(B, C) / 2");
+                    let xA = apiTram4.getXcoord("A");
+                    let yA = apiTram4.getYcoord("A");
 
-                    if (Math.abs(am - bc2) < 0.1) {
-                        msgBox.innerText = "Xuất sắc! Tam giác có trung tuyến bằng nửa cạnh tương ứng là Tam giác vuông.";
+                    if (Math.abs(am - 4) > 0.01 && Math.abs(am - 4) < 0.35) {
+                        window.isSnapping = true;
+                        let angle = Math.atan2(yA - 2, xA - 6);
+                        apiTram4.setCoords("A", 6 + 4 * Math.cos(angle), 2 + 4 * Math.sin(angle));
+                        setTimeout(() => { window.isSnapping = false; }, 50);
+                        return;
+                    }
+
+                    if (Math.abs(am - 4) < 0.1) {
+                        msgBox.innerHTML = "🚀 Xuất sắc! Tam giác có trung tuyến bằng nửa cạnh là Tam giác vuông.";
                         msgBox.style.color = "#27ae60";
                         apiTram4.setColor("TamGiac", 46, 204, 113);
                     } else {
-                        msgBox.innerText = "Kéo đỉnh A để đường trung tuyến AM bằng nửa cạnh BC...";
+                        msgBox.innerHTML = "📐 Thám tử trung tuyến: Kéo điểm A sao cho AM bằng đúng 4 cm!";
                         msgBox.style.color = "#e74c3c";
                         apiTram4.setColor("TamGiac", 231, 76, 60);
                     }
@@ -627,10 +657,7 @@
                 "language": "en",
                 "appletOnLoad": function(api) {
                     apiTram4 = api;
-                    // Đăng ký bộ lắng nghe DUY NHẤT 1 LẦN
                     apiTram4.registerUpdateListener("listenerTram4");
-                    
-                    // Khởi động load nhiệm vụ 1
                     loadMission4(1);
                 }
             };
