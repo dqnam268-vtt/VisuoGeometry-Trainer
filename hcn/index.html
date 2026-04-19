@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Liệu Số: Khám Phá Hình Chữ Nhật - Thầy Đinh Quốc Nam</title>
+    <script src="https://www.geogebra.org/apps/deployggb.js"></script>
+    <style>
+        /* === STYLE TỔNG THỂ === */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; color: #2c3e50; }
+        h1 { text-align: center; color: #2980b9; margin-bottom: 30px; }
+        .nav-tabs { display: flex; justify-content: center; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 20px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; background: #d1d8e0; color: #4b6584; border-radius: 30px; transition: 0.3s; }
+        .tab-btn.active { background: #3498db; color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
+        
+        .game-section { display: none; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 1100px; margin: 0 auto; min-height: 500px; }
+        .game-section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        button.action-btn { padding: 12px 25px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        button.action-btn:hover { background: #219150; transform: translateY(-2px); }
+
+        /* === TRẠM 1: ĐẤU TRƯỜNG === */
+        .tram1-layout { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+        .game-main { flex: 3; min-width: 350px; }
+        .leaderboard-panel { flex: 1; min-width: 250px; background: #fff9e6; padding: 20px; border-radius: 15px; border: 2px solid #f1c40f; }
+        .leaderboard-panel h3 { margin-top: 0; color: #d35400; text-align: center; border-bottom: 2px solid #f1c40f; padding-bottom: 10px; }
+        #leaderboard-list { padding-left: 0; list-style: none; margin: 0; }
+        #leaderboard-list li { padding: 10px 0; border-bottom: 1px dashed #f39c12; }
+        .stats-panel { display: flex; justify-content: space-between; background: #34495e; color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        #game-area-1 { position: relative; width: 100%; height: 400px; background: #dfe6e9; border: 3px dashed #b2bec3; border-radius: 15px; overflow: hidden; }
+        .shape { position: absolute; cursor: pointer; transition: transform 0.1s; border: 2px solid rgba(0,0,0,0.1); }
+        .parallelogram { transform: skew(-20deg); }
+        .trapezoid { clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); border: none; }
+        .rhombus { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border: none; }
+
+        /* === TRẠM 2: TÍNH CHẤT NÂNG CẤP === */
+        .tram2-layout { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; margin-top: 20px;}
+        .drag-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center;}
+        .ggb-col { flex: 1.2; min-width: 400px; background: #fafafa; padding: 15px; border-radius: 15px; border: 2px solid #e0e0e0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); text-align: center;}
+        .drag-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; width: 100%;}
+        .draggable { padding: 12px 18px; color: white; font-weight: bold; border-radius: 10px; cursor: grab; display: flex; align-items: center; gap: 8px; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); user-select: none; transition: transform 0.2s;}
+        .draggable:active { cursor: grabbing; transform: scale(0.95); }
+        #prop-sai { background-color: #e74c3c; } 
+        #prop-goc { background-color: #e67e22; } 
+        #prop-cheo { background-color: #9b59b6; } 
+        #prop-cat { background-color: #27ae60; } 
+        #drop-zone { width: 100%; height: 200px; border: 4px dashed #3498db; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ebf5fb; gap: 10px; padding: 15px; box-sizing: border-box; transition: background 0.3s;}
+        #drop-zone.drag-over { background: #d6eaf8; border-color: #2980b9; }
+        #ggb-container-2 { width: 450px; height: 350px; border-radius: 10px; overflow: hidden; margin: 0 auto; border: 1px solid #ccc; background: white;}
+
+        /* === TRẠM 3: ĐUA XE === */
+        #math-card { background: #f1c40f; padding: 30px; border-radius: 15px; max-width: 600px; margin: 20px auto; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3); }
+        input[type="number"] { padding: 12px; font-size: 18px; width: 120px; border-radius: 8px; border: 2px solid #bdc3c7; text-align: center; font-weight: bold;}
+        .racing-track { width: 100%; max-width: 700px; height: 70px; background: #7f8c8d; border-radius: 10px; margin: 20px auto; position: relative; overflow: hidden; border: 4px solid #34495e; box-sizing: border-box; }
+        .road-line { position: absolute; top: 50%; left: 0; right: 0; border-top: 5px dashed #ecf0f1; transform: translateY(-50%); }
+        .finish-line { position: absolute; right: 10px; top: 10px; font-size: 35px; }
+        #racing-car { position: absolute; top: 10px; left: 10px; font-size: 35px; transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10; filter: drop-shadow(2px 4px 6px black); }
+
+        /* === TRẠM 4: DẤU HIỆU === */
+        #ggb-container-4 { margin: 20px auto; width: 800px; height: 450px; border-radius: 15px; border: 2px solid #ccc; overflow: hidden; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
+        .m4-btn { padding: 10px 20px; font-size: 15px; margin: 0 5px; opacity: 0.5; transition: 0.3s; border-radius: 8px; cursor: pointer; border: 2px solid transparent; color: white; font-weight: bold;}
+        .m4-btn:hover { opacity: 0.8; }
+        .m4-active { opacity: 1 !important; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 2px solid #2c3e50;}
+    </style>
+</head>
+<body>
+
+    <h1>Hành Trình Khám Phá Hình Chữ Nhật</h1>
+    
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(1)">Trạm 1: Nhận dạng</button>
+        <button class="tab-btn" onclick="switchTab(2)">Trạm 2: Tính chất</button>
+        <button class="tab-btn" onclick="switchTab(3)">Trạm 3: Tính độ dài</button>
+        <button class="tab-btn" onclick="switchTab(4)">Trạm 4: Dấu hiệu</button>
+    </div>
+
+    <div id="tram1" class="game-section active">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <label><b>Cài đặt thời gian:</b> </label>
+            <input type="number" id="time-setting" value="30" min="10" style="width: 70px; margin-right: 10px; font-size: 16px; padding: 5px;"> giây
+            <button class="action-btn" id="start-btn-1" onclick="startGame1()">BẮT ĐẦU CHƠI</button>
+        </div>
+        <div class="tram1-layout">
+            <div class="game-main">
+                <div class="stats-panel">
+                    <span>Điểm: <span id="score1">0</span></span>
+                    <span>⏱ <span id="time-left">0</span>s</span>
+                </div>
+                <div id="game-area-1"></div>
+            </div>
+            <div class="leaderboard-panel">
+                <h3>🏆 BẢNG VÀNG TOP 10</h3>
+                <ul id="leaderboard-list">
+                    <li style="color: #95a5a6;">Chưa có dữ liệu...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="tram2" class="game-section">
+        <h2 style="text-align: center; color: #2c3e50;">Mảnh Ghép Hoàn Hảo</h2>
+        <p style="text-align: center; margin-bottom: 30px;">Kéo các đặc điểm đúng của Hình Chữ Nhật vào vùng xanh. Hãy quan sát hình vẽ bên phải biến đổi nhé!</p>
+        
+        <div class="tram2-layout">
+            <div class="drag-col">
+                <div class="drag-container" id="source-zone">
+                    <div class="draggable" draggable="true" id="prop-sai">❌ 2 đường chéo vuông góc</div>
+                    <div class="draggable" draggable="true" id="prop-goc">📐 Có 4 góc vuông</div>
+                    <div class="draggable" draggable="true" id="prop-cat">✂️ Cắt nhau tại trung điểm</div>
+                    <div class="draggable" draggable="true" id="prop-cheo">📏 2 đường chéo bằng nhau</div>
+                </div>
+                
+                <div id="drop-zone">
+                    <b style="color: #2980b9; font-size: 18px;">VÙNG HÌNH CHỮ NHẬT</b>
+                </div>
+                
+                <p id="msg-tram2" style="text-align: center; font-weight: bold; min-height: 25px; margin-top: 15px; font-size: 16px;"></p>
+                <button class="action-btn" onclick="resetTram2()" style="margin-top: 10px;">Làm lại từ đầu</button>
+            </div>
+
+            <div class="ggb-col">
+                <h4 style="text-align: center; margin-top: 0; color: #8e44ad;">🎨 Minh Họa Trực Quan</h4>
+                <div id="ggb-container-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tram3" class="game-section">
+        <h2 style="text-align: center;">Đua Xe Giải Mã</h2>
+        
+        <div class="racing-track">
+            <div class="road-line"></div>
+            <div class="finish-line">🏁</div>
+            <div id="racing-car">🏎️</div>
+        </div>
+
+        <div id="math-card" style="text-align: center;">
+            <p id="math-question" style="font-size: 20px; font-weight: bold; color: #2c3e50;">Đang khởi tạo bài toán...</p>
+            <input type="number" id="math-answer" placeholder="?">
+            <button class="action-btn" onclick="checkMathAnswer()" style="margin-left: 10px; padding: 12px 30px;">Gửi</button>
+        </div>
+        <p id="msg-tram3" style="text-align: center; font-weight: bold; font-size: 18px; min-height: 25px;"></p>
+        <p style="text-align: center; font-size: 16px;">Vòng đua: <span id="lap-score" style="font-weight:bold; color: #d35400;">1</span> | Tổng số câu đúng: <span id="math-score" style="font-weight:bold; color: #27ae60;">0</span></p>
+    </div>
+
+    <div id="tram4" class="game-section">
+        <h2 style="text-align: center; color: #2c3e50; margin-bottom: 5px;">Thám Tử Hình Học: 3 Dấu Hiệu</h2>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px;">Hãy chọn từng cấp độ để chứng minh các dấu hiệu nhận biết Hình chữ nhật.</p>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button class="m4-btn m4-active" id="btn-m4-1" style="background: #e67e22;" onclick="loadMission4(1)">1. HBH + 1 Góc vuông</button>
+            <button class="m4-btn" id="btn-m4-2" style="background: #9b59b6;" onclick="loadMission4(2)">2. HBH + 2 Đường chéo</button>
+            <button class="m4-btn" id="btn-m4-3" style="background: #e74c3c;" onclick="loadMission4(3)">3. Tam giác + Trung tuyến</button>
+        </div>
+
+        <p id="msg-tram4" style="text-align: center; font-weight: bold; font-size: 18px; color: #e67e22; min-height: 25px;">Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)...</p>
+        
+        <div id="ggb-container-4"></div>
+    </div>
+
+    <script>
+        // --- CHUYỂN TABS ---
+        function switchTab(idx) {
+            document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tram' + idx).classList.add('active');
+            document.querySelectorAll('.tab-btn')[idx-1].classList.add('active');
+            
+            if(idx === 2 && !window.ggbLoadedTram2) {
+                initGgbTram2();
+                window.ggbLoadedTram2 = true;
+            }
+
+            if(idx === 4 && !window.ggbLoadedTram4) {
+                initGgbTram4();
+                window.ggbLoadedTram4 = true;
+            }
+        }
+
+        /* =========================================
+           TRẠM 1: ĐẤU TRƯỜNG PHÂN LOẠI
+           ========================================= */
+        let score1 = 0, timer1, spawnInt, isRunning = false, lastPlayedTime = 30; 
+        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#16a085', '#e67e22'];
+        let leaderboard = JSON.parse(localStorage.getItem('hcn_leaderboard_v2')) || [];
+        let shapeBag = [];
+
+        function getNextShapeType() {
+            if (shapeBag.length === 0) {
+                shapeBag = ['rect', 'rect', 'parallelogram', 'trapezoid', 'rhombus'];
+                for (let i = shapeBag.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shapeBag[i], shapeBag[j]] = [shapeBag[j], shapeBag[i]];
+                }
+            }
+            return shapeBag.pop();
+        }
+
+        function updateLeaderboardUI() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = leaderboard.length ? '' : '<li style="color: #95a5a6;">Chưa có dữ liệu...</li>';
+            leaderboard.slice(0, 10).forEach((entry, i) => {
+                list.innerHTML += `
+                <li style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+                    <span style="flex: 1; min-width: 120px; font-weight: bold; color: #2c3e50;">${i+1}. ${entry.name}</span> 
+                    <span style="color:#c0392b; font-weight:bold; font-size: 16px;">${entry.avg} đ/s</span>
+                    <span style="font-size:12px; color:#7f8c8d; width: 100%; text-align: right; margin-top: 4px;">(Tổng: ${entry.score}đ / ${entry.time}s)</span>
+                </li>`;
+            });
+        }
+        updateLeaderboardUI();
+
+        function startGame1() {
+            if(isRunning) return;
+            isRunning = true; score1 = 0; shapeBag = []; 
+            lastPlayedTime = parseInt(document.getElementById('time-setting').value) || 30;
+            if(lastPlayedTime <= 0) lastPlayedTime = 30; 
+            document.getElementById('score1').innerText = 0;
+            document.getElementById('time-left').innerText = lastPlayedTime;
+            document.getElementById('start-btn-1').innerText = "ĐANG CHƠI...";
+            document.getElementById('time-setting').disabled = true;
+            
+            let remaining = lastPlayedTime;
+            timer1 = setInterval(() => {
+                remaining--;
+                document.getElementById('time-left').innerText = remaining;
+                if(remaining <= 0) endGame1();
+            }, 1000);
+            spawnInt = setInterval(spawnShape, 900);
+        }
+
+        function spawnShape() {
+            const area = document.getElementById('game-area-1');
+            const shape = document.createElement('div');
+            const type = getNextShapeType();
+            let w = Math.floor(Math.random()*40)+60, h = Math.floor(Math.random()*30)+40;
+            if(type === 'rect' && Math.abs(w-h) < 10) w += 30;
+            shape.className = `shape ${type}`;
+            shape.style.width = w+'px'; shape.style.height = h+'px';
+            shape.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+            shape.style.left = Math.floor(Math.random()*(area.offsetWidth - w)) + 'px';
+            shape.style.top = '-100px';
+            area.appendChild(shape);
+
+            let pos = -100, fixedSpeed = 3.5; 
+            let move = setInterval(() => {
+                pos += fixedSpeed; shape.style.top = pos + 'px';
+                if(pos > area.offsetHeight) { clearInterval(move); shape.remove(); }
+            }, 20);
+
+            shape.onmousedown = () => {
+                if(!isRunning) return;
+                if(type === 'rect') { score1 += 10; shape.style.border = "3px solid gold"; }
+                else { score1 -= 5; shape.style.opacity = "0.3"; }
+                document.getElementById('score1').innerText = score1;
+                setTimeout(() => { clearInterval(move); shape.remove(); }, 100);
+            };
+        }
+
+        function endGame1() {
+            clearInterval(timer1); clearInterval(spawnInt);
+            isRunning = false;
+            document.getElementById('start-btn-1').innerText = "BẮT ĐẦU CHƠI";
+            document.getElementById('time-setting').disabled = false;
+            document.getElementById('game-area-1').innerHTML = '';
+            
+            setTimeout(() => {
+                if(score1 > 0) {
+                    let avgPoints = (score1 / lastPlayedTime).toFixed(2);
+                    let name = prompt(`Hết giờ! Bạn đạt ${score1} điểm.\nTốc độ: ${avgPoints} điểm/giây.\nNhập tên để lưu bảng vàng:`);
+                    if(name && name.trim() !== "") {
+                        leaderboard.push({ name: name.trim(), score: score1, time: lastPlayedTime, avg: parseFloat(avgPoints) });
+                        leaderboard.sort((a,b) => b.avg - a.avg);
+                        localStorage.setItem('hcn_leaderboard_v2', JSON.stringify(leaderboard));
+                        updateLeaderboardUI();
+                    }
+                } else alert("Hết giờ! Bạn chưa ghi được điểm nào.");
+            }, 100);
+        }
+
+        /* =========================================
+           TRẠM 2: MẢNH GHÉP HOÀN HẢO
+           ========================================= */
+        let apiTram2 = null;
+        function drawBaseRect(api) {
+            api.evalCommand("SetPerspective(\"G\")");
+            api.evalCommand("ShowAxes(false)");
+            api.evalCommand("ShowGrid(false)");
+            api.evalCommand("A = (2, 1)");
+            api.evalCommand("B = (8, 1)");
+            api.evalCommand("C = (8, 5)");
+            api.evalCommand("D = (2, 5)");
+            api.evalCommand("HCN = Polygon(A, B, C, D)");
+            api.evalCommand("CachAB = Segment(A, B)");
+            api.evalCommand("CachBC = Segment(B, C)");
+            api.evalCommand("CachCD = Segment(C, D)");
+            api.evalCommand("CachDA = Segment(D, A)");
+            
+            api.setColor("HCN", 52, 152, 219);
+            api.setFilling("HCN", 0.15);
+            const edges = ["CachAB", "CachBC", "CachCD", "CachDA"];
+            edges.forEach(edge => {
+                api.setColor(edge, 41, 128, 185);
+                api.setLineThickness(edge, 5);
+            });
+            const points = ["A", "B", "C", "D"];
+            points.forEach(pt => {
+                api.setLabelVisible(pt, true);
+                api.setFixed(pt, true, false);
+                api.setPointSize(pt, 4);
+            });
+            api.evalCommand("CenterView((5, 3))");
+            api.evalCommand("ZoomIn(0.8)");
+        }
+
+        function initGgbTram2() {
+            var params2 = {
+                "appName": "geometry", 
+                "width": 450, "height": 350,
+                "showToolBar": false, "showAlgebraInput": false, "showMenuBar": false,
+                "enableRightClick": false, "language": "en",
+                "appletOnLoad": function(api) {
+                    apiTram2 = api;
+                    setTimeout(() => { drawBaseRect(apiTram2); }, 300);
+                }
+            };
+            var applet2 = new GGBApplet(params2, true);
+            applet2.inject('ggb-container-2');
+        }
+
+        document.querySelectorAll('#tram2 .draggable').forEach(d => {
+            d.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('id', e.target.id);
+                e.target.style.opacity = '0.6';
+            });
+            d.addEventListener('dragend', e => e.target.style.opacity = '1');
+        });
+
+        const dz = document.getElementById('drop-zone');
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+        dz.addEventListener('drop', e => {
+            e.preventDefault();
+            dz.classList.remove('drag-over');
+            const id = e.dataTransfer.getData('id');
+            const el = document.getElementById(id);
+            const msgBox = document.getElementById('msg-tram2');
+
+            if(id === 'prop-sai') {
+                msgBox.innerHTML = "Sai rồi! HCN không nhất thiết có 2 đường chéo vuông góc.";
+                msgBox.style.color = "#e74c3c";
+                el.style.transform = "translateX(-10px)";
+                setTimeout(() => el.style.transform = "translateX(10px)", 100);
+                setTimeout(() => el.style.transform = "translateX(0)", 200);
+            } else {
+                dz.appendChild(el);
+                msgBox.innerText = "Chính xác! Hãy xem hình minh họa cập nhật.";
+                msgBox.style.color = "#27ae60";
+
+                if (apiTram2) {
+                    if (id === 'prop-goc') {
+                        apiTram2.evalCommand("AngA = Angle(D, A, B)");
+                        apiTram2.evalCommand("AngB = Angle(A, B, C)");
+                        apiTram2.evalCommand("AngC = Angle(B, C, D)");
+                        apiTram2.evalCommand("AngD = Angle(C, D, A)");
+                        ["AngA", "AngB", "AngC", "AngD"].forEach(ang => { apiTram2.setColor(ang, 230, 126, 34); });
+                    } 
+                    else if (id === 'prop-cheo') {
+                        apiTram2.evalCommand("Diag1 = Segment(A, C)");
+                        apiTram2.evalCommand("Diag2 = Segment(B, D)");
+                        ["Diag1", "Diag2"].forEach(diag => {
+                            apiTram2.setColor(diag, 155, 89, 182); 
+                            apiTram2.setLineThickness(diag, 5);
+                        });
+                    }
+                    else if (id === 'prop-cat') {
+                        apiTram2.evalCommand("O = Intersect(Segment(A,C), Segment(B,D))");
+                        apiTram2.setColor("O", 39, 174, 96); 
+                        apiTram2.setPointSize("O", 5);
+                        apiTram2.setLabelVisible("O", true);
+                        apiTram2.evalCommand("SegOA = Segment(O, A)");
+                        apiTram2.evalCommand("SegOB = Segment(O, B)");
+                        apiTram2.evalCommand("SegOC = Segment(O, C)");
+                        apiTram2.evalCommand("SegOD = Segment(O, D)");
+                        ["SegOA", "SegOB", "SegOC", "SegOD"].forEach(seg => {
+                            apiTram2.setColor(seg, 39, 174, 96); 
+                            apiTram2.setLineThickness(seg, 4);
+                            apiTram2.evalCommand("SetDecoration(" + seg + ", 2)"); 
+                        });
+                    }
+                }
+            }
+        });
+
+        function resetTram2() {
+            document.querySelectorAll('#tram2 .draggable').forEach(d => document.getElementById('source-zone').appendChild(d));
+            document.getElementById('msg-tram2').innerText = "";
+            if (apiTram2) {
+                apiTram2.newConstruction(); 
+                drawBaseRect(apiTram2); 
+            }
+        }
+
+        /* =========================================
+           TRẠM 3: ĐUA XE GIẢI MÃ
+           ========================================= */
+        let currentAns, mathScore = 0, lap = 1;
+        const questionsPerLap = 5; 
+
+        function genQ() {
+            let val = (Math.floor(Math.random()*15)+5)*2; 
+            let isM = Math.random() > 0.5;
+            document.getElementById('math-question').innerHTML = isM 
+                ? `Tam giác vuông có cạnh huyền = <b style="color:#e74c3c;">${val}cm</b>. <br>Đường trung tuyến AM = ?` 
+                : `Tam giác vuông có trung tuyến AM = <b style="color:#e74c3c;">${val/2}cm</b>. <br>Cạnh huyền BC = ?`;
+            currentAns = isM ? val/2 : val;
+        }
+
+        function checkMathAnswer() {
+            let user = parseFloat(document.getElementById('math-answer').value);
+            const msgBox = document.getElementById('msg-tram3');
+            const car = document.getElementById('racing-car');
+
+            if(user === currentAns) {
+                mathScore++; document.getElementById('math-score').innerText = mathScore;
+                msgBox.innerText = "Đúng rồi! Rồ ga tiến lên! 🚀";
+                msgBox.style.color = "#27ae60";
+
+                let progressInLap = mathScore % questionsPerLap;
+                if (progressInLap === 0 && mathScore > 0) progressInLap = questionsPerLap; 
+                let newPosition = 10 + (progressInLap * 17); 
+                car.style.left = `calc(${newPosition}% - 20px)`;
+
+                if (progressInLap === questionsPerLap) {
+                    msgBox.innerText = "🎉 Tuyệt vời! Bạn đã hoàn thành vòng đua! 🎉";
+                    msgBox.style.color = "#8e44ad";
+                    setTimeout(() => {
+                        car.style.transition = "none"; car.style.left = "10px"; lap++;
+                        document.getElementById('lap-score').innerText = lap;
+                        setTimeout(() => { car.style.transition = "left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)"; }, 50);
+                    }, 2000);
+                }
+                genQ(); document.getElementById('math-answer').value = '';
+            } else {
+                msgBox.innerText = "Sai rồi, tính cẩn thận lại nhé! Xe đang phanh gấp! 🛑";
+                msgBox.style.color = "#e74c3c";
+                car.style.transform = "rotate(-15deg)";
+                setTimeout(() => { car.style.transform = "rotate(15deg)"; }, 150);
+                setTimeout(() => { car.style.transform = "rotate(0deg)"; }, 300);
+            }
+        }
+        genQ();
+
+        /* =========================================
+           TRẠM 4: 3 CẤP ĐỘ DẤU HIỆU TỔNG HỢP
+           ========================================= */
+        let apiTram4 = null;
+        let currentMission4 = 1;
+
+        function loadMission4(m) {
+            currentMission4 = m;
+            
+            // Xử lý UI nút bấm
+            document.querySelectorAll('.m4-btn').forEach(btn => btn.classList.remove('m4-active'));
+            document.getElementById('btn-m4-' + m).classList.add('m4-active');
+
+            let msgBox = document.getElementById('msg-tram4');
+
+            if(apiTram4) {
+                // Xóa tàn dư cũ thay vì newConstruction để giữ nguyên bộ lắng nghe sự kiện
+                apiTram4.evalCommand("Delete(A)");
+                apiTram4.evalCommand("Delete(B)"); // Trong trường hợp Tam giác
+                
+                setTimeout(() => {
+                    apiTram4.evalCommand("SetPerspective(\"G\")");
+                    apiTram4.evalCommand("ShowAxes(false)");
+                    apiTram4.evalCommand("ShowGrid(false)");
+
+                    // SỨ MỆNH 1 & 2: HÌNH BÌNH HÀNH
+                    if (m === 1 || m === 2) {
+                        apiTram4.evalCommand("A = (2, 2)");
+                        apiTram4.evalCommand("B = (8, 2)");
+                        apiTram4.evalCommand("C = (9, 5)"); // Để lệch 1 chút thành hình bình hành
+                        apiTram4.evalCommand("D = A + C - B"); // Tính tịnh tiến D để luôn tạo ra HBH
+
+                        apiTram4.evalCommand("HBH = Polygon(A, B, C, D)");
+                        apiTram4.setColor("HBH", 230, 126, 34); // Màu cam
+                        apiTram4.setFilling("HBH", 0.15);
+
+                        apiTram4.evalCommand("CachAB = Segment(A, B)");
+                        apiTram4.evalCommand("CachBC = Segment(B, C)");
+                        apiTram4.evalCommand("CachCD = Segment(C, D)");
+                        apiTram4.evalCommand("CachDA = Segment(D, A)");
+                        ["CachAB", "CachBC", "CachCD", "CachDA"].forEach(e => {
+                            apiTram4.setColor(e, 211, 84, 0);
+                            apiTram4.setLineThickness(e, 5);
+                        });
+
+                        apiTram4.setFixed("A", true, false);
+                        apiTram4.setFixed("B", true, false);
+                        apiTram4.setFixed("D", false, false);
+                        apiTram4.setFixed("C", false, true); // Chỉ cho phép kéo C
+
+                        if (m === 1) {
+                            msgBox.innerText = "Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)...";
+                            msgBox.style.color = "#e67e22";
+                            apiTram4.evalCommand("AngA = Angle(D, A, B)");
+                            apiTram4.setColor("AngA", 41, 128, 185);
+                        } else {
+                            msgBox.innerText = "Kéo đỉnh C để 2 đường chéo AC và BD bằng nhau...";
+                            msgBox.style.color = "#8e44ad";
+                            apiTram4.evalCommand("Cheo1 = Segment(A, C)");
+                            apiTram4.evalCommand("Cheo2 = Segment(B, D)");
+                            apiTram4.setColor("Cheo1", 155, 89, 182);
+                            apiTram4.setColor("Cheo2", 155, 89, 182);
+                            apiTram4.setLineThickness("Cheo1", 3);
+                            apiTram4.setLineThickness("Cheo2", 3);
+                            
+                            // Hiển thị độ dài động
+                            apiTram4.evalCommand("Txt1 = Text(\"AC = \" + round(Distance(A,C)*10)/10, (1, 6))");
+                            apiTram4.evalCommand("Txt2 = Text(\"BD = \" + round(Distance(B,D)*10)/10, (1, 5.5))");
+                            apiTram4.setColor("Txt1", 142, 68, 173);
+                            apiTram4.setColor("Txt2", 142, 68, 173);
+                        }
+                        apiTram4.evalCommand("CenterView((5, 3))");
+                        apiTram4.evalCommand("ZoomIn(0.8)");
+                    } 
+                    // SỨ MỆNH 3: TAM GIÁC VUÔNG
+                    else if (m === 3) {
+                        msgBox.innerText = "Kéo đỉnh A để đường trung tuyến AM bằng nửa cạnh BC...";
+                        msgBox.style.color = "#e74c3c";
+                        
+                        apiTram4.evalCommand("B = (2, 2)");
+                        apiTram4.evalCommand("C = (10, 2)");
+                        apiTram4.evalCommand("M = Midpoint(B, C)");
+                        apiTram4.evalCommand("A = (5, 6)"); // Điểm A được phép kéo
+
+                        apiTram4.evalCommand("TamGiac = Polygon(A, B, C)");
+                        apiTram4.setColor("TamGiac", 231, 76, 60); // Màu đỏ
+                        apiTram4.setFilling("TamGiac", 0.15);
+
+                        apiTram4.evalCommand("AM = Segment(A, M)");
+                        apiTram4.setColor("AM", 52, 152, 219); // Tuyến màu xanh
+                        apiTram4.setLineThickness("AM", 4);
+
+                        ["A", "B", "C", "M"].forEach(pt => {
+                            apiTram4.setLabelVisible(pt, true);
+                            apiTram4.setPointSize(pt, 5);
+                        });
+                        
+                        apiTram4.setFixed("B", true, false);
+                        apiTram4.setFixed("C", true, false);
+                        apiTram4.setFixed("M", true, false);
+                        apiTram4.setFixed("A", false, true); // Chỉ kéo A
+
+                        apiTram4.evalCommand("TxtAM = Text(\"Trung tuyến AM = \" + round(Distance(A,M)*10)/10, (1, 6))");
+                        apiTram4.evalCommand("TxtBC = Text(\"Nửa cạnh BC/2 = \" + round(Distance(B,C)/2*10)/10, (1, 5.5))");
+                        apiTram4.setColor("TxtAM", 41, 128, 185);
+                        
+                        apiTram4.evalCommand("CenterView((6, 3))");
+                        apiTram4.evalCommand("ZoomIn(0.7)");
+                    }
+                }, 100);
+            }
+        }
+
+        // LẮNG NGHE SỰ KIỆN KÉO ĐỈNH VÀ CHẤM ĐIỂM
+        window.listenerTram4 = function(objName) {
+            if(!apiTram4) return;
+            let msgBox = document.getElementById('msg-tram4');
+
+            if (currentMission4 === 1 || currentMission4 === 2) {
+                // Đang chơi HBH (kéo đỉnh C)
+                if (objName === "C" || objName === "A" || objName === "B" || objName === "D") {
+                    let ac = apiTram4.getValue("Distance(A, C)");
+                    let bd = apiTram4.getValue("Distance(B, D)");
+
+                    // Về bản chất hình học, HBH có 2 chéo bằng nhau thì chắc chắn có 1 góc vuông và là HCN
+                    if (Math.abs(ac - bd) < 0.1) {
+                        msgBox.innerText = currentMission4 === 1 
+                            ? "Tuyệt vời! Hình bình hành có 1 góc vuông là Hình chữ nhật." 
+                            : "Tuyệt vời! Hình bình hành có 2 đường chéo bằng nhau là Hình chữ nhật.";
+                        msgBox.style.color = "#27ae60";
+
+                        apiTram4.setColor("HBH", 46, 204, 113);
+                        ["CachAB", "CachBC", "CachCD", "CachDA"].forEach(e => apiTram4.setColor(e, 39, 174, 96));
+                    } else {
+                        msgBox.innerText = currentMission4 === 1 
+                            ? "Kéo đỉnh C để tạo thành 1 góc vuông (90 độ)..." 
+                            : "Kéo đỉnh C để 2 đường chéo AC và BD bằng nhau...";
+                        msgBox.style.color = currentMission4 === 1 ? "#e67e22" : "#8e44ad";
+
+                        apiTram4.setColor("HBH", 230, 126, 34);
+                        ["CachAB", "CachBC", "CachCD", "CachDA"].forEach(e => apiTram4.setColor(e, 211, 84, 0));
+                    }
+                }
+            } 
+            else if (currentMission4 === 3) {
+                // Đang chơi Tam Giác (kéo đỉnh A)
+                if (objName === "A" || objName === "B" || objName === "C") {
+                    let am = apiTram4.getValue("Distance(A, M)");
+                    let bc2 = apiTram4.getValue("Distance(B, C) / 2");
+
+                    if (Math.abs(am - bc2) < 0.1) {
+                        msgBox.innerText = "Xuất sắc! Tam giác có trung tuyến bằng nửa cạnh tương ứng là Tam giác vuông.";
+                        msgBox.style.color = "#27ae60";
+                        apiTram4.setColor("TamGiac", 46, 204, 113);
+                    } else {
+                        msgBox.innerText = "Kéo đỉnh A để đường trung tuyến AM bằng nửa cạnh BC...";
+                        msgBox.style.color = "#e74c3c";
+                        apiTram4.setColor("TamGiac", 231, 76, 60);
+                    }
+                }
+            }
+        };
+
+        function initGgbTram4() {
+            var params4 = {
+                "appName": "geometry",
+                "width": 800,
+                "height": 450,
+                "showToolBar": false,
+                "showAlgebraInput": false,
+                "showMenuBar": false,
+                "enableRightClick": false,
+                "language": "en",
+                "appletOnLoad": function(api) {
+                    apiTram4 = api;
+                    // Đăng ký bộ lắng nghe DUY NHẤT 1 LẦN
+                    apiTram4.registerUpdateListener("listenerTram4");
+                    
+                    // Khởi động load nhiệm vụ 1
+                    loadMission4(1);
+                }
+            };
+            var applet4 = new GGBApplet(params4, true);
+            applet4.inject('ggb-container-4');
+        }
+    </script>
+</body>
+</html>
